@@ -44,15 +44,17 @@ That eval indexes the repo's own source and scores 12 golden cases against it �
 | Metric | Value |
 |---|---|
 | **Hit@5** (code scope, pure hybrid) — *the regression-gated headline* | **0.833** |
-| Hit@1 | 0.75 |
-| MRR | 0.792 |
-| Corpus | this repo, self-indexed (12 code files; chunk count drifts as the repo grows) |
+| Hit@1 | 0.667 |
+| MRR | 0.75 |
+| Corpus | this repo, self-indexed (code files; counts drift as the repo grows) |
 
-9 of 12 cases hit at rank 1; the misses are left in on purpose (a couple of
+8 of 12 cases hit at rank 1; the misses are left in on purpose (a couple of
 `config.py` queries lose to `build.py`). Inflating a benchmark by quietly dropping
 the cases it fails is the first thing this project refuses to do — see
-[DECISIONS.md](./DECISIONS.md); measured before/after deltas are logged in
-[CHANGELOG.md](./CHANGELOG.md).
+[DECISIONS.md](./DECISIONS.md); measured before/after deltas are in
+[CHANGELOG.md](./CHANGELOG.md). An honest ablation — where plain **BM25-only actually
+edges hybrid** on this small demo — is walked through in
+[docs/METHODOLOGY.md](./docs/METHODOLOGY.md).
 
 Because the demo indexes **this repo itself**, the corpus grows as the repo does, so
 the exact counts and Hit@1 drift over time — adding a file can demote a borderline

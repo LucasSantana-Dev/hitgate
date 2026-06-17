@@ -1,0 +1,62 @@
+[
+  {
+    "sha": "e6cced61",
+    "date": "2026-06-16",
+    "subject": "Inc 3: portable demo corpus + golden set; first standalone Hit@5=0.833",
+    "hit5": 0.833
+  },
+  {
+    "sha": "b4937e4a",
+    "date": "2026-06-16",
+    "subject": "Inc 4-5: adapters extension point, docs, packaging, redaction (publish-ready)",
+    "hit5": 0.833
+  },
+  {
+    "sha": "d9796056",
+    "date": "2026-06-16",
+    "subject": "docs: add no-support disclaimer to README (ADR 0015 reconciliation)",
+    "hit5": 0.833
+  },
+  {
+    "sha": "62d6fb6b",
+    "date": "2026-06-16",
+    "subject": "docs: neutralize tokenizer example identifier (remove project-traceable symbol)",
+    "hit5": 0.833
+  },
+  {
+    "sha": "dbe50a1d",
+    "date": "2026-06-17",
+    "subject": "docs: add ROADMAP \u2014 measured candidate experiments, not commitments",
+    "hit5": 0.833
+  },
+  {
+    "sha": "1efdf0e6",
+    "date": "2026-06-17",
+    "subject": "fix(eval): make check.sh runnable on a fresh clone + add determinism gate",
+    "hit5": 0.833
+  },
+  {
+    "sha": "9d4de80d",
+    "date": "2026-06-17",
+    "subject": "feat(eval): reusable contamination audit + worked-example doc",
+    "hit5": 0.833
+  },
+  {
+    "sha": "46362aee",
+    "date": "2026-06-17",
+    "subject": "docs+ci: ARCHITECTURE.md, advisory eval-gate CI, honest re-baseline",
+    "hit5": 0.833
+  },
+  {
+    "sha": "a46c9c72",
+    "date": "2026-06-17",
+    "subject": "fix(eval): robust --dataset resolution in audit_contamination",
+    "hit5": 0.833
+  },
+  {
+    "sha": "d4c2a2d4",
+    "date": "2026-06-17",
+    "subject": "docs: add measured CHANGELOG (ADR 0025 conditional, with discipline)",
+    "hit5": 0.833
+  }
+]

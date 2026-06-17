@@ -1,0 +1,4 @@
+# Optional dev dependencies — NOT needed by core or the eval gate (those use requirements.txt).
+# matplotlib: eval/plot_history.py chart.  pytest: the unit suite under tests/.
+matplotlib>=3.7
+pytest>=7

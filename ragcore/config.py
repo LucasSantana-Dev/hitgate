@@ -51,4 +51,7 @@ EXCLUDED_DIR_PARTS = {
     "__pycache__", ".pytest_cache", ".mypy_cache", "test-results",
     "playwright-report", ".storybook", ".docusaurus", ".worktrees", "worktrees",
     ".rag-index",
+    # Test scaffolding is not part of the implementation corpus a "where is X implemented"
+    # query searches — indexing it makes the retriever return tests instead of the code.
+    "tests", "test", "__tests__", "spec", "specs",
 }

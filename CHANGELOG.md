@@ -10,6 +10,42 @@ Numbers are code-scope, pure hybrid (`RAG_RERANK_AUTO=off`). Because the demo se
 this repo, exact chunk counts drift commit-to-commit; entries cite the stable **file count**
 and the **metric deltas**, not a chunk number that's wrong by the next commit.
 
+## Unreleased — methodology + ablation (branch `feat/methodology-ablation`)
+
+### Added
+- **`RAG_RANK_MODE` (hybrid | dense | bm25)** in `ragcore/retrieval.py` so single-channel
+  ranking is reproducible, not asserted. Enables the ablation below. `RAG_HYBRID=0` kept as a
+  back-compatible alias for `dense`.
+- **`docs/METHODOLOGY.md`** — the label-free measurement argument, backed by a real ablation
+  on the 12-case code demo (pure, `RAG_RERANK_AUTO=off`):
+
+  | mode | Hit@1 | Hit@3 | Hit@5 | MRR |
+  |---|---|---|---|---|
+  | BM25-only | 0.750 | 0.833 | 0.833 | 0.792 |
+  | dense-only | 0.667 | 0.833 | 0.917 | 0.767 |
+  | hybrid | 0.667 | 0.833 | 0.833 | 0.750 |
+  | hybrid+rerank (forced) | 0.583 | 0.833 | 0.833 | 0.708 |
+
+  Honest headline: **BM25-only edges hybrid here, and forced reranking is the worst config** —
+  the measured arguments for gating rerank (not running it globally) and for trusting Hit@5
+  (stable) over Hit@1/MRR (noise-prone on 12 cases). The prose-rerank regression is *not*
+  reproducible on this code-only demo and is attributed to DECISIONS.md, not re-derived.
+- **`eval/plot_history.py`** — Hit@5 per commit across git history (per-commit, self-indexed),
+  → `docs/hit5_history.svg`. **Measured:** Hit@5 held **0.833 across all 10 harness-bearing
+  commits**. Optional `matplotlib` dev dep (`requirements-dev.txt`); core stays at 3 deps.
+- **`tests/`** — real assertions on the identifier tokenizer, the `RAG_RANK_MODE` branches,
+  RRF result shape, and reranker graceful-fallback. **Measured:** 11 passed. (`pytest` is a dev dep.)
+
+### Changed
+- **Excluded `tests/`/`spec/` dirs from indexing** (`ragcore/config.py`). Test scaffolding is not
+  the implementation a "where is X" query searches; indexing it returned tests instead of code
+  (drove Hit@1 to 0.500 before exclusion). **Reopen:** if a user needs tests searchable, make the
+  exclusion configurable.
+- **Baseline re-frozen** to `Hit@1 0.667 / Hit@5 0.833` (was `0.75 / 0.833`). Adding `eval/plot_history.py`
+  to the self-indexed corpus demoted the "git commits" case from rank 1→2 (still within top-5, so
+  **Hit@5 held**). Deliberate re-baseline per the living-benchmark policy (>±5pp on Hit@1).
+  **Reopen:** any gated metric (Hit@5) moves beyond ±5pp.
+
 ## 2026-06-17
 
 ### Fixed

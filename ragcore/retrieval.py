@@ -210,11 +210,14 @@ def search(
     bm_scores = bm25.get_scores(q_tokens) if q_tokens else np.zeros(len(meta))
     bm_order = np.argsort(-bm_scores)
 
-    # Retrieval: hybrid BM25+cosine via Reciprocal Rank Fusion OR pure cosine
-    # Set RAG_HYBRID=1 to use hybrid (RRF); default is cosine-only
-    use_hybrid = os.environ.get("RAG_HYBRID", "1").lower() in ("1", "on", "true")
+    # Rank mode: hybrid (RRF of BM25+dense, default) | dense (cosine-only) | bm25 (lexical-only).
+    # RAG_HYBRID=0 is kept as a back-compatible alias for dense. The single-channel modes exist so
+    # the ablation in docs/METHODOLOGY.md is reproducible from real eval runs, not asserted.
+    rank_mode = os.environ.get("RAG_RANK_MODE", "").strip().lower()
+    if not rank_mode:
+        rank_mode = "hybrid" if os.environ.get("RAG_HYBRID", "1").lower() in ("1", "on", "true") else "dense"
 
-    if use_hybrid:
+    if rank_mode == "hybrid":
         # Reciprocal Rank Fusion — take top (top*8, min 40) from each to bound work.
         fusion_window = min(len(meta), max(top * 16, 80))
         rrf: dict[int, float] = {}
@@ -232,8 +235,11 @@ def search(
                 if sym and sym in q_idents:
                     rrf[int(i)] = rrf.get(int(i), 0.0) + 1.0 / (RRF_K + 1)
         cos_scores_for_ranking = rrf
+    elif rank_mode == "bm25":
+        # BM25-only: rank by lexical score alone (ablation baseline).
+        cos_scores_for_ranking = {int(idx): float(bm_scores[idx]) for idx in range(len(bm_scores))}
     else:
-        # Cosine-only: rank by cosine similarity
+        # dense / cosine-only: rank by cosine similarity.
         cos_scores_for_ranking = {int(idx): float(cos[idx]) for idx in range(len(cos))}
 
     if rerank is None:
