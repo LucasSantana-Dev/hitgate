@@ -28,3 +28,9 @@ jobs:
         run: bash eval/check.sh ci
       - name: Determinism gate — same query must yield the same top-K ordering
         run: RAG_SOURCE_ROOTS="$PWD" python eval/test_determinism.py
+      - name: Unit tests — tokenizer, rank modes, harness, adapter
+        # Reuses the e5 model the eval gate already cached; tests duck-type LangChain so the
+        # adapter suite needs no extra install.
+        run: |
+          pip install pytest
+          python -m pytest tests/ -q
