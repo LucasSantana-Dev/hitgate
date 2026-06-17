@@ -2,14 +2,14 @@
 
 [![eval-gate (advisory)](https://github.com/LucasSantana-Dev/evidence-first-rag/actions/workflows/eval.yml/badge.svg)](https://github.com/LucasSantana-Dev/evidence-first-rag/actions/workflows/eval.yml)
 
-> A small, portable **hybrid retrieval engine + evaluation harness** — and the
-> measurement discipline that keeps it honest. Extracted from a personal AI-assistant
-> memory index and decoupled from any specific tool, so it runs anywhere on any
-> source tree.
+> **A pytest-style regression gate for retrieval quality** — plus the small hybrid
+> retriever it was built to measure. Point it at *your* retriever and find out whether a
+> change helped or hurt, when you have **no labeled data and no users to A/B against**.
 
 **Status:** working · stable · single-author personal tooling, published for the
-*methodology*. The interesting part isn't the retriever — it's how you tell whether
-a change to it helped, when you have **no labeled data and no users to A/B against**.
+*methodology*. The adoptable part is the **harness**: a label-free, regression-gated quality
+check for any retriever (`--retriever module:callable`). The bundled hybrid engine is just
+the thing it measures.
 
 ---
 
@@ -32,8 +32,11 @@ RAG_SOURCE_ROOTS="$PWD" python ragcore/build.py
 # Ask it something
 RAG_SOURCE_ROOTS="$PWD" python ragcore/query.py --scope code "how does the reranker fall back"
 
-# Run the eval gate
+# Run the eval gate (bundled retriever)
 RAG_RERANK_AUTO=off python eval/run.py --label demo
+
+# ...or point the SAME gate at YOUR retriever — any callable (query, top, scope) -> [{"path": ...}]
+python eval/run.py --retriever eval.example_external_retriever:retrieve --label mine
 ```
 
 That eval indexes the repo's own source and scores 12 golden cases against it — so
@@ -73,13 +76,37 @@ self-indexing benchmark, not noise swept under a frozen number.
 - **Language-aware chunking** — Python by AST symbol, TS/JS/Shell by regex, with a
   word-count fallback.
 - **Config by env var** — zero-setup defaults (`RAG_*`); see [`ragcore/config.py`](./ragcore/config.py).
-- **Eval** — `eval/run.py` reports Hit@K/MRR; `eval/check.sh` gates a run against a
-  frozen baseline.
+- **Eval (the point)** — `eval/run.py` reports Hit@K/MRR for *any* retriever via
+  `--retriever`; `eval/check.sh` gates a run against a frozen baseline (±5pp).
 
-## What this is NOT
+## Use it on your own retriever
 
-- **Not a framework or a product** — no plugin API, no hosted service. The value is
-  the approach; fork the harness, not the wiring.
+The harness doesn't care whose retriever it's measuring. A retriever is any callable:
+
+```python
+retrieve(query: str, top: int, scope: str | None) -> Sequence[Mapping]
+# results ranked best-first; each a mapping with at least "path" (optionally "start_line")
+```
+
+Point the gate at yours with `--retriever module.path:callable`:
+
+```bash
+python eval/run.py --retriever mypkg.myretriever:retrieve --label mine
+```
+
+A runnable, dependency-free example — a deliberately dumb keyword matcher — is in
+[`eval/example_external_retriever.py`](./eval/example_external_retriever.py). Ecosystem
+wrappers (LangChain / LlamaIndex) live under [`adapters/`](./adapters/README.md). Bring your
+own retriever and corpus; keep the measurement discipline.
+
+## What to adopt (and what to skip)
+
+**Adopt the harness.** The reusable thing here is `eval/` — the label-free, regression-gated
+quality check and the `--retriever` interface. The bundled hybrid engine is a reference
+implementation, not the product. What this is **not**:
+
+- **Not a framework or a hosted service** — no plugin marketplace, no SaaS. Fork the harness;
+  the retriever is swappable by design.
 - **Not state-of-the-art retrieval research** — a pragmatic single-user system that
   knows its own ceiling and stops there.
 - **Not a maintained project** — a solo operator's personal tool, shared for the

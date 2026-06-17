@@ -10,6 +10,30 @@ Numbers are code-scope, pure hybrid (`RAG_RERANK_AUTO=off`). Because the demo se
 this repo, exact chunk counts drift commit-to-commit; entries cite the stable **file count**
 and the **metric deltas**, not a chunk number that's wrong by the next commit.
 
+## Unreleased — retriever-agnostic harness (branch `feat/retriever-agnostic-harness`)
+
+### Added
+- **`eval/run.py --retriever module.path:callable`** — the eval harness now measures *any*
+  retriever, not just the bundled one. A retriever is any callable
+  `(query, top, scope) -> Sequence[Mapping]` returning results ranked best-first, each with a
+  `"path"`. Rank is assigned by position, so external retrievers stay trivial. Default is the
+  bundled hybrid; `--rerank` applies to it only.
+- **`eval/example_external_retriever.py`** — a dependency-free "bring your own" template (a dumb
+  keyword matcher). **Measured (proves agnosticism):** scored through the same gate, the demo
+  yields `Hit@5 1.0 / Hit@1 0.833 / MRR 0.917` — *higher* than the bundled hybrid (0.667/0.833),
+  which is the 12-case demo being too easy to discriminate retrievers (see METHODOLOGY.md), not a
+  claim that keyword-matching beats hybrid.
+- **`tests/test_harness.py`** — retriever-agnostic metric math (stub retriever, no model),
+  `--retriever` resolution (default/spec/malformed/unknown-module), and the example's protocol
+  shape. **Measured:** 17 tests pass (6 new).
+
+### Changed
+- **README repositioned** so the **evaluation harness** is the headline product (a pytest-style
+  regression gate for retrieval quality), with a "use it on your own retriever" section. The
+  bundled hybrid engine is framed as the reference implementation it measures.
+- **Bundled-retriever behaviour is unchanged** — the gate still reports `Hit@1 0.667 / Hit@5 0.833`
+  (rank-by-position is identical to the engine's own rank order). **No metric delta.**
+
 ## Unreleased — methodology + ablation (branch `feat/methodology-ablation`)
 
 ### Added

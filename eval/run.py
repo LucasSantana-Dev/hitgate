@@ -1,34 +1,77 @@
 #!/usr/bin/env python3
-"""Evaluate retrieval quality against a curated Q/A dataset.
+"""Evaluate retrieval quality against a curated Q/A dataset — for ANY retriever.
+
+This is the harness: a label-free, regression-gated quality check you can point at your
+own retriever, not just the bundled one. A retriever is any callable
+
+    retrieve(query: str, top: int, scope: str | None) -> Sequence[Mapping]
+
+returning results ranked best-first, each a mapping with at least a "path" key (and
+optionally "start_line"). Rank is assigned by position, so an external retriever doesn't
+compute it. The harness scores Hit@1/@3/@5 + MRR by where the expected path first appears
+and writes eval/<label>.json.
 
 Inputs:  eval/golden.demo.jsonl  (one JSON per line: query, expect_path_contains, expect_scope)
-Outputs: MRR, Hit@1, Hit@3, Hit@5 — prints table + writes eval/<label>.json
 
 Usage:
-  eval/run.py                         # scores the demo golden set
-  eval/run.py --label post-reranker   # save as named run
-  eval/run.py --top 10 --label wider
+  python eval/run.py                                            # bundled retriever, demo set
+  python eval/run.py --label wider --top 10
+  python eval/run.py --rerank                                   # bundled + cross-encoder rerank
+  python eval/run.py --retriever mypkg.myretriever:retrieve     # YOUR retriever (see adapters/)
 """
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import sys
 import time
 from pathlib import Path
+from typing import Callable, Mapping, Optional, Sequence
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "ragcore"))
-from retrieval import search
+for _p in (str(ROOT), str(ROOT / "ragcore")):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 DATASET = ROOT / "eval" / "golden.demo.jsonl"
+
+# A retriever takes (query, top, scope) and returns results ranked best-first; each result
+# is a mapping with at least "path". Rank is assigned by position.
+Retriever = Callable[[str, int, Optional[str]], Sequence[Mapping]]
+
+
+def builtin_retriever(rerank: bool = False) -> Retriever:
+    """The bundled hybrid retriever (ragcore), wrapped to the harness protocol."""
+    from retrieval import search  # ragcore is on sys.path
+
+    def _retrieve(query: str, top: int, scope: Optional[str]) -> Sequence[Mapping]:
+        return search(query, top=top, scope_types=scope, scope_repos=["all"], cwd=None, rerank=rerank)
+
+    return _retrieve
+
+
+def load_retriever(spec: Optional[str], rerank: bool = False) -> Retriever:
+    """Resolve --retriever: None -> bundled; 'module.path:callable' -> imported callable."""
+    if not spec:
+        return builtin_retriever(rerank)
+    mod_name, sep, func_name = spec.partition(":")
+    if not sep or not mod_name or not func_name:
+        sys.exit(f"--retriever must be 'module.path:callable', got {spec!r}")
+    try:
+        fn = getattr(importlib.import_module(mod_name), func_name)
+    except (ImportError, AttributeError) as e:
+        sys.exit(f"could not load retriever {spec!r}: {e}")
+    if not callable(fn):
+        sys.exit(f"retriever {spec!r} is not callable")
+    return fn
 
 
 def load(path: Path = DATASET) -> list[dict]:
     return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
 
-def run(cases: list[dict], top: int, rerank: bool = False) -> dict:
+def run(cases: list[dict], top: int, retriever: Retriever) -> dict:
     per_case = []
     for case in cases:
         # Tolerate the legacy diff-scoped schema (id/type/expected_files) by skipping it.
@@ -39,20 +82,15 @@ def run(cases: list[dict], top: int, rerank: bool = False) -> dict:
         scope = case.get("expect_scope")
         scope_key = scope if isinstance(scope, str) and scope else ("+".join(scope) if isinstance(scope, list) and scope else "none")
         expected = expect if isinstance(expect, list) else [expect]
-        results = search(q, top=top, scope_types=scope, scope_repos=["all"], cwd=None, rerank=rerank)
+        results = list(retriever(q, top, scope if isinstance(scope, str) else None))
         hit_rank = None
-        for r in results:
+        for rank, r in enumerate(results, 1):  # rank by position — retriever-agnostic
             if any(e in r["path"] for e in expected):
-                hit_rank = r["rank"]
+                hit_rank = rank
                 break
+        top_hit = f"{results[0]['path']}:{results[0].get('start_line', '?')}" if results else None
         per_case.append(
-            {
-                "query": q,
-                "expect": expect,
-                "scope": scope_key,
-                "hit_rank": hit_rank,
-                "top_hit": f"{results[0]['path']}:{results[0]['start_line']}" if results else None,
-            }
+            {"query": q, "expect": expect, "scope": scope_key, "hit_rank": hit_rank, "top_hit": top_hit}
         )
 
     def metrics(cases: list[dict]) -> dict:
@@ -82,18 +120,20 @@ def main() -> int:
     ap.add_argument("--top", type=int, default=5)
     ap.add_argument("--label", default="baseline")
     ap.add_argument("--dataset", default=str(DATASET), help="path to eval dataset jsonl")
-    ap.add_argument("--rerank", action="store_true", help="enable cross-encoder reranking")
+    ap.add_argument("--retriever", default=None, help="'module.path:callable' for your own retriever (default: bundled)")
+    ap.add_argument("--rerank", action="store_true", help="enable cross-encoder reranking (bundled retriever only)")
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
 
+    retriever = load_retriever(args.retriever, rerank=args.rerank)
     cases = load(Path(args.dataset))
     started = time.time()
-    result = run(cases, top=args.top, rerank=args.rerank)
+    result = run(cases, top=args.top, retriever=retriever)
     elapsed = time.time() - started
 
-    rerank_tag = " [RERANK]" if args.rerank else " [FAST]"
+    tag = f" [{args.retriever}]" if args.retriever else (" [RERANK]" if args.rerank else " [FAST]")
     print(
-        f"[{args.label}]{rerank_tag}  n={result['n']}  MRR={result['mrr']}  "
+        f"[{args.label}]{tag}  n={result['n']}  MRR={result['mrr']}  "
         f"hit@1={result['hit@1']}  hit@3={result['hit@3']}  hit@5={result['hit@5']}  "
         f"({elapsed:.1f}s)"
     )
