@@ -18,6 +18,33 @@ that yields `(source_type, Path)` pairs, mirroring `build.iter_md_sources()` /
 Because `index_files` already handles chunking, embedding, and sqlite writes, an
 adapter only has to *find* and *label* content.
 
+## Retriever adapters (measure an external retriever)
+
+A *source* adapter feeds the index; a *retriever* adapter goes the other way — it lets the eval
+harness (`eval/run.py`) measure a retriever from another ecosystem. The harness protocol is any
+callable `retrieve(query, top, scope) -> list[{"path": ...}]`, ranked best-first (see
+`eval/run.py`). An adapter just maps a foreign retriever onto it, and stays **opt-in** — the
+core never imports the vendor library.
+
+### LangChain — `adapters/langchain_retriever.py`
+
+`to_harness(lc_retriever, path_key="source")` wraps any LangChain retriever (anything with
+`.invoke(query)` / `.get_relevant_documents(query)` returning Documents) into the protocol. The
+adapter is dependency-free; it duck-types the interface.
+
+Runnable example over this repo (`adapters/example_langchain_retriever.py`):
+
+```bash
+pip install langchain-community           # opt-in; NOT a core dependency
+RAG_SOURCE_ROOTS="$PWD" python eval/run.py \
+    --retriever adapters.example_langchain_retriever:retrieve --label langchain
+```
+
+Measured on the demo: `Hit@5 0.917 / Hit@1 0.75 / MRR 0.833`. (That it edges the bundled hybrid
+says the 12-case demo is too easy to discriminate retrievers — see `docs/METHODOLOGY.md` — not
+that BM25-over-whole-files is better.) To wire your own, mirror the example: build your retriever,
+`to_harness(...)` it, expose the callable, and point `--retriever` at it.
+
 ## Intentionally out of scope (and why)
 
 This repository was extracted from a personal AI-assistant memory index. Two

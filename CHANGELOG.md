@@ -10,6 +10,23 @@ Numbers are code-scope, pure hybrid (`RAG_RERANK_AUTO=off`). Because the demo se
 this repo, exact chunk counts drift commit-to-commit; entries cite the stable **file count**
 and the **metric deltas**, not a chunk number that's wrong by the next commit.
 
+## Unreleased — LangChain retriever adapter (branch `feat/langchain-adapter`)
+
+### Added
+- **`adapters/langchain_retriever.py`** — `to_harness(lc_retriever, path_key="source")` maps any
+  LangChain retriever (`.invoke` / `.get_relevant_documents`) into the harness `--retriever`
+  protocol. **No hard dependency** — duck-typed, so it imports without LangChain installed.
+- **`adapters/example_langchain_retriever.py`** — runnable example: a LangChain `BM25Retriever`
+  over the repo's code, strictly opt-in (`pip install langchain-community`). **Measured through
+  the gate:** `Hit@5 0.917 / Hit@1 0.75 / MRR 0.833` — edges the bundled hybrid (0.667/0.833),
+  i.e. the 12-case demo is too small to discriminate retrievers (see `docs/METHODOLOGY.md`), not
+  a retriever-quality claim.
+- **`tests/test_langchain_adapter.py`** — dependency-free mapping tests with fake Documents:
+  metadata→path, top-k, page_content fallback, legacy `get_relevant_documents`, custom path_key.
+  **22 tests pass.**
+- **`adapters/README.md`** — documents the retriever-adapter category + the runnable example.
+  `langchain-community` added to `requirements-dev.txt` (optional; **core stays at 3 deps**).
+
 ## Unreleased — retriever-agnostic harness (branch `feat/retriever-agnostic-harness`)
 
 ### Added
