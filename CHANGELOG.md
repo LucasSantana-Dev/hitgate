@@ -10,6 +10,15 @@ Numbers are code-scope, pure hybrid (`RAG_RERANK_AUTO=off`). Because the demo se
 this repo, exact chunk counts drift commit-to-commit; entries cite the stable **file count**
 and the **metric deltas**, not a chunk number that's wrong by the next commit.
 
+## Unreleased — cache HF model in CI (branch `ci/cache-hf-model`)
+
+### Changed
+- **CI caches the e5 embedding model** (`actions/cache` on `~/.cache/huggingface`). On a cache
+  hit the eval + determinism steps run **fully offline** (`HF_HUB_OFFLINE=1`), so HuggingFace is
+  never contacted — kills the intermittent **HTTP 429** download flake that red-failed a run. First
+  run (cache miss) still downloads online and populates the cache. **No metric delta** (CI plumbing).
+  **Reopen:** if the model name changes, bump the cache key.
+
 ## Unreleased — pytest in CI (branch `ci/pytest`)
 
 ### Changed

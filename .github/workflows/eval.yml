@@ -22,11 +22,25 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+      - name: Cache the embedding model (avoids HuggingFace 429 rate-limits)
+        id: hfcache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-models-multilingual-e5-small-v1
       - name: Install the three deps the README quickstart lists
         run: pip install -r requirements.txt
+      # On a cache hit, go fully offline so HF isn't contacted at all (no HEAD -> no 429).
+      # On a cache miss (first run), stay online to download + populate the cache.
       - name: Eval gate — auto-builds the index, compares Hit@K to the frozen baseline (±5pp)
+        env:
+          HF_HUB_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
+          TRANSFORMERS_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
         run: bash eval/check.sh ci
       - name: Determinism gate — same query must yield the same top-K ordering
+        env:
+          HF_HUB_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
+          TRANSFORMERS_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
         run: RAG_SOURCE_ROOTS="$PWD" python eval/test_determinism.py
       - name: Unit tests — tokenizer, rank modes, harness, adapter
         # Reuses the e5 model the eval gate already cached; tests duck-type LangChain so the
