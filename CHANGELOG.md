@@ -10,6 +10,14 @@ Numbers are code-scope, pure hybrid (`RAG_RERANK_AUTO=off`). Because the demo se
 this repo, exact chunk counts drift commit-to-commit; entries cite the stable **file count**
 and the **metric deltas**, not a chunk number that's wrong by the next commit.
 
+## Unreleased — pytest in CI (branch `ci/pytest`)
+
+### Changed
+- **CI now runs the unit suite** (`.github/workflows/eval.yml`) after the eval + determinism
+  gates — so the `tests/` are enforced, not just runnable. Reuses the e5 model the eval gate
+  already cached; installs only `pytest` (the adapter tests duck-type LangChain, no extra dep).
+  **No metric delta** (CI/test plumbing). **Reopen:** drop it if the suite turns flaky in CI.
+
 ## Unreleased — LangChain retriever adapter (branch `feat/langchain-adapter`)
 
 ### Added
