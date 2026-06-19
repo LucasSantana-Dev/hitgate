@@ -46,16 +46,16 @@ That eval indexes the repo's own source and scores 23 golden cases against it �
 
 | Metric | Value |
 |---|---|
-| **Hit@5** (code scope, pure hybrid) — *the regression-gated headline* | **0.913** |
-| Hit@1 | 0.348 |
-| MRR | 0.579 |
+| **Hit@5** (code scope, pure hybrid) — *the regression-gated headline* | **1.0** |
+| Hit@1 | 0.435 |
+| MRR | 0.666 |
 | Corpus | this repo, self-indexed · 23 cases (12 identifier + 11 paraphrase) |
 
-8 of 23 cases hit at rank 1; the misses are left in on purpose. Inflating a benchmark by
+10 of 23 cases hit at rank 1; the misses are left in on purpose. Inflating a benchmark by
 quietly dropping the cases it fails is the first thing this project refuses to do — see
 [DECISIONS.md](./DECISIONS.md); measured before/after deltas are in
 [CHANGELOG.md](./CHANGELOG.md). An honest ablation — where **BM25-only wins Hit@1**
-(0.522) while **hybrid wins Hit@5** (0.913, the only mode with 0 missed classes) — is
+(0.522) while **hybrid wins Hit@5** (1.0, all three intent classes covered) — is
 walked through in [docs/METHODOLOGY.md](./docs/METHODOLOGY.md).
 
 Because the demo indexes **this repo itself**, the corpus grows as the repo does, so

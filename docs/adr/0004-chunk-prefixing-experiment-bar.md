@@ -202,3 +202,21 @@ is better than either alone on this case.
 **Remaining open question:** would a prefix that omits the filename and includes only
 the symbol name reduce false positives while retaining precision gains? This is
 deferred — the current evidence doesn't make a strong enough case to change defaults.
+
+---
+
+## Postscript: vocabulary gap resolved by docstring fix (2026-06-19)
+
+The two persistent `chunkers.py` misses — the only cases that remained unresolved after
+all three prefix-ablation stages — were fixed by enriching the module docstring with
+plain-English vocabulary: "passages", "fragments", "declaration boundaries", "line counts".
+
+Both cases moved from MISS to rank 1. Hit@5 moved from 0.913 to **1.0** (all 23 cases,
+all three intent classes). No other case regressed.
+
+**Implication for the prefix decision:** the Stage 3 Hit@5 regression (−0.044) was not
+fundamentally a prefix problem — it was a vocabulary gap in the source. The prefix could
+not fix what wasn't there. Adding the vocabulary to the source resolved the gap cleanly,
+without any embedding-pipeline change. The `RAG_CHUNK_CONTEXT_PREFIX=on` default remains
+correct; the postscript confirms that source-level vocabulary and embedding-pipeline
+vocabulary are complementary, not substitutes.

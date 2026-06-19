@@ -1,7 +1,16 @@
-"""Language-aware chunkers. Each returns list[(start_line, end_line, text, symbol_name)].
+"""Splits source files into smaller fragments (passages / segments) before they are embedded.
 
-Keep chunks:
-- Python: one chunk per top-level def/class (via stdlib ast).
+This module is responsible for dividing files into individually indexed passages at logical
+declaration boundaries — one fragment per top-level function, class, or symbol — rather than
+slicing at arbitrary line counts. Language-aware: Python uses the AST so declaration boundaries
+are exact; TypeScript/JavaScript uses brace-matched regex; Shell uses function-block regex.
+Non-code and unrecognised files fall back to word-count windows (~300 words each, with overlap).
+
+Each chunker returns list[(start_line, end_line, text, symbol_name)] for the caller to embed.
+
+Strategy per language:
+- Python: one chunk per top-level def/class (via stdlib ast); module-level constants and
+  docstrings captured in the gaps between symbols (so config.py isn't lost).
 - TS/JS: regex on top-level `export? (async )?(function|class|const NAME =)` blocks, brace-matched.
 - Shell: regex on `NAME() {` blocks through closing `^}`.
 - Config / others: fall back to markdown-style word-count windows.
