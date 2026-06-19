@@ -45,6 +45,11 @@ GIT_LOG_DAYS = int(os.environ.get("RAG_GIT_LOG_DAYS", "180"))
 
 CODE_EXTS = {".py", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".sh", ".bash", ".zsh"}
 
+# --- chunk context prefix -------------------------------------------------
+# When True, prepend "source_type | repo | filename | symbol" to each chunk
+# before embedding. Stored in the DB as a flag so ablation runs can be compared.
+CHUNK_CONTEXT_PREFIX = os.environ.get("RAG_CHUNK_CONTEXT_PREFIX", "on").lower() not in ("off", "0", "false")
+
 EXCLUDED_DIR_PARTS = {
     "site-packages", "htmlcov", ".eggs", ".tox", "node_modules", "vendor",
     "dist", "build", "coverage", ".git", ".next", ".turbo", "venv", ".venv",

@@ -29,16 +29,23 @@ and publish the honest delta — including any scope where the simpler baseline 
 BM25-only ties the hybrid on this corpus, that finding is *more* valuable than a number
 that flatters the design.
 
-## 2. Contextual chunk prefixing (measured, not assumed)
+## 2. Contextual chunk prefixing — Stage 1 null result, Stage 2 pending
 
 Code retrieval's hardest failure is vocabulary mismatch: a natural-language query shares
 almost no tokens with an implementation. One candidate fix is to prepend a short,
 generated or structured **context line** to each chunk before embedding (file/symbol
 role, surrounding scope), so the embedding sees the context the raw lines omit.
 
-**Bar to ship:** measurably improves code-scope Hit@5 on the demo set **without
-regressing prose** — the same selective standard the cross-encoder reranker already has
-to meet. If it helps code but hurts prose, it stays opt-in or stays out.
+**Status:** The feature was implemented in the initial scaffold (`RAG_CHUNK_CONTEXT_PREFIX`,
+default on). Stage 1 ablation (WITH vs WITHOUT prefix on the 12-case golden set) returned a
+null result — identical numbers in both modes (MRR=0.778, Hit@1=0.583). Expected: all 12 cases
+are identifier/keyword lookups where BM25 dominates and the dense channel's context boost has
+nothing to win on. Per ADR-0004, this triggers Stage 2: add 3–5 paraphrase golden cases
+(natural-language queries, no shared tokens with the implementation) and re-run Stage 1.
+
+**Bar to ship (Stage 2):** ≥+0.05 MRR improvement on the expanded golden set, no intent
+class regressing by >5pp. If both Stage 1 and Stage 2 return null results, chunk prefixing
+is deferred with the finding recorded.
 
 ## 3. Run the eval as tracked experiments (measurement, not model)
 

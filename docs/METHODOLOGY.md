@@ -101,6 +101,21 @@ should fire on real degradation, not on a borderline case slipping from rank 1 t
 the gate (`eval/check.sh`, ±5pp) is anchored on Hit@5 and the README leads with it. The other
 metrics are always reported, never hidden; they're just not what the gate trusts.
 
+## Contextual chunk prefixing — null Stage 1 result
+
+Each chunk is embedded with a short context line prepended — `source_type | repo | filename | symbol` — before the passage prefix that E5 requires. The hypothesis: this helps the dense channel disambiguate same-named symbols across files and improves recall on natural-language (paraphrase) queries.
+
+The ablation runs WITH (`RAG_CHUNK_CONTEXT_PREFIX=on`) vs WITHOUT (`=off`) on the 12-case golden set returned identical results:
+
+| Prefix mode | Hit@1 | Hit@3 | Hit@5 | MRR |
+|---|---|---|---|---|
+| WITH (default) | 0.583 | 1.0 | 1.0 | 0.778 |
+| WITHOUT | 0.583 | 1.0 | 1.0 | 0.778 |
+
+Null result: no measurable difference on this set. The explanation is the same as why BM25 dominates: 12 identifier/keyword queries give the dense channel no paraphrase surface to work with. The feature stays on (it costs nothing at runtime) and the experiment moves to Stage 2 — adding 3–5 paraphrase golden cases where it should matter. See [ADR-0004](../docs/adr/0004-chunk-prefixing-experiment-bar.md) for the full decision and bar.
+
+This is also when the baseline drifted (MRR 0.833→0.778, Hit@1 0.667→0.583): the new ADR and docs/agents files added competing chunks that pushed the "excluded directories" infrastructure query from rank 1 to rank 3 on config.py. Hit@5 held at 1.0 — the right answer was still retrievable, just not the top result. Baseline re-frozen at the new values; the drift is expected living-corpus behavior.
+
 ## The discipline underneath all three
 
 Each section is the same loop, applied: run the real eval, read the delta *especially* when it's

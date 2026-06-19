@@ -1,14 +1,14 @@
 {
   "n": 12,
-  "mrr": 0.833,
-  "hit@1": 0.667,
+  "mrr": 0.778,
+  "hit@1": 0.583,
   "hit@3": 1.0,
   "hit@5": 1.0,
   "by_scope": {
     "code": {
       "n": 12,
-      "mrr": 0.833,
-      "hit@1": 0.667,
+      "mrr": 0.778,
+      "hit@1": 0.583,
       "hit@3": 1.0,
       "hit@5": 1.0
     }
@@ -23,8 +23,8 @@
     },
     "infrastructure": {
       "n": 3,
-      "mrr": 1.0,
-      "hit@1": 1.0,
+      "mrr": 0.778,
+      "hit@1": 0.667,
       "hit@3": 1.0,
       "hit@5": 1.0
     },
@@ -36,5 +36,5 @@
       "hit@5": 1.0
     }
   },
-  "_note": "Frozen baseline for eval/golden.demo.jsonl: repo self-indexed, pure hybrid (RAG_RERANK_AUTO=off). The demo indexes this repo itself, so the corpus grows as the repo does; Hit@5 is the stable gated headline (held at 1.0 after the chunker fix that added module-level constant indexing), while Hit@1/MRR drift as files are added. Re-freeze deliberately when a metric moves beyond the +/-5pp gate tolerance."
+  "_note": "Frozen baseline for eval/golden.demo.jsonl: repo self-indexed, pure hybrid (RAG_RERANK_AUTO=off). The demo indexes this repo itself, so the corpus grows as the repo does; Hit@5 is the stable gated headline (held at 1.0 after the chunker fix that added module-level constant indexing), while Hit@1/MRR drift as files are added. Re-freeze deliberately when a metric moves beyond the +/-5pp gate tolerance. This freeze reflects the post-ADR-0004 corpus (new docs/adr/ and docs/agents/ files were added, shifting infrastructure Hit@1 from 1.0→0.667 as new docs competed with config.py for the 'excluded directories' query). Chunk context prefix ablation: WITH and WITHOUT prefix both produce identical numbers — Stage 1 null result, see docs/adr/0004 and ROADMAP item #2."
 }

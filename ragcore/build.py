@@ -26,6 +26,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).parent))
 from chunkers import chunk_file, detect_language
 from config import (
+    CHUNK_CONTEXT_PREFIX,
     CODE_EXTS,
     DB,
     EMBED_DIM as DIM,
@@ -234,9 +235,11 @@ def index_files(
         repo = classify_repo(path)
         language = detect_language(path)
         for start, end, body, symbol in chunk_file(path, text):
-            # Contextual prefix for embedding (not stored): type | repo | file | symbol
-            context_prefix = f"{stype} | {repo or ''} | {path.name} | {symbol or ''}"
-            contextualized_text = f"{context_prefix}\n{body[:4000]}"
+            if CHUNK_CONTEXT_PREFIX:
+                context_prefix = f"{stype} | {repo or ''} | {path.name} | {symbol or ''}"
+                contextualized_text = f"{context_prefix}\n{body[:4000]}"
+            else:
+                contextualized_text = body[:4000]
             batch_texts.append(contextualized_text)
             batch_meta.append(
                 {
