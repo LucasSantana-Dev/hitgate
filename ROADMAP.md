@@ -14,9 +14,10 @@ public.
 
 ## 1. Comparative benchmark vs. named baselines
 
-Today the demo reports a single number (Hit@5 0.833, self-indexed). A single number
-tells you the system works; it doesn't tell you the hybrid+RRF design is *earning its
-complexity*. The experiment: run the same reproducible demo eval against
+Today the demo reports a single number (Hit@5 1.0, self-indexed after the chunker fix
+that added module-level constant indexing). A single number tells you the system works;
+it doesn't tell you the hybrid+RRF design is *earning its complexity*. The experiment:
+run the same reproducible demo eval against
 
 - **BM25 only** (drop the dense half),
 - a **late-interaction / token-level** retriever (e.g. a ColBERT-style scorer),
@@ -50,13 +51,18 @@ This is squarely on-thesis — *improve the measurement, not the model.* Scope i
 **eval-first**: tracking offline eval campaigns, not instrumenting live queries. Stays
 an adapter, never a core dependency, in keeping with [What this is NOT](./README.md).
 
-## 4. Stratified (per-intent) measurement
+## 4. Stratified (per-intent) measurement ✅ shipped
 
-The aggregate Hit@K hides *where* the system is weak. The experiment: classify eval
-queries by type — exact-symbol lookup, "who calls X", prose recall, config search — and
-report the metric **per class**. No model change; pure visibility. A stratified score is
-the prerequisite for honestly judging every other item on this list, because "it got
-better" means nothing until you know *which queries* got better.
+~~The aggregate Hit@K hides *where* the system is weak.~~ Done. The eval harness now
+reports `by_intent` breakdowns across three classes — `retrieval` (n=5), `indexing`
+(n=4), `infrastructure` (n=3) — alongside the existing `by_scope` rows. Cases without
+an `intent` field fall into `unclassified` for backward compatibility. Per-intent CI
+gating is deliberately deferred until classes are large enough for a 5pp tolerance to
+be meaningful (see `docs/adr/0002` and `docs/adr/0003`).
+
+Bonus: stratified measurement immediately exposed a chunker gap — module-level Python
+constants and docstrings were silently dropped, causing two `infrastructure` cases to
+miss outside top-10. Fixed in the same session; Hit@5 moved from 0.833 → 1.0.
 
 ## 5. Reranker tradeoff table
 
