@@ -45,6 +45,37 @@ says the 12-case demo is too easy to discriminate retrievers — see `docs/METHO
 that BM25-over-whole-files is better.) To wire your own, mirror the example: build your retriever,
 `to_harness(...)` it, expose the callable, and point `--retriever` at it.
 
+## Eval-tracking adapters (push results to experiment trackers)
+
+An *eval-tracking* adapter takes the output of `eval/run.py` and pushes it into an
+experiment-tracking tool so before/after comparisons are versioned and drillable
+instead of hand-diffed JSON. The adapter is strictly opt-in — the core never imports
+the vendor library.
+
+### Langfuse — `adapters/langfuse_eval.py`
+
+`push(golden_path, results_path, run_name, dataset_name)` upserts a Langfuse Dataset
+from the golden JSONL file and records a named Run with per-item scores
+(`hit@1`, `hit@3`, `hit@5`, `mrr_contribution`, `hit_rank`). Items are keyed by
+stable position ID so re-runs accumulate as separate experiments against the same
+dataset.
+
+```bash
+pip install langfuse           # opt-in; NOT a core dependency
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+
+# Run an eval, then push the results:
+python eval/run.py --label feat/my-experiment
+python adapters/langfuse_eval.py \
+    --dataset eval/golden.demo.jsonl \
+    --results  eval/feat-my-experiment.json \
+    --run-name "feat/my-experiment"
+```
+
+Runnable example: `adapters/example_langfuse_eval.py`. For self-hosted Langfuse,
+set `LANGFUSE_HOST=http://your-host:3000`.
+
 ## Intentionally out of scope (and why)
 
 This repository was extracted from a personal AI-assistant memory index. Two

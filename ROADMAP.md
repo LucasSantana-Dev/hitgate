@@ -45,16 +45,26 @@ filename doesn't help. The golden set now has 17 cases (5 paraphrase). See `docs
 correct but statistically thin. The feature ships default-on at zero runtime cost (prefix not
 stored); the stronger validation would require ≥20 paraphrase cases.
 
-## 3. Run the eval as tracked experiments (measurement, not model)
+## 3. Run the eval as tracked experiments (measurement, not model) ✅ shipped
 
-The harness currently compares runs by diffing JSON files. An **opt-in adapter** could
-push the eval set and its Hit@K/MRR scores into an experiment-tracking tool (e.g.
-[Langfuse](https://langfuse.com) Datasets/Experiments), so before/after comparisons are
-versioned and drillable instead of hand-diffed.
+The harness currently compares runs by diffing JSON files. An **opt-in adapter** pushes
+the eval set and its Hit@K/MRR scores into [Langfuse](https://langfuse.com)
+Datasets/Experiments, so before/after comparisons are versioned and drillable instead
+of hand-diffed.
 
-This is squarely on-thesis — *improve the measurement, not the model.* Scope is
-**eval-first**: tracking offline eval campaigns, not instrumenting live queries. Stays
-an adapter, never a core dependency, in keeping with [What this is NOT](./README.md).
+Shipped as `adapters/langfuse_eval.py`. Scores recorded per item: `hit@1`, `hit@3`,
+`hit@5`, `mrr_contribution`, `hit_rank`. Dataset items are stable-ID'd so every
+experiment run accumulates against the same dataset. Usage:
+
+```bash
+pip install langfuse
+python adapters/langfuse_eval.py \
+    --dataset eval/golden.demo.jsonl \
+    --results  eval/my-run.json \
+    --run-name "feat/my-experiment"
+```
+
+Stays an adapter, never a core dependency, in keeping with [What this is NOT](./README.md).
 
 ## 4. Stratified (per-intent) measurement ✅ shipped
 
