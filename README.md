@@ -39,7 +39,7 @@ RAG_RERANK_AUTO=off python eval/run.py --label demo
 python eval/run.py --retriever eval.example_external_retriever:retrieve --label mine
 ```
 
-That eval indexes the repo's own source and scores 24 golden cases against it — so
+That eval indexes the repo's own source and scores 30 golden cases against it — so
 **you can reproduce the number below yourself**, no private data required.
 
 ## Results (honest, self-indexed demo)
@@ -47,11 +47,11 @@ That eval indexes the repo's own source and scores 24 golden cases against it �
 | Metric | Value |
 |---|---|
 | **Hit@5** (code scope, pure hybrid) — *the regression-gated headline* | **1.0** |
-| Hit@1 | 0.458 |
-| MRR | 0.68 |
-| Corpus | this repo, self-indexed · 24 cases (12 identifier + 12 paraphrase) |
+| Hit@1 | 0.5 |
+| MRR | 0.699 |
+| Corpus | this repo, self-indexed · 30 cases (15 identifier + 15 paraphrase) |
 
-10 of 24 cases hit at rank 1; the misses are left in on purpose. Inflating a benchmark by
+15 of 30 cases hit at rank 1; the misses are left in on purpose. Inflating a benchmark by
 quietly dropping the cases it fails is the first thing this project refuses to do — see
 [DECISIONS.md](./DECISIONS.md); measured before/after deltas are in
 [CHANGELOG.md](./CHANGELOG.md). An honest ablation — where **BM25-only wins Hit@1**
