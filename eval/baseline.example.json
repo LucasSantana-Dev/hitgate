@@ -1,15 +1,15 @@
 {
-  "n": 23,
-  "mrr": 0.666,
-  "hit@1": 0.435,
-  "hit@3": 0.87,
+  "n": 24,
+  "mrr": 0.68,
+  "hit@1": 0.458,
+  "hit@3": 0.875,
   "hit@5": 1.0,
   "by_scope": {
     "code": {
-      "n": 23,
-      "mrr": 0.666,
-      "hit@1": 0.435,
-      "hit@3": 0.87,
+      "n": 24,
+      "mrr": 0.68,
+      "hit@1": 0.458,
+      "hit@3": 0.875,
       "hit@5": 1.0
     }
   },
@@ -29,12 +29,12 @@
       "hit@5": 1.0
     },
     "retrieval": {
-      "n": 9,
-      "mrr": 0.606,
-      "hit@1": 0.333,
-      "hit@3": 0.778,
+      "n": 10,
+      "mrr": 0.645,
+      "hit@1": 0.4,
+      "hit@3": 0.8,
       "hit@5": 1.0
     }
   },
-  "_note": "Frozen baseline for eval/golden.demo.jsonl: repo self-indexed, pure hybrid (RAG_RERANK_AUTO=off), RAG_CHUNK_CONTEXT_PREFIX=on (default). 23 cases (12 identifier + 11 paraphrase). chunkers.py docstring enriched with plain-English vocabulary ('passages', 'fragments', 'declaration boundaries', 'line counts'); both persistent chunkers.py paraphrase misses resolved to rank 1. Hit@5=1.0 across all intent classes. Re-freeze when any metric moves beyond ±5pp from these values."
+  "_note": "Frozen baseline for eval/golden.demo.jsonl: repo self-indexed, pure hybrid (RAG_RERANK_AUTO=off), RAG_CHUNK_CONTEXT_PREFIX=on (default). 24 cases (12 identifier + 12 paraphrase). Per-intent Hit@5=1.0 across all three classes; per-intent CI gating enabled (ADR-0003 conditions met). Re-freeze when any aggregate or per-class Hit@5 moves beyond ±5pp."
 }

@@ -21,3 +21,4 @@
 {"query": "which file exposes the semantic lookup capability as a callable tool that outside processes can invoke via a message-passing protocol", "expect_path_contains": "mcp_server.py", "expect_scope": "code", "intent": "infrastructure", "paraphrase": true}
 {"query": "where is the logic that decides whether an additional scoring pass should be triggered based on how confident the initial ranking is", "expect_path_contains": "retrieval.py", "expect_scope": "code", "intent": "retrieval", "paraphrase": true}
 {"query": "what breaks source code into smaller fragments at logical declaration boundaries rather than arbitrary line counts", "expect_path_contains": "chunkers.py", "expect_scope": "code", "intent": "indexing", "paraphrase": true}
+{"query": "which function loads all indexed content from disk to build the candidate pool for an incoming search query", "expect_path_contains": "retrieval.py", "expect_scope": "code", "intent": "retrieval", "paraphrase": true}

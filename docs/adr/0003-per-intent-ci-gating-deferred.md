@@ -61,3 +61,21 @@ relative to the 5pp threshold. Revisit when `retrieval` has ≥10 cases.
    aggregate gate.
 
 Until all three are true, do not add per-intent comparisons to `check.sh`.
+
+---
+
+## Resolution (2026-06-19) — per-intent gating enabled
+
+All three conditions were met after the 24-case golden set was frozen:
+
+1. **Per-intent baseline captured.** `eval/baseline.example.json` contains `by_intent`
+   with Hit@5=1.0 for all three classes (indexing n=7, infrastructure n=7, retrieval n=10).
+2. **Variance <5pp across consecutive runs.** Deterministic eval; multiple runs confirmed
+   stable 1.0 across all classes.
+3. **Silent class regression observed.** During the Stage 3 chunk-prefix ablation, the
+   aggregate Hit@5 held at 0.913 (within the ±5pp gate) while `indexing` Hit@5 silently
+   dropped from 1.0 to 0.714 — exactly the failure mode this gate is designed to catch.
+
+`check.sh` updated to gate on `by_intent.*.hit@5` for all classes present in the baseline,
+using the same ±5pp tolerance. Sample sizes (n=7–10) mean a single miss fires the gate
+(10–14pp per miss), which is appropriate given Hit@5=1.0 is the proven achievable baseline.
