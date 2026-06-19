@@ -26,6 +26,7 @@ def chunk_python(text: str) -> List[Chunk]:
     except SyntaxError:
         return chunk_fallback(text)
     chunks: List[Chunk] = []
+    symbol_ranges: List[Tuple[int, int]] = []
     for node in tree.body:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
             start = getattr(node, "lineno", 1)
@@ -33,6 +34,21 @@ def chunk_python(text: str) -> List[Chunk]:
             body = "\n".join(lines[start - 1 : end])
             if len(body) >= MIN_CHUNK_CHARS:
                 chunks.append((start, end, body[:8000], node.name))
+                symbol_ranges.append((start, end))
+    # Capture module-level regions between symbols: docstring, constants, imports.
+    # Without this, files like config.py (mostly top-level assignments) would only
+    # contribute their single helper function and lose all their constant definitions.
+    if symbol_ranges:
+        boundaries = [0] + [e for _, e in sorted(symbol_ranges)] + [len(lines)]
+        starts = [0] + [s for s, _ in sorted(symbol_ranges)]
+        gaps = [(boundaries[i] + 1, starts[i + 1] - 1) for i in range(len(starts) - 1)]
+        gaps.append((sorted(symbol_ranges)[-1][1] + 1, len(lines)))
+        for gap_start, gap_end in gaps:
+            if gap_start > gap_end:
+                continue
+            gap_text = "\n".join(lines[gap_start - 1 : gap_end]).strip()
+            if len(gap_text) >= MIN_CHUNK_CHARS:
+                chunks.append((gap_start, gap_end, gap_text[:8000], "<module>"))
     if not chunks:
         return chunk_fallback(text)
     return chunks

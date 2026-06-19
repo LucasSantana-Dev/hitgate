@@ -1,17 +1,40 @@
 {
   "n": 12,
-  "mrr": 0.75,
+  "mrr": 0.833,
   "hit@1": 0.667,
-  "hit@3": 0.833,
-  "hit@5": 0.833,
+  "hit@3": 1.0,
+  "hit@5": 1.0,
   "by_scope": {
     "code": {
       "n": 12,
-      "mrr": 0.75,
+      "mrr": 0.833,
       "hit@1": 0.667,
-      "hit@3": 0.833,
-      "hit@5": 0.833
+      "hit@3": 1.0,
+      "hit@5": 1.0
     }
   },
-  "_note": "Frozen baseline for eval/golden.demo.jsonl: repo self-indexed, pure hybrid (RAG_RERANK_AUTO=off). The demo indexes this repo itself, so the corpus grows as the repo does; Hit@5 is the stable gated headline (held at 0.833), while Hit@1/MRR drift as files are added. Re-freeze deliberately when a metric moves beyond the +/-5pp gate tolerance."
+  "by_intent": {
+    "indexing": {
+      "n": 4,
+      "mrr": 0.75,
+      "hit@1": 0.5,
+      "hit@3": 1.0,
+      "hit@5": 1.0
+    },
+    "infrastructure": {
+      "n": 3,
+      "mrr": 1.0,
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0
+    },
+    "retrieval": {
+      "n": 5,
+      "mrr": 0.8,
+      "hit@1": 0.6,
+      "hit@3": 1.0,
+      "hit@5": 1.0
+    }
+  },
+  "_note": "Frozen baseline for eval/golden.demo.jsonl: repo self-indexed, pure hybrid (RAG_RERANK_AUTO=off). The demo indexes this repo itself, so the corpus grows as the repo does; Hit@5 is the stable gated headline (held at 1.0 after the chunker fix that added module-level constant indexing), while Hit@1/MRR drift as files are added. Re-freeze deliberately when a metric moves beyond the +/-5pp gate tolerance."
 }
