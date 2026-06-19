@@ -2,6 +2,11 @@
 # eval/check.sh — run the eval suite and compare against baseline.json.
 # Exit 0 if delta within tolerance, 1 if any metric regresses by >5pp.
 # Designed to be called manually or chained from build.py after full reindex.
+#
+# NOTE: this gate compares aggregate metrics only — not per-intent breakdowns.
+# Per-intent (by_intent) metrics are printed by run.py for visibility but are
+# not gated here. See docs/adr/0003-per-intent-ci-gating-deferred.md for why
+# and the exact trigger conditions that would change this.
 set -uo pipefail
 
 EVAL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

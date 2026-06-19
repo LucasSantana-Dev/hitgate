@@ -1,12 +1,12 @@
-{"query": "hybrid retrieval fusing BM25 and cosine with reciprocal rank fusion", "expect_path_contains": "retrieval.py", "expect_scope": "code"}
-{"query": "selective cross-encoder reranker applied only to code-scope queries", "expect_path_contains": "retrieval.py", "expect_scope": "code"}
-{"query": "tokenize identifiers into camelCase and snake_case subtokens", "expect_path_contains": "retrieval.py", "expect_scope": "code"}
-{"query": "auto rerank weak ambiguous queries below a score threshold", "expect_path_contains": "retrieval.py", "expect_scope": "code"}
-{"query": "environment variable configuration defaults for the index", "expect_path_contains": "config.py", "expect_scope": "code"}
-{"query": "directories excluded from indexing like node_modules and venv", "expect_path_contains": "config.py", "expect_scope": "code"}
-{"query": "chunk and embed source roots into a sqlite index", "expect_path_contains": "build.py", "expect_scope": "code"}
-{"query": "index recent git commits as subject and body chunks", "expect_path_contains": "build.py", "expect_scope": "code"}
-{"query": "classify a file into a source type by its path", "expect_path_contains": "build.py", "expect_scope": "code"}
-{"query": "evaluate retrieval quality Hit at K and MRR against a golden dataset", "expect_path_contains": "run.py", "expect_scope": "code"}
-{"query": "E5 passage prefix added at embed time for indexed chunks", "expect_path_contains": "build.py", "expect_scope": "code"}
-{"query": "reranker falls back to fused ranking when the model is unavailable", "expect_path_contains": "retrieval.py", "expect_scope": "code"}
+{"query": "hybrid retrieval fusing BM25 and cosine with reciprocal rank fusion", "expect_path_contains": "retrieval.py", "expect_scope": "code", "intent": "retrieval"}
+{"query": "selective cross-encoder reranker applied only to code-scope queries", "expect_path_contains": "retrieval.py", "expect_scope": "code", "intent": "retrieval"}
+{"query": "tokenize identifiers into camelCase and snake_case subtokens", "expect_path_contains": "retrieval.py", "expect_scope": "code", "intent": "retrieval"}
+{"query": "auto rerank weak ambiguous queries below a score threshold", "expect_path_contains": "retrieval.py", "expect_scope": "code", "intent": "retrieval"}
+{"query": "environment variable configuration defaults for the index", "expect_path_contains": "config.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "directories excluded from indexing like node_modules and venv", "expect_path_contains": "config.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "chunk and embed source roots into a sqlite index", "expect_path_contains": "build.py", "expect_scope": "code", "intent": "indexing"}
+{"query": "index recent git commits as subject and body chunks", "expect_path_contains": "build.py", "expect_scope": "code", "intent": "indexing"}
+{"query": "classify a file into a source type by its path", "expect_path_contains": "build.py", "expect_scope": "code", "intent": "indexing"}
+{"query": "evaluate retrieval quality Hit at K and MRR against a golden dataset", "expect_path_contains": "run.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "E5 passage prefix added at embed time for indexed chunks", "expect_path_contains": "build.py", "expect_scope": "code", "intent": "indexing"}
+{"query": "reranker falls back to fused ranking when the model is unavailable", "expect_path_contains": "retrieval.py", "expect_scope": "code", "intent": "retrieval"}

@@ -89,8 +89,9 @@ def run(cases: list[dict], top: int, retriever: Retriever) -> dict:
                 hit_rank = rank
                 break
         top_hit = f"{results[0]['path']}:{results[0].get('start_line', '?')}" if results else None
+        intent = case.get("intent", "unclassified")
         per_case.append(
-            {"query": q, "expect": expect, "scope": scope_key, "hit_rank": hit_rank, "top_hit": top_hit}
+            {"query": q, "expect": expect, "scope": scope_key, "intent": intent, "hit_rank": hit_rank, "top_hit": top_hit}
         )
 
     def metrics(cases: list[dict]) -> dict:
@@ -109,8 +110,13 @@ def run(cases: list[dict], top: int, retriever: Retriever) -> dict:
     for c in per_case:
         by_scope.setdefault(c["scope"], []).append(c)
 
+    by_intent: dict[str, list] = {}
+    for c in per_case:
+        by_intent.setdefault(c["intent"], []).append(c)
+
     out = metrics(per_case)
     out["by_scope"] = {sc: metrics(cs) for sc, cs in sorted(by_scope.items())}
+    out["by_intent"] = {it: metrics(cs) for it, cs in sorted(by_intent.items())}
     out["per_case"] = per_case
     return out
 
@@ -139,6 +145,8 @@ def main() -> int:
     )
     for sc, m in result.get("by_scope", {}).items():
         print(f"    scope={sc:10} n={m['n']:>3}  hit@1={m['hit@1']}  hit@5={m['hit@5']}  mrr={m['mrr']}")
+    for it, m in result.get("by_intent", {}).items():
+        print(f"    intent={it:14} n={m['n']:>3}  hit@1={m['hit@1']}  hit@5={m['hit@5']}  mrr={m['mrr']}")
     if args.verbose:
         for c in result["per_case"]:
             status = "✓" if c["hit_rank"] else "✗"
