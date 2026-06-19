@@ -69,14 +69,19 @@ Bonus: stratified measurement immediately exposed a chunker gap — module-level
 constants and docstrings were silently dropped, causing two `infrastructure` cases to
 miss outside top-10. Fixed in the same session; Hit@5 moved from 0.833 → 1.0.
 
-## 5. Reranker tradeoff table
+## 5. Reranker tradeoff table ✅ shipped
 
-The optional cross-encoder reranker is one specific model today. A small **Pareto study**
-across a few rerankers — quality vs. latency vs. memory footprint — would let a forker
-pick one for their resource budget, instead of inheriting one tuned for a 16 GB laptop.
+Two models measured on the 17-case golden set (hybrid mode, CPU):
 
-**Bar to ship:** a reproducible comparison table; the default only changes if a
-candidate is strictly better on the demo within a stated latency budget.
+| Model | Size | Warm latency | Hit@1 | MRR | Infra Hit@5 |
+|---|---|---|---|---|---|
+| `ms-marco-MiniLM-L-6-v2` *(default)* | 88 MB | 48 ms | 0.529 | 0.696 | 0.75 |
+| `BAAI/bge-reranker-v2-m3` | 2.1 GB | 88 ms | **0.647** | **0.767** | **1.0** |
+
+`bge-reranker-v2-m3` is strictly better on quality (no metric regresses). Default stays
+`ms-marco-L-6-v2` for portability (88MB); the bar for switching is met — set
+`RAG_RERANK_MODEL=BAAI/bge-reranker-v2-m3` when footprint is not a constraint. Full
+table and analysis in `docs/METHODOLOGY.md`.
 
 ---
 

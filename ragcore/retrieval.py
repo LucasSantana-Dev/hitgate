@@ -30,9 +30,12 @@ _model = None
 _reranker = None
 _cache: dict[tuple, tuple[list[dict], np.ndarray, BM25Okapi]] = {}
 # Reranker model. Override with RAG_RERANK_MODEL env var.
-# Default kept on ms-marco-MiniLM-L-6-v2 (lightweight, fast, no download
-# needed — already cached). Swap to "BAAI/bge-reranker-v2-m3" for +5-10pp
-# Hit@5 once K3 LongMemEval baseline confirms the gain on this corpus.
+# Reranker model — two measured options (Pareto table, ROADMAP #5):
+#   ms-marco-MiniLM-L-6-v2:  88MB,  48ms/query, Hit@1=0.529, MRR=0.696, infra Hit@5=0.75
+#   BAAI/bge-reranker-v2-m3: 2.1GB, 88ms/query, Hit@1=0.647, MRR=0.767, infra Hit@5=1.0
+# bge-v2-m3 is strictly better on quality (no regressions) at 1.8x latency.
+# Default stays ms-marco-L6 for portability (88MB vs 2.1GB); set
+# RAG_RERANK_MODEL=BAAI/bge-reranker-v2-m3 when disk space allows.
 RERANK_MODEL_DEFAULT = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 RERANK_MODEL = os.environ.get("RAG_RERANK_MODEL", RERANK_MODEL_DEFAULT)
 

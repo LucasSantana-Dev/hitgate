@@ -90,6 +90,31 @@ top-1/top-2 margin), with the heavier code-tuned reranker confined to code scope
 > private mixed corpus (see [DECISIONS.md](../DECISIONS.md)); it is stated there, not re-derived
 > here, and no prose number is implied on this page.
 
+## Reranker Pareto table — quality vs size vs latency
+
+Measured on the 17-case golden set, hybrid mode, CPU (Apple M1):
+
+| Model | Size | Warm latency¹ | Hit@1 | Hit@5 | MRR | Infra Hit@5 |
+|---|---|---|---|---|---|---|
+| *(no rerank)* | — | 0 ms | 0.471 | **0.941** | 0.681 | **1.0** |
+| `ms-marco-MiniLM-L-6-v2` *(default)* | 88 MB | 48 ms | 0.529 | **0.941** | 0.696 | 0.75 |
+| `BAAI/bge-reranker-v2-m3` | 2.1 GB | 88 ms | **0.647** | **0.941** | **0.767** | **1.0** |
+
+¹ Warm = model already loaded; measured over 5 runs, top-5 candidates per query.
+
+**Reading the table:** `bge-reranker-v2-m3` is strictly better than `ms-marco-L-6-v2`
+on every quality metric — +12pp Hit@1, +7pp MRR — and crucially does *not* collapse
+infrastructure Hit@5 the way ms-marco does (1.0 vs 0.75). The latency trade is modest:
+88ms vs 48ms warm, both well under any interactive budget. The only reason to prefer
+ms-marco is size: 88MB is a no-friction install; 2.1GB requires the user to have disk
+space and patience. The default therefore stays `ms-marco-L-6-v2`; set
+`RAG_RERANK_MODEL=BAAI/bge-reranker-v2-m3` when you can afford the footprint.
+
+**What the table cannot say:** both models were measured only on this repo's 17-case
+code-only set. Neither model's behaviour on prose, memory, or mixed corpora is captured
+here. The private-corpus finding (that reranking regresses prose) was measured with
+ms-marco; whether bge-v2-m3 also regresses prose is unknown and not implied.
+
 ## Why Hit@5 is the gated metric
 
 ![Hit@5 per commit](./hit5_history.svg)
