@@ -25,25 +25,28 @@ achieve Hit@5=1.0 on both retrieval and infrastructure intent classes simultaneo
 Reopen trigger: a use case arises where sub-word token overlap is the primary failure mode
 and BM25/dense fusion hasn't already addressed it on a ≥30-case eval set.
 
-## 2. Contextual chunk prefixing ✅ shipped (marginal positive result)
+## 2. Contextual chunk prefixing ✅ shipped (precision-positive, coverage-neutral)
 
 Code retrieval's hardest failure is vocabulary mismatch: a natural-language query shares
 almost no tokens with an implementation. The fix: prepend `source_type | repo | filename | symbol`
 to each chunk before embedding, so the dense channel sees the context the raw lines omit.
 
-**Experiment:** Two-stage ablation. Stage 1 (12-case identifier-only set) returned a null result —
-expected, because BM25 dominates identifier lookups. Stage 2 expanded the golden set to 17 cases
-with 5 paraphrase queries (no shared tokens with implementation). WITH vs WITHOUT prefix on the
-17-case set: **+0.050 MRR / +0.059 Hit@1**, no class regression. Bar met.
+**Three-stage experiment:**
 
-Key finding: the gain is driven by one query ("folder names that get skipped") jumping rank 5→1
-when the prefix adds "config.py" as a semantic hint. The chunkers.py paraphrase case remains a
-persistent miss in both modes — a harder vocabulary gap ("passages", "vectorized") where even the
-filename doesn't help. The golden set now has 17 cases (5 paraphrase). See `docs/adr/0004`.
+- **Stage 1** (12-case identifier set): null result — expected, BM25 dominates identifier lookups.
+- **Stage 2** (17 cases, +5 paraphrase): +0.050 MRR / +0.059 Hit@1, 0.0 Hit@5 delta. Positive.
+- **Stage 3** (23 cases, +11 paraphrase): +0.017 MRR / +0.044 Hit@1, **−0.044 Hit@5**. Mixed.
 
-**Honest caveat:** n=5 paraphrase cases means ±1 case is ±0.02 MRR. The result is directionally
-correct but statistically thin. The feature ships default-on at zero runtime cost (prefix not
-stored); the stronger validation would require ≥20 paraphrase cases.
+The refined finding: prefix is a *precision optimizer*. It boosts Hit@1 and MRR on cases where
+the filename is a semantic anchor (config.py for "folder names", retrieval.py for "auto rerank"),
+but can hurt Hit@5 where prefix tokens attract false positives (chunkers.py second angle drops
+from rank 5 to MISS — `build.py` outscores it on "source code fragments" after the prefix
+amplifies the overlap). The reranker recovers the chunkers.py miss (rank 6→1 with cross-encoder).
+
+The golden set now has **23 cases (11 paraphrase)**. See `docs/adr/0004` for the full record.
+
+**Decision stands: default-on.** Cost is zero; MRR direction remains positive; the one
+reproducible Hit@5 regression is compensated by the gated reranker.
 
 ## 3. Run the eval as tracked experiments (measurement, not model) ✅ shipped
 

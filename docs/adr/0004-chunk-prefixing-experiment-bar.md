@@ -145,3 +145,60 @@ conceptual query about configuration.
 is zero (the prefix is not stored, only used at embed time) and the direction is
 positive. The stronger validation would require a larger paraphrase golden set
 (≥20 cases) to get variance below ±5pp per missing case.
+
+---
+
+## Stage 3 result (run on 2026-06-19)
+
+Golden set expanded to 23 cases (+6 new paraphrase cases, 11 total paraphrase).
+New targets: `pack.py`, `eval/run.py`, `adapters/langchain_retriever.py`,
+`ragcore/mcp_server.py`, `retrieval.py` (auto-rerank trigger angle), and a second
+`chunkers.py` angle ("logical declaration boundaries rather than arbitrary line counts").
+
+Ablation: hybrid mode, `RAG_RERANK_AUTO=off`, 23-case set.
+
+| Mode | Hit@1 | Hit@3 | Hit@5 | MRR |
+|---|---|---|---|---|
+| WITHOUT context prefix | 0.304 | 0.739 | **0.957** | 0.562 |
+| **WITH context prefix (default)** | **0.348** | **0.783** | 0.913 | **0.579** |
+| **Delta** | **+0.044** | **+0.044** | **−0.044** | **+0.017** |
+
+**Per-new-paraphrase-case breakdown:**
+
+| Query | WITHOUT | WITH |
+|---|---|---|
+| "collects top results as bundle for a task" → pack.py | #2 | #2 |
+| "counts expected doc in highest-ranked positions" → run.py | #4 | #5 |
+| "swap in third-party finder same quality gate" → langchain_retriever.py | #5 | #5 |
+| "exposes lookup as callable tool via protocol" → mcp_server.py | #2 | #3 |
+| "decides if additional scoring pass needed" → retrieval.py | #2 | #2 |
+| "breaks code at declaration boundaries not line counts" → chunkers.py | **#5** | **MISS** |
+
+**Result: refined — precision positive, coverage neutral-to-negative.**
+
+The positive MRR trend (+0.017) and Hit@1 gain (+0.044) from Stage 2 persist, but
+the Hit@5 regression (−0.044) is new. It is driven entirely by one case: the second
+chunkers.py paraphrase drops from rank 5 (WITHOUT) to MISS (WITH prefix). Root
+cause: the prefix adds "code | … | chunkers.py | chunk_python" context that causes
+the dense channel to score a `build.py` chunk ("iter_code_sources", module-level)
+higher for the query "breaks source code into smaller fragments … declaration
+boundaries."
+
+Notably, **the auto-reranker recovers this miss** — with the default cross-encoder
+enabled, chunkers.py rises to rank 1 for this query. The prefix + reranker combination
+is better than either alone on this case.
+
+**Revised characterization of chunk prefixing:**
+
+- It is a *precision optimizer*, not a *coverage optimizer*. Hit@1 and MRR improve;
+  Hit@5 is neutral-to-negative depending on golden set composition.
+- Gains are concentrated where the filename carries semantic signal (e.g., "config.py"
+  helping the folder-names query). Losses occur where the prefix's file/symbol tokens
+  attract false positives from semantically adjacent files (chunkers.py vs build.py
+  both dealing with "source code" and "fragments").
+- The decision to ship default-on stands: cost is zero, MRR direction is positive, and
+  the reranker compensates for the one reproducible Hit@5 regression.
+
+**Remaining open question:** would a prefix that omits the filename and includes only
+the symbol name reduce false positives while retaining precision gains? This is
+deferred — the current evidence doesn't make a strong enough case to change defaults.

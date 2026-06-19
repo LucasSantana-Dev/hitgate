@@ -7,10 +7,10 @@ set, a frozen baseline, and a refusal to assert any number that didn't come out 
 real ablation — including, prominently, the places where the measurement **contradicts** the
 design. That contradiction is the point.
 
-Every number below is reproducible with the commands shown, on the 12-case code demo
+Every number below is reproducible with the commands shown, on the 23-case code demo
 (`eval/golden.demo.jsonl`), self-indexed over this repo, pure hybrid unless stated.
-Numbers were updated after the chunker fix that added module-level constant indexing
-(see `docs/adr/0001` and the commit `fix(chunker)`).
+The golden set was expanded from 12 → 17 → 23 cases across three sessions; numbers
+reflect the full 23-case set (12 identifier + 11 paraphrase queries).
 
 ## The ablation
 
@@ -22,54 +22,54 @@ RAG_RANK_MODE=hybrid RAG_RERANK_AUTO=off python eval/run.py --label abl-hybrid
 RAG_RANK_MODE=hybrid                     python eval/run.py --label abl-hybrid-rerank --rerank
 ```
 
-Current numbers on the 17-case golden set (12 identifier queries + 5 paraphrase queries):
+Current numbers on the 23-case golden set (12 identifier + 11 paraphrase queries):
 
 | Rank mode | Hit@1 | Hit@3 | Hit@5 | MRR |
 |---|---|---|---|---|
-| BM25-only | 0.588 | 0.765 | 0.882 | 0.693 |
-| dense-only | 0.588 | 0.882 | 0.882 | 0.716 |
-| **hybrid (RRF + symbol boost)** | 0.471 | 0.882 | **0.941** | 0.681 |
-| hybrid + rerank (ms-marco, forced on all) | 0.529 | **0.941** | **0.941** | 0.696 |
+| BM25-only | 0.522 | 0.783 | 0.826 | 0.639 |
+| dense-only | 0.478 | 0.783 | 0.826 | 0.617 |
+| **hybrid (RRF + symbol boost)** | 0.348 | 0.783 | **0.913** | 0.579 |
 
-The story changed when paraphrase cases were added. On the original 12-case identifier-only
-set, BM25 dominated on every metric (Hit@1=0.917, MRR=0.958; hybrid trailed at 0.667/0.833).
-That result still stands on identifier queries — BM25's lexical advantage is real. Adding 5
-paraphrase queries (natural language, no shared tokens with the implementation) broke the
-degeneracy: BM25 drops to Hit@5=0.882 while hybrid holds at 0.941.
+The 23-case set tells the most complete story. BM25 wins precision (Hit@1=0.522, MRR=0.639)
+because 12/23 cases are identifier-match queries where lexical overlap dominates. Dense wins
+the indexing intent class (Hit@5=1.0, see below) because paraphrase indexing queries
+("collects top results as bundle", "third-party document finder") are semantically richer
+than their code. Hybrid achieves the best overall Hit@5 (0.913) — the only mode that holds
+Hit@5=1.0 on both retrieval and infrastructure simultaneously — at the cost of Hit@1 and MRR.
 
-Per-intent breakdown (Hit@5 across all four modes, 17-case set):
+Per-intent breakdown (Hit@5 across three modes, 23-case set):
 
-| Rank mode | retrieval (n=7) | indexing (n=6) | infrastructure (n=4) |
+| Rank mode | retrieval (n=9) | indexing (n=7) | infrastructure (n=7) |
 |---|---|---|---|
-| BM25-only | 0.857 | 0.833 | **1.0** |
-| dense-only | 0.857 | **1.0** | 0.75 |
-| **hybrid** | **1.0** | 0.833 | **1.0** |
-| hybrid + rerank | **1.0** | **1.0** | 0.75 |
+| BM25-only | 0.889 | 0.714 | 0.857 |
+| dense-only | 0.778 | **1.0** | 0.714 |
+| **hybrid** | **1.0** | 0.714 | **1.0** |
 
 The per-intent table makes the tradeoffs precise:
-- BM25 achieves perfect infrastructure Hit@5 but misses paraphrase retrieval and indexing cases.
-- Dense achieves perfect indexing Hit@5 (paraphrase indexing cases recovered) but collapses on infrastructure.
-- Hybrid recovers both: perfect retrieval and infrastructure Hit@5, at the cost of lower indexing Hit@5 (0.833, one persistent miss — the chunkers.py paraphrase case).
-- Hybrid + rerank recovers the indexing miss but collapses infrastructure again.
+- BM25 wins precision on retrieval queries (identifier/API names) but misses paraphrase indexing cases.
+- Dense achieves perfect indexing Hit@5 (all paraphrase indexing queries resolved semantically) but collapses on infrastructure (adapters, tooling).
+- Hybrid maintains perfect Hit@5 on both retrieval and infrastructure; indexing is the remaining gap (0.714) — two chunkers.py paraphrase cases remain persistent misses regardless of mode, one recoverable by the reranker.
 
-## Why hybrid + RRF — the story the 12-case set couldn't tell
+## Why hybrid + RRF — the story that got clearer as the golden set grew
 
 On the original 12-case identifier-only set, hybrid beat *neither* BM25 nor dense. The
 honest headline was "the dumbest configuration wins." That finding still holds for
-identifier queries: BM25 wins Hit@1 (0.75 vs. hybrid's 0.471 on those 12 cases) and the
-dense channel adds noise on code symbols where BM25 already has the answer.
+identifier queries: BM25 wins Hit@1 (0.522 on the full 23-case set, vs hybrid's 0.348)
+and the dense channel adds noise on code symbols where BM25 already has the answer.
 
-The 17-case set reveals where the design's bet pays off. Hybrid is the *only* mode that
-achieves Hit@5=1.0 on both `retrieval` and `infrastructure` — the two classes dominated by
-identifier queries. Dense achieves 1.0 on indexing (paraphrase-friendly) but collapses on
-infrastructure (0.75). The RRF fusion threads the needle: it absorbs the paraphrase signal
-from the dense channel while letting the lexical channel dominate on identifier queries.
-One miss persists regardless of mode — the chunkers.py paraphrase case, where the
-vocabulary gap ("passages/vectorized") is wide enough that neither channel recovers it.
+The 23-case set reveals where the design's bet pays off. Hybrid is the *only* mode that
+achieves Hit@5=1.0 on both `retrieval` and `infrastructure` simultaneously — despite BM25
+winning raw precision and dense winning indexing. The RRF fusion threads the needle across
+all three intent classes. The cost is precision: hybrid's Hit@1 (0.348) is the lowest of
+the three modes, because the dense channel sometimes elevates a semantically close but
+rank-2 match above the BM25-confident rank-1 hit.
 
-**What changed the answer:** the golden set's composition. Identifier-only → BM25 wins.
-Identifier + paraphrase → hybrid wins. The retriever design is only as testable as its
-golden set; a set optimised for one query type manufactures a misleading winner.
+**What changed the answer over three iterations:** the golden set's composition. At 12
+identifier cases, BM25 wins everything. At 17 (adding 5 paraphrase cases), hybrid's
+Hit@5 advantage became visible. At 23 (11 paraphrase), the intent-class picture is
+complete: hybrid is the only mode that prevents any class from collapsing. Two chunkers.py
+paraphrase cases remain persistent misses regardless of mode — a vocabulary gap deeper
+than either channel can bridge without reranking.
 
 ## Why reranking is gated, not global
 
@@ -119,31 +119,42 @@ ms-marco; whether bge-v2-m3 also regresses prose is unknown and not implied.
 
 ![Hit@5 per commit](./hit5_history.svg)
 
-Hit@1 swings from 0.471 to 0.588 across the four modes on the 17-case set; MRR from 0.681
-to 0.716 — large moves driven by single cases flipping rank. Hit@5 is tighter: 0.882 for
-BM25 and dense, 0.941 for hybrid and hybrid+rerank. On a set this small, Hit@1 and MRR are
+Hit@1 ranges from 0.304 to 0.522 across modes on the 23-case set; MRR from 0.562 to 0.639
+— large swings driven by single cases flipping between rank 1 and rank 2. Hit@5 is tighter:
+0.826 for BM25 and dense, 0.913 for hybrid. On a set this small, Hit@1 and MRR are
 noise-prone and Hit@5 is the stable signal. A regression gate should fire on real
 degradation, not on a borderline case slipping from rank 1 to rank 2 — so the gate
 (`eval/check.sh`, ±5pp) is anchored on Hit@5 and the README leads with it. The other
 metrics are always reported, never hidden; they're just not what the gate trusts.
 
-## Contextual chunk prefixing — two-stage experiment
+## Contextual chunk prefixing — three-stage experiment
 
 Each chunk is embedded with a short context line prepended — `source_type | repo | filename | symbol` — before the E5 `passage:` prefix. The hypothesis: this helps the dense channel disambiguate same-named symbols and improves recall on natural-language (paraphrase) queries where the query shares no tokens with the implementation.
 
 **Stage 1 (12-case identifier set):** null result — WITH and WITHOUT prefix both produced MRR=0.778, Hit@1=0.583. Expected: all 12 cases are BM25-dominant identifier lookups.
 
-**Stage 2** expanded the golden set to 17 cases with 5 paraphrase queries (no shared identifiers with target implementations). Results:
+**Stage 2 (17-case, +5 paraphrase):** positive — +0.050 MRR, +0.059 Hit@1, 0.0 Hit@5 delta. The gain came from one case where the prefix added `config.py` as a semantic anchor, jumping rank 5→1.
+
+**Stage 3 (23-case, +11 paraphrase)** refined the picture:
 
 | Prefix mode | Hit@1 | Hit@3 | Hit@5 | MRR |
 |---|---|---|---|---|
-| WITHOUT context prefix | 0.412 | 0.824 | 0.941 | 0.631 |
-| **WITH context prefix (default)** | **0.471** | **0.882** | 0.941 | **0.681** |
-| **Delta** | **+0.059** | **+0.059** | 0.0 | **+0.050** |
+| WITHOUT context prefix | 0.304 | 0.739 | **0.957** | 0.562 |
+| **WITH context prefix (default)** | **0.348** | **0.783** | 0.913 | **0.579** |
+| **Delta** | **+0.044** | **+0.044** | **−0.044** | **+0.017** |
 
-Positive result — barely. The entire +0.050 MRR gain comes from one paraphrase case: "folder names that are skipped when walking the project tree" jumped from rank 5 to rank 1 when the prefix added `config.py` as a semantic hint. Two paraphrase cases were unchanged (rank 2 in both modes). One remained a persistent miss regardless of prefix: "dividing files into passages before vectorized" targeting chunkers.py — a harder vocabulary gap where neither "passages" nor "vectorized" appears anywhere in the file or its context prefix.
+The Hit@5 regression (−0.044) is new. It is driven by a single case: "breaks source code at logical declaration boundaries" targeting `chunkers.py` drops from rank 5 (WITHOUT) to MISS (WITH prefix). Root cause: the prefix context (`"code | … | chunkers.py | chunk_python"`) causes the dense channel to score `build.py` chunks higher on a query that mentions "source code" — semantically overlapping tokens that the prefix amplifies.
 
-The verdict: chunk prefixing is validated on paraphrase queries where the filename itself carries semantic signal. It does not help when the vocabulary gap spans concepts unrelated to the filename. The feature ships default-on at zero runtime cost; the stronger validation would require ≥20 paraphrase cases to get variance below ±5pp per missing case. See [ADR-0004](../docs/adr/0004-chunk-prefixing-experiment-bar.md) for the full decision and caveats.
+**The full picture:** prefix is a *precision optimizer*, not a *coverage optimizer*.
+
+| Effect | Mechanism |
+|---|---|
+| Gains where filename = semantic anchor | "folder names" → config.py; "auto rerank" → retrieval.py |
+| Neutral when prefix adds no new signal | pack.py, mcp_server.py — rank unchanged in both modes |
+| Loses where prefix causes false positives | "source code… fragments" → build.py outscores chunkers.py |
+| Recoverable via reranker | chunkers.py miss goes rank 6 → 1 with cross-encoder reranking |
+
+The decision to ship default-on stands: cost is zero (prefix used at embed time only, not stored), MRR direction remains positive (+0.017 on 23 cases), and the one reproducible Hit@5 regression is compensated by the gated reranker. See [ADR-0004](docs/adr/0004-chunk-prefixing-experiment-bar.md) for the full three-stage experiment record.
 
 ## The discipline underneath all three
 

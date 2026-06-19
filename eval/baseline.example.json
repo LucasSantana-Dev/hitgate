@@ -1,40 +1,40 @@
 {
-  "n": 17,
-  "mrr": 0.681,
-  "hit@1": 0.471,
-  "hit@3": 0.882,
-  "hit@5": 0.941,
+  "n": 23,
+  "mrr": 0.579,
+  "hit@1": 0.348,
+  "hit@3": 0.783,
+  "hit@5": 0.913,
   "by_scope": {
     "code": {
-      "n": 17,
-      "mrr": 0.681,
-      "hit@1": 0.471,
-      "hit@3": 0.882,
-      "hit@5": 0.941
+      "n": 23,
+      "mrr": 0.579,
+      "hit@1": 0.348,
+      "hit@3": 0.783,
+      "hit@5": 0.913
     }
   },
   "by_intent": {
     "indexing": {
-      "n": 6,
-      "mrr": 0.583,
-      "hit@1": 0.333,
-      "hit@3": 0.833,
-      "hit@5": 0.833
+      "n": 7,
+      "mrr": 0.5,
+      "hit@1": 0.286,
+      "hit@3": 0.714,
+      "hit@5": 0.714
     },
     "infrastructure": {
-      "n": 4,
-      "mrr": 0.833,
-      "hit@1": 0.75,
-      "hit@3": 1.0,
-      "hit@5": 1.0
-    },
-    "retrieval": {
       "n": 7,
-      "mrr": 0.679,
+      "mrr": 0.624,
       "hit@1": 0.429,
       "hit@3": 0.857,
       "hit@5": 1.0
+    },
+    "retrieval": {
+      "n": 9,
+      "mrr": 0.606,
+      "hit@1": 0.333,
+      "hit@3": 0.778,
+      "hit@5": 1.0
     }
   },
-  "_note": "Frozen baseline for eval/golden.demo.jsonl: repo self-indexed, pure hybrid (RAG_RERANK_AUTO=off), RAG_CHUNK_CONTEXT_PREFIX=on (default). Golden set expanded from 12 to 17 cases with 5 paraphrase cases (queries sharing no identifiers with their target implementations). Hit@5 gated headline; Hit@1/MRR drift as the corpus grows. Stage 2 chunk-prefix ablation: WITH prefix beats WITHOUT by +0.050 MRR / +0.059 Hit@1 on the 17-case set, meeting the ADR-0004 bar. Re-freeze when any metric moves beyond ±5pp from these values."
+  "_note": "Frozen baseline for eval/golden.demo.jsonl: repo self-indexed, pure hybrid (RAG_RERANK_AUTO=off), RAG_CHUNK_CONTEXT_PREFIX=on (default). Golden set expanded from 17 to 23 cases (+6 paraphrase cases targeting pack.py, run.py, langchain_retriever.py, mcp_server.py, retrieval.py auto-rerank trigger, and a second chunkers.py angle). Stage 3 chunk-prefix ablation on 23-case set: WITH prefix beats WITHOUT by +0.017 MRR / +0.044 Hit@1 but regresses Hit@5 by -0.044. The regression is driven by the chunkers.py second-angle paraphrase (rank 5 WITHOUT prefix, MISS WITH prefix — the prefix context causes build.py to outscore it in the dense channel). Hit@5 is the gated headline; re-freeze when it moves beyond ±5pp from 0.913."
 }
