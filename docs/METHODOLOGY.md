@@ -22,66 +22,68 @@ RAG_RANK_MODE=hybrid RAG_RERANK_AUTO=off python eval/run.py --label abl-hybrid
 RAG_RANK_MODE=hybrid                     python eval/run.py --label abl-hybrid-rerank --rerank
 ```
 
+Current numbers on the 17-case golden set (12 identifier queries + 5 paraphrase queries):
+
 | Rank mode | Hit@1 | Hit@3 | Hit@5 | MRR |
 |---|---|---|---|---|
-| **BM25-only** | **0.917** | **1.0** | **1.0** | **0.958** |
-| dense-only | 0.667 | 1.0 | 1.0 | 0.806 |
-| hybrid (RRF + symbol boost) | 0.667 | 1.0 | 1.0 | 0.833 |
-| hybrid + rerank (ms-marco, forced on all) | 0.667 | 0.917 | 0.917 | 0.778 |
+| BM25-only | 0.588 | 0.765 | 0.882 | 0.693 |
+| dense-only | 0.588 | 0.882 | 0.882 | 0.716 |
+| **hybrid (RRF + symbol boost)** | 0.471 | 0.882 | **0.941** | 0.681 |
+| hybrid + rerank (ms-marco, forced on all) | 0.529 | **0.941** | **0.941** | 0.696 |
 
-Read that table before the rationale, because it refuses to tell the tidy story: **on this
-demo, the dumbest configuration wins — by a wider margin than before.**
+The story changed when paraphrase cases were added. On the original 12-case identifier-only
+set, BM25 dominated on every metric (Hit@1=0.917, MRR=0.958; hybrid trailed at 0.667/0.833).
+That result still stands on identifier queries — BM25's lexical advantage is real. Adding 5
+paraphrase queries (natural language, no shared tokens with the implementation) broke the
+degeneracy: BM25 drops to Hit@5=0.882 while hybrid holds at 0.941.
 
-Per-intent breakdown reveals where each mode actually differs (all Hit@5 shown):
+Per-intent breakdown (Hit@5 across all four modes, 17-case set):
 
-| Rank mode | retrieval | indexing | infrastructure |
+| Rank mode | retrieval (n=7) | indexing (n=6) | infrastructure (n=4) |
 |---|---|---|---|
-| BM25-only | 1.0 | 1.0 | **1.0** |
-| dense-only | 1.0 | 1.0 | 1.0 |
-| hybrid | 1.0 | 1.0 | 1.0 |
-| hybrid + rerank | 1.0 | 1.0 | **0.667** |
+| BM25-only | 0.857 | 0.833 | **1.0** |
+| dense-only | 0.857 | **1.0** | 0.75 |
+| **hybrid** | **1.0** | 0.833 | **1.0** |
+| hybrid + rerank | **1.0** | **1.0** | 0.75 |
 
-The aggregate masks the reranker's worst failure: it collapses `infrastructure` Hit@5 from 1.0
-to 0.667 — two of three infrastructure queries pushed out of the top 5 entirely.
+The per-intent table makes the tradeoffs precise:
+- BM25 achieves perfect infrastructure Hit@5 but misses paraphrase retrieval and indexing cases.
+- Dense achieves perfect indexing Hit@5 (paraphrase indexing cases recovered) but collapses on infrastructure.
+- Hybrid recovers both: perfect retrieval and infrastructure Hit@5, at the cost of lower indexing Hit@5 (0.833, one persistent miss — the chunkers.py paraphrase case).
+- Hybrid + rerank recovers the indexing miss but collapses infrastructure again.
 
-## Why hybrid + RRF — stated against the evidence
+## Why hybrid + RRF — the story the 12-case set couldn't tell
 
-The conventional pitch is "hybrid beats either channel alone." Here it beats *neither*.
-BM25-only dominates on every axis: Hit@1 0.917 vs. hybrid's 0.667, MRR 0.958 vs. 0.833.
-Hit@5 is tied at 1.0 for BM25, dense, and hybrid, so the only differentiation is at
-rank 1 — where BM25 wins decisively. An honest reading: **this demo does not justify
-hybrid's added complexity.** Two things are true and worth saying out loud:
+On the original 12-case identifier-only set, hybrid beat *neither* BM25 nor dense. The
+honest headline was "the dumbest configuration wins." That finding still holds for
+identifier queries: BM25 wins Hit@1 (0.75 vs. hybrid's 0.471 on those 12 cases) and the
+dense channel adds noise on code symbols where BM25 already has the answer.
 
-1. **The corpus is lexical and tiny.** Twelve queries, almost all identifier/keyword lookups
-   against code, where BM25 (weighted slightly above dense, `RAG_BM25_WEIGHT=1.5`, plus a
-   symbol-definition boost) already lands the answer. Fusion can't improve a channel that's
-   already right; it can only add a second opinion that sometimes drags. On the "index recent
-   git commits" query, the dense/symbol signal even promotes a *different* file above the
-   intended one — which is how hybrid loses 0.25 of Hit@1 to plain BM25 here.
-2. **At Hit@5, all three non-rerank modes are equivalent.** The pre-chunker-fix era showed
-   dense edging out hybrid at Hit@5 (0.917 vs 0.833). After fixing the chunker gap, that
-   edge vanished — the 12 cases are all reachable by all three modes. The Hit@1/MRR
-   difference is the real story: BM25's symbol-definition boost puts the right answer first.
+The 17-case set reveals where the design's bet pays off. Hybrid is the *only* mode that
+achieves Hit@5=1.0 on both `retrieval` and `infrastructure` — the two classes dominated by
+identifier queries. Dense achieves 1.0 on indexing (paraphrase-friendly) but collapses on
+infrastructure (0.75). The RRF fusion threads the needle: it absorbs the paraphrase signal
+from the dense channel while letting the lexical channel dominate on identifier queries.
+One miss persists regardless of mode — the chunkers.py paraphrase case, where the
+vocabulary gap ("passages/vectorized") is wide enough that neither channel recovers it.
 
-So why ship hybrid? Honestly: **not because this demo earns it.** The dense channel is
-insurance for paraphrase queries — natural-language questions that share almost no tokens
-with the implementation — which a code-only, 12-case demo barely contains. The
-measurement's job here is to make that limitation visible, not to manufacture a win. The
-contextual-retrieval experiment in [ROADMAP.md](../ROADMAP.md) is exactly the test that
-would put hybrid where it should pay off.
+**What changed the answer:** the golden set's composition. Identifier-only → BM25 wins.
+Identifier + paraphrase → hybrid wins. The retriever design is only as testable as its
+golden set; a set optimised for one query type manufactures a misleading winner.
 
 ## Why reranking is gated, not global
 
-The last row is the cleanest result on the page. Forcing the default cross-encoder
-(`ms-marco-MiniLM-L-6-v2`) to rerank **every** query is the *worst* configuration measured:
-Hit@5 **1.0 → 0.917**, MRR **0.833 → 0.778**. The per-intent breakdown makes the failure
-precise: the reranker collapses `infrastructure` Hit@5 from 1.0 to 0.667 — two of three
-infrastructure queries (env-var config, excluded-dirs) pushed out of the top 5. A
-general-purpose reranker trained on natural-language passage retrieval reorders code and
-config lookups incorrectly. That is the measured argument for the production policy: rerank
-is **off by default** and fires only on *weak or ambiguous* queries (auto-trigger on a low
-top-1 cosine or a thin top-1/top-2 margin), with the heavier, code-tuned reranker confined
-to code scope. "Add a reranker everywhere" is not a free win — here it is a measured loss.
+The reranker story on the 17-case set is more nuanced but the production policy unchanged.
+Forcing `ms-marco-MiniLM-L-6-v2` to rerank every query improves indexing (Hit@5 0.833→1.0,
+recovering the "assigns content category" paraphrase case) but collapses infrastructure
+(Hit@5 1.0→0.75) and drops retrieval MRR (0.679→0.595). The infrastructure collapse is the
+same failure mode as on the 12-case set — a general-purpose NL-passage reranker incorrectly
+reorders config and tooling lookups. The aggregate Hit@5 is unchanged (0.941), masking the
+intra-class trade.
+
+The measured argument for the production policy remains: rerank is **off by default** and
+fires only on *weak or ambiguous* queries (auto-trigger on a low top-1 cosine or a thin
+top-1/top-2 margin), with the heavier code-tuned reranker confined to code scope.
 
 > Honest boundary: the companion claim — that reranking *also* regresses prose/memory retrieval —
 > is **not reproducible on this public demo**, which is 100% code-scope. It was measured on a
@@ -92,13 +94,12 @@ to code scope. "Add a reranker everywhere" is not a free win — here it is a me
 
 ![Hit@5 per commit](./hit5_history.svg)
 
-This is where the ablation's *noise* becomes the argument. Across the four modes, Hit@1 swings
-between 0.667 and 0.917 and MRR between 0.778 and 0.958 — large moves driven by a single case
-flipping rank, on a 12-case set. Hit@5, meanwhile, is 1.0 for three of the four modes (and 0.917
-for rerank) after the chunker fix that surfaced previously invisible module-level constants. On a
-set this small, Hit@1 and MRR are noise-prone and Hit@5 is the stable signal. A regression gate
-should fire on real degradation, not on a borderline case slipping from rank 1 to rank 2 — so
-the gate (`eval/check.sh`, ±5pp) is anchored on Hit@5 and the README leads with it. The other
+Hit@1 swings from 0.471 to 0.588 across the four modes on the 17-case set; MRR from 0.681
+to 0.716 — large moves driven by single cases flipping rank. Hit@5 is tighter: 0.882 for
+BM25 and dense, 0.941 for hybrid and hybrid+rerank. On a set this small, Hit@1 and MRR are
+noise-prone and Hit@5 is the stable signal. A regression gate should fire on real
+degradation, not on a borderline case slipping from rank 1 to rank 2 — so the gate
+(`eval/check.sh`, ±5pp) is anchored on Hit@5 and the README leads with it. The other
 metrics are always reported, never hidden; they're just not what the gate trusts.
 
 ## Contextual chunk prefixing — two-stage experiment

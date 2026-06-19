@@ -12,22 +12,18 @@ public.
 
 ---
 
-## 1. Comparative benchmark vs. named baselines
+## 1. Comparative benchmark vs. named baselines ✅ shipped (BM25 vs dense vs hybrid)
 
-Today the demo reports a single number (Hit@5 1.0, self-indexed after the chunker fix
-that added module-level constant indexing). A single number tells you the system works;
-it doesn't tell you the hybrid+RRF design is *earning its complexity*. The experiment:
-run the same reproducible demo eval against
+The comparison shipped with the paraphrase golden-set expansion (ROADMAP #2 Stage 2).
+The BM25 vs dense vs hybrid ablation on the 17-case set is in `docs/METHODOLOGY.md`.
+Key finding: **hybrid earned its complexity once the golden set included paraphrase queries.**
+On identifier-only queries, BM25-only dominated (Hit@1=0.917, MRR=0.958); on the expanded
+17-case set, hybrid achieves Hit@5=0.941 vs BM25's 0.882, and is the only mode to
+achieve Hit@5=1.0 on both retrieval and infrastructure intent classes simultaneously.
 
-- **BM25 only** (drop the dense half),
-- a **late-interaction / token-level** retriever (e.g. a ColBERT-style scorer),
-- an **off-the-shelf framework's default** RAG pipeline,
-
-and publish the honest delta — including any scope where the simpler baseline wins.
-
-**Bar to ship:** the comparison is the deliverable; it ships regardless of outcome. If
-BM25-only ties the hybrid on this corpus, that finding is *more* valuable than a number
-that flatters the design.
+**Deferred:** late-interaction (ColBERT-style) and off-the-shelf framework comparison.
+Reopen trigger: a use case arises where sub-word token overlap is the primary failure mode
+and BM25/dense fusion hasn't already addressed it on a ≥30-case eval set.
 
 ## 2. Contextual chunk prefixing ✅ shipped (marginal positive result)
 
