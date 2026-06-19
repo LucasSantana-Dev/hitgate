@@ -7,10 +7,11 @@ set, a frozen baseline, and a refusal to assert any number that didn't come out 
 real ablation — including, prominently, the places where the measurement **contradicts** the
 design. That contradiction is the point.
 
-Every number below is reproducible with the commands shown, on the 23-case code demo
+Every number below is reproducible with the commands shown, on the 24-case code demo
 (`eval/golden.demo.jsonl`), self-indexed over this repo, pure hybrid unless stated.
-The golden set was expanded from 12 → 17 → 23 cases across three sessions; numbers
-reflect the full 23-case set (12 identifier + 11 paraphrase queries).
+The golden set was expanded from 12 → 17 → 23 → 24 cases across four sessions; numbers
+reflect the full 24-case set (12 identifier + 12 paraphrase queries) unless a section
+explicitly notes it measured on an earlier 23-case snapshot.
 
 ## The ablation
 
@@ -22,24 +23,26 @@ RAG_RANK_MODE=hybrid RAG_RERANK_AUTO=off python eval/run.py --label abl-hybrid
 RAG_RANK_MODE=hybrid                     python eval/run.py --label abl-hybrid-rerank --rerank
 ```
 
-Current numbers on the 23-case golden set (12 identifier + 11 paraphrase queries):
+BM25 and dense-only rows below are from the 23-case ablation; the hybrid row reflects the
+current 24-case baseline (one additional retrieval paraphrase case, hit at rank 1):
 
 | Rank mode | Hit@1 | Hit@3 | Hit@5 | MRR |
 |---|---|---|---|---|
-| BM25-only | 0.522 | 0.783 | 0.826 | 0.639 |
-| dense-only | 0.478 | 0.783 | 0.826 | 0.617 |
-| **hybrid (RRF + symbol boost)** | **0.435** | **0.870** | **1.0** | **0.666** |
+| BM25-only *(23-case ablation)* | 0.522 | 0.783 | 0.826 | 0.639 |
+| dense-only *(23-case ablation)* | 0.478 | 0.783 | 0.826 | 0.617 |
+| **hybrid (RRF + symbol boost)** | **0.458** | **0.875** | **1.0** | **0.68** |
 
-The 23-case hybrid numbers reflect the `chunkers.py` docstring fix (see "vocabulary gap" below).
-BM25 still wins Hit@1 on the identifier subset (0.522), because 12/23 cases are keyword lookups
-where lexical overlap dominates. Hybrid wins both Hit@5 and MRR on the full set.
+The hybrid numbers reflect the `chunkers.py` docstring fix (see "vocabulary gap" below) and
+the 24-case baseline freeze. BM25 still wins Hit@1 on the identifier subset (0.522), because
+12/24 cases are keyword lookups where lexical overlap dominates. Hybrid wins both Hit@5 and MRR.
 
-Per-intent breakdown (Hit@5 across three modes, 23-case set with docstring fix):
+Per-intent breakdown (Hit@5 across three modes; hybrid numbers from the 24-case baseline,
+BM25/dense from the 23-case ablation):
 
-| Rank mode | retrieval (n=9) | indexing (n=7) | infrastructure (n=7) |
+| Rank mode | retrieval (n=10) | indexing (n=7) | infrastructure (n=7) |
 |---|---|---|---|
-| BM25-only | 0.889 | 0.714 | 0.857 |
-| dense-only | 0.778 | 1.0 | 0.714 |
+| BM25-only *(n=9 for retrieval)* | 0.889 | 0.714 | 0.857 |
+| dense-only *(n=9 for retrieval)* | 0.778 | 1.0 | 0.714 |
 | **hybrid** | **1.0** | **1.0** | **1.0** |
 
 Hybrid is the only mode that achieves Hit@5=1.0 across all three intent classes simultaneously.
@@ -50,23 +53,24 @@ The docstring fix that resolved the indexing gap is documented below.
 
 On the original 12-case identifier-only set, hybrid beat *neither* BM25 nor dense. The
 honest headline was "the dumbest configuration wins." That finding still holds for
-identifier queries: BM25 wins Hit@1 (0.522 on the full 23-case set, vs hybrid's 0.348)
-and the dense channel adds noise on code symbols where BM25 already has the answer.
+identifier queries: BM25 wins Hit@1 (0.522 on the 23-case ablation, vs hybrid's 0.458 on
+24 cases) and the dense channel adds noise on code symbols where BM25 already has the answer.
 
-The 23-case set reveals where the design's bet pays off. Hybrid is the *only* mode that
+The 24-case set confirms where the design's bet pays off. Hybrid is the *only* mode that
 achieves Hit@5=1.0 on both `retrieval` and `infrastructure` simultaneously — despite BM25
 winning raw precision and dense winning indexing. The RRF fusion threads the needle across
-all three intent classes. The cost is precision: hybrid's Hit@1 (0.348) is the lowest of
+all three intent classes. The cost is precision: hybrid's Hit@1 (0.458) is the lowest of
 the three modes, because the dense channel sometimes elevates a semantically close but
 rank-2 match above the BM25-confident rank-1 hit.
 
-**What changed the answer over four iterations:** the golden set's composition AND the
+**What changed the answer over five iterations:** the golden set's composition AND the
 corpus vocabulary. At 12 identifier cases, BM25 wins everything. At 17 (adding 5
 paraphrase cases), hybrid's Hit@5 advantage became visible. At 23 (11 paraphrase), the
 intent-class picture is complete. The final step — adding plain-English vocabulary to
 `chunkers.py`'s module docstring ("passages", "fragments", "declaration boundaries") —
 resolved the two persistent indexing misses and brought hybrid to Hit@5=1.0 across all
-classes. The right fix for a vocabulary gap isn't always in the embedding pipeline: sometimes
+classes. Case 24 (retrieval paraphrase) confirmed the baseline at n=10 for retrieval.
+The right fix for a vocabulary gap isn't always in the embedding pipeline: sometimes
 the source itself is missing the language that describes what it does.
 
 ## Why reranking is gated, not global
@@ -117,7 +121,7 @@ ms-marco; whether bge-v2-m3 also regresses prose is unknown and not implied.
 
 ![Hit@5 per commit](./hit5_history.svg)
 
-Hit@1 ranges from 0.333 to 0.522 across modes on the 23-case set; MRR from 0.606 to 0.666
+Hit@1 ranges from 0.333 to 0.522 across modes (0.458 for hybrid on the 24-case set); MRR from 0.606 to 0.68
 — large swings driven by single cases flipping between rank 1 and rank 2. Hit@5 is tighter:
 0.826 for BM25 and dense, 1.0 for hybrid (after the docstring fix). On a set this small,
 Hit@1 and MRR are noise-prone and Hit@5 is the stable signal. A regression gate should fire
@@ -133,7 +137,7 @@ Each chunk is embedded with a short context line prepended — `source_type | re
 
 **Stage 2 (17-case, +5 paraphrase):** positive — +0.050 MRR, +0.059 Hit@1, 0.0 Hit@5 delta. The gain came from one case where the prefix added `config.py` as a semantic anchor, jumping rank 5→1.
 
-**Stage 3 (23-case, +11 paraphrase)** refined the picture:
+**Stage 3 (23-case, +11 paraphrase)** refined the picture (ablation run on 23 cases; case 24 was added after):
 
 | Prefix mode | Hit@1 | Hit@3 | Hit@5 | MRR |
 |---|---|---|---|---|
@@ -152,7 +156,7 @@ The Hit@5 regression (−0.044) is new. It is driven by a single case: "breaks s
 | Loses where prefix causes false positives | "source code… fragments" → build.py outscores chunkers.py |
 | Recoverable via reranker | chunkers.py miss goes rank 6 → 1 with cross-encoder reranking |
 
-The decision to ship default-on stands: cost is zero (prefix used at embed time only, not stored), MRR direction remains positive (+0.017 on 23 cases), and the one reproducible Hit@5 regression is compensated by the gated reranker. See [ADR-0004](docs/adr/0004-chunk-prefixing-experiment-bar.md) for the full three-stage experiment record.
+The decision to ship default-on stands: cost is zero (prefix used at embed time only, not stored), MRR direction remains positive (+0.017 on the 23-case ablation), and the one reproducible Hit@5 regression is compensated by the gated reranker. See [ADR-0004](docs/adr/0004-chunk-prefixing-experiment-bar.md) for the full three-stage experiment record.
 
 ## Vocabulary gap — the fix is in the source, not the pipeline
 
@@ -169,7 +173,8 @@ The fix was a one-sentence docstring addition:
 > counts."*
 
 Result: both cases moved from MISS to rank 1. No other case regressed. Hit@5 moved from
-0.913 to 1.0 (across all 23 cases, all three intent classes).
+0.913 to 1.0 (across all 23 cases at the time; the 24-case baseline subsequently confirmed
+Hit@5=1.0 with retrieval n=10).
 
 **The lesson:** when a retrieval miss is caused by vocabulary gap, the highest-leverage fix
 is usually in the *corpus* — adding plain-English description to the module or function that
