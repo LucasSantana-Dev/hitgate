@@ -39,31 +39,29 @@ RAG_RERANK_AUTO=off python eval/run.py --label demo
 python eval/run.py --retriever eval.example_external_retriever:retrieve --label mine
 ```
 
-That eval indexes the repo's own source and scores 12 golden cases against it — so
+That eval indexes the repo's own source and scores 23 golden cases against it — so
 **you can reproduce the number below yourself**, no private data required.
 
 ## Results (honest, self-indexed demo)
 
 | Metric | Value |
 |---|---|
-| **Hit@5** (code scope, pure hybrid) — *the regression-gated headline* | **0.833** |
-| Hit@1 | 0.667 |
-| MRR | 0.75 |
-| Corpus | this repo, self-indexed (code files; counts drift as the repo grows) |
+| **Hit@5** (code scope, pure hybrid) — *the regression-gated headline* | **0.913** |
+| Hit@1 | 0.348 |
+| MRR | 0.579 |
+| Corpus | this repo, self-indexed · 23 cases (12 identifier + 11 paraphrase) |
 
-8 of 12 cases hit at rank 1; the misses are left in on purpose (a couple of
-`config.py` queries lose to `build.py`). Inflating a benchmark by quietly dropping
-the cases it fails is the first thing this project refuses to do — see
+8 of 23 cases hit at rank 1; the misses are left in on purpose. Inflating a benchmark by
+quietly dropping the cases it fails is the first thing this project refuses to do — see
 [DECISIONS.md](./DECISIONS.md); measured before/after deltas are in
-[CHANGELOG.md](./CHANGELOG.md). An honest ablation — where plain **BM25-only actually
-edges hybrid** on this small demo — is walked through in
-[docs/METHODOLOGY.md](./docs/METHODOLOGY.md).
+[CHANGELOG.md](./CHANGELOG.md). An honest ablation — where **BM25-only wins Hit@1**
+(0.522) while **hybrid wins Hit@5** (0.913, the only mode with 0 missed classes) — is
+walked through in [docs/METHODOLOGY.md](./docs/METHODOLOGY.md).
 
 Because the demo indexes **this repo itself**, the corpus grows as the repo does, so
-the exact counts and Hit@1 drift over time — adding a file can demote a borderline
-case. That's why **Hit@5 is the number under regression gate** (`eval/check.sh`, ±5pp);
-it has held at 0.833 across these additions. The drift is the honest behavior of a
-self-indexing benchmark, not noise swept under a frozen number.
+Hit@1 and MRR drift over time — adding a file can demote a borderline case. That's why
+**Hit@5 is the number under regression gate** (`eval/check.sh`, ±5pp). The drift is the
+honest behavior of a self-indexing benchmark, not noise swept under a frozen number.
 
 ## How it works
 
