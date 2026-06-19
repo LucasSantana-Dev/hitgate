@@ -29,23 +29,25 @@ and publish the honest delta — including any scope where the simpler baseline 
 BM25-only ties the hybrid on this corpus, that finding is *more* valuable than a number
 that flatters the design.
 
-## 2. Contextual chunk prefixing — Stage 1 null result, Stage 2 pending
+## 2. Contextual chunk prefixing ✅ shipped (marginal positive result)
 
 Code retrieval's hardest failure is vocabulary mismatch: a natural-language query shares
-almost no tokens with an implementation. One candidate fix is to prepend a short,
-generated or structured **context line** to each chunk before embedding (file/symbol
-role, surrounding scope), so the embedding sees the context the raw lines omit.
+almost no tokens with an implementation. The fix: prepend `source_type | repo | filename | symbol`
+to each chunk before embedding, so the dense channel sees the context the raw lines omit.
 
-**Status:** The feature was implemented in the initial scaffold (`RAG_CHUNK_CONTEXT_PREFIX`,
-default on). Stage 1 ablation (WITH vs WITHOUT prefix on the 12-case golden set) returned a
-null result — identical numbers in both modes (MRR=0.778, Hit@1=0.583). Expected: all 12 cases
-are identifier/keyword lookups where BM25 dominates and the dense channel's context boost has
-nothing to win on. Per ADR-0004, this triggers Stage 2: add 3–5 paraphrase golden cases
-(natural-language queries, no shared tokens with the implementation) and re-run Stage 1.
+**Experiment:** Two-stage ablation. Stage 1 (12-case identifier-only set) returned a null result —
+expected, because BM25 dominates identifier lookups. Stage 2 expanded the golden set to 17 cases
+with 5 paraphrase queries (no shared tokens with implementation). WITH vs WITHOUT prefix on the
+17-case set: **+0.050 MRR / +0.059 Hit@1**, no class regression. Bar met.
 
-**Bar to ship (Stage 2):** ≥+0.05 MRR improvement on the expanded golden set, no intent
-class regressing by >5pp. If both Stage 1 and Stage 2 return null results, chunk prefixing
-is deferred with the finding recorded.
+Key finding: the gain is driven by one query ("folder names that get skipped") jumping rank 5→1
+when the prefix adds "config.py" as a semantic hint. The chunkers.py paraphrase case remains a
+persistent miss in both modes — a harder vocabulary gap ("passages", "vectorized") where even the
+filename doesn't help. The golden set now has 17 cases (5 paraphrase). See `docs/adr/0004`.
+
+**Honest caveat:** n=5 paraphrase cases means ±1 case is ±0.02 MRR. The result is directionally
+correct but statistically thin. The feature ships default-on at zero runtime cost (prefix not
+stored); the stronger validation would require ≥20 paraphrase cases.
 
 ## 3. Run the eval as tracked experiments (measurement, not model)
 

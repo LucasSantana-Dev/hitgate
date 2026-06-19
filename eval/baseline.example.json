@@ -1,40 +1,40 @@
 {
-  "n": 12,
-  "mrr": 0.778,
-  "hit@1": 0.583,
-  "hit@3": 1.0,
-  "hit@5": 1.0,
+  "n": 17,
+  "mrr": 0.681,
+  "hit@1": 0.471,
+  "hit@3": 0.882,
+  "hit@5": 0.941,
   "by_scope": {
     "code": {
-      "n": 12,
-      "mrr": 0.778,
-      "hit@1": 0.583,
-      "hit@3": 1.0,
-      "hit@5": 1.0
+      "n": 17,
+      "mrr": 0.681,
+      "hit@1": 0.471,
+      "hit@3": 0.882,
+      "hit@5": 0.941
     }
   },
   "by_intent": {
     "indexing": {
-      "n": 4,
-      "mrr": 0.75,
-      "hit@1": 0.5,
-      "hit@3": 1.0,
-      "hit@5": 1.0
+      "n": 6,
+      "mrr": 0.583,
+      "hit@1": 0.333,
+      "hit@3": 0.833,
+      "hit@5": 0.833
     },
     "infrastructure": {
-      "n": 3,
-      "mrr": 0.778,
-      "hit@1": 0.667,
+      "n": 4,
+      "mrr": 0.833,
+      "hit@1": 0.75,
       "hit@3": 1.0,
       "hit@5": 1.0
     },
     "retrieval": {
-      "n": 5,
-      "mrr": 0.8,
-      "hit@1": 0.6,
-      "hit@3": 1.0,
+      "n": 7,
+      "mrr": 0.679,
+      "hit@1": 0.429,
+      "hit@3": 0.857,
       "hit@5": 1.0
     }
   },
-  "_note": "Frozen baseline for eval/golden.demo.jsonl: repo self-indexed, pure hybrid (RAG_RERANK_AUTO=off). The demo indexes this repo itself, so the corpus grows as the repo does; Hit@5 is the stable gated headline (held at 1.0 after the chunker fix that added module-level constant indexing), while Hit@1/MRR drift as files are added. Re-freeze deliberately when a metric moves beyond the +/-5pp gate tolerance. This freeze reflects the post-ADR-0004 corpus (new docs/adr/ and docs/agents/ files were added, shifting infrastructure Hit@1 from 1.0→0.667 as new docs competed with config.py for the 'excluded directories' query). Chunk context prefix ablation: WITH and WITHOUT prefix both produce identical numbers — Stage 1 null result, see docs/adr/0004 and ROADMAP item #2."
+  "_note": "Frozen baseline for eval/golden.demo.jsonl: repo self-indexed, pure hybrid (RAG_RERANK_AUTO=off), RAG_CHUNK_CONTEXT_PREFIX=on (default). Golden set expanded from 12 to 17 cases with 5 paraphrase cases (queries sharing no identifiers with their target implementations). Hit@5 gated headline; Hit@1/MRR drift as the corpus grows. Stage 2 chunk-prefix ablation: WITH prefix beats WITHOUT by +0.050 MRR / +0.059 Hit@1 on the 17-case set, meeting the ADR-0004 bar. Re-freeze when any metric moves beyond ±5pp from these values."
 }

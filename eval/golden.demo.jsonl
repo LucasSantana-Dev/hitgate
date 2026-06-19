@@ -10,3 +10,8 @@
 {"query": "evaluate retrieval quality Hit at K and MRR against a golden dataset", "expect_path_contains": "run.py", "expect_scope": "code", "intent": "infrastructure"}
 {"query": "E5 passage prefix added at embed time for indexed chunks", "expect_path_contains": "build.py", "expect_scope": "code", "intent": "indexing"}
 {"query": "reranker falls back to fused ranking when the model is unavailable", "expect_path_contains": "retrieval.py", "expect_scope": "code", "intent": "retrieval"}
+{"query": "which module is responsible for dividing files into passages before they are vectorized", "expect_path_contains": "chunkers.py", "expect_scope": "code", "intent": "indexing", "paraphrase": true}
+{"query": "how are separate result lists from two different scoring approaches merged into one ranked output", "expect_path_contains": "retrieval.py", "expect_scope": "code", "intent": "retrieval", "paraphrase": true}
+{"query": "where does the codebase list the folder names that are skipped when walking the project tree", "expect_path_contains": "config.py", "expect_scope": "code", "intent": "infrastructure", "paraphrase": true}
+{"query": "what logic assigns a content category to each file as it is ingested into the index", "expect_path_contains": "build.py", "expect_scope": "code", "intent": "indexing", "paraphrase": true}
+{"query": "what is the entry point for running a search against the local knowledge base", "expect_path_contains": "query.py", "expect_scope": "code", "intent": "retrieval", "paraphrase": true}

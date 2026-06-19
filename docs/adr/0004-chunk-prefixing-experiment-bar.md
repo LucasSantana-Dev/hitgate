@@ -97,3 +97,51 @@ chunk prefixing's semantic boost should materialize.
 Hit@1 0.667→0.583) due to corpus growth (new docs/adr/ and docs/agents/ files added
 competing chunks). Hit@5 held at 1.0. Baseline re-frozen at the new values; the
 drift is expected living-corpus behavior, not a code regression.
+
+---
+
+## Stage 2 result (run on 2026-06-19)
+
+Golden set expanded to 17 cases (+5 paraphrase cases targeting chunkers.py,
+retrieval.py, config.py, build.py, and query.py with queries sharing no identifiers
+with their target implementations).
+
+Ablation: hybrid mode, `RAG_RERANK_AUTO=off`, 17-case set.
+
+| Mode | Hit@1 | Hit@3 | Hit@5 | MRR |
+|---|---|---|---|---|
+| WITHOUT context prefix | 0.412 | 0.824 | 0.941 | 0.631 |
+| **WITH context prefix (default)** | **0.471** | **0.882** | 0.941 | **0.681** |
+| **Delta** | **+0.059** | **+0.059** | **0.0** | **+0.050** |
+
+**Per-paraphrase-case breakdown:**
+
+| Query | WITHOUT | WITH |
+|---|---|---|
+| "dividing files into passages before vectorized" → chunkers.py | MISS | MISS |
+| "separate result lists merged into one ranked output" → retrieval.py | #5 | #4 |
+| "folder names skipped when walking project tree" → config.py | #5 | **#1** |
+| "assigns content category to each file as ingested" → build.py | #2 | #2 |
+| "entry point for running a search" → query.py | #2 | #2 |
+
+**Result: positive — bar met (marginally).** MRR +0.050 exactly meets the ≥+0.05
+threshold. No intent class regressed (infrastructure gained +0.2 MRR from the
+"folder names" paraphrase case jumping rank 5→1 with prefix). The improvement is
+driven by one case where the filename "config.py" in the prefix disambiguated a
+conceptual query about configuration.
+
+**Honest caveats:**
+
+1. The margin is thin — one query drives the entire MRR gain. With n=5 paraphrase
+   cases, ±1 case is ±0.02 MRR.
+2. The chunkers.py paraphrase case is a persistent miss in both modes, revealing a
+   harder vocabulary gap where even the filename ("chunkers.py") doesn't help because
+   the query uses "passages" and "vectorized" — neither of which appears in chunkers.py
+   or its context prefix.
+3. The indexed class showed no change across all 5 paraphrase cases — the prefix's
+   benefit is concentrated in cases where the filename itself is a semantic signal.
+
+**Verdict: chunk prefixing ships as default-on.** The evidence is thin but the cost
+is zero (the prefix is not stored, only used at embed time) and the direction is
+positive. The stronger validation would require a larger paraphrase golden set
+(≥20 cases) to get variance below ±5pp per missing case.

@@ -101,20 +101,23 @@ should fire on real degradation, not on a borderline case slipping from rank 1 t
 the gate (`eval/check.sh`, ±5pp) is anchored on Hit@5 and the README leads with it. The other
 metrics are always reported, never hidden; they're just not what the gate trusts.
 
-## Contextual chunk prefixing — null Stage 1 result
+## Contextual chunk prefixing — two-stage experiment
 
-Each chunk is embedded with a short context line prepended — `source_type | repo | filename | symbol` — before the passage prefix that E5 requires. The hypothesis: this helps the dense channel disambiguate same-named symbols across files and improves recall on natural-language (paraphrase) queries.
+Each chunk is embedded with a short context line prepended — `source_type | repo | filename | symbol` — before the E5 `passage:` prefix. The hypothesis: this helps the dense channel disambiguate same-named symbols and improves recall on natural-language (paraphrase) queries where the query shares no tokens with the implementation.
 
-The ablation runs WITH (`RAG_CHUNK_CONTEXT_PREFIX=on`) vs WITHOUT (`=off`) on the 12-case golden set returned identical results:
+**Stage 1 (12-case identifier set):** null result — WITH and WITHOUT prefix both produced MRR=0.778, Hit@1=0.583. Expected: all 12 cases are BM25-dominant identifier lookups.
+
+**Stage 2** expanded the golden set to 17 cases with 5 paraphrase queries (no shared identifiers with target implementations). Results:
 
 | Prefix mode | Hit@1 | Hit@3 | Hit@5 | MRR |
 |---|---|---|---|---|
-| WITH (default) | 0.583 | 1.0 | 1.0 | 0.778 |
-| WITHOUT | 0.583 | 1.0 | 1.0 | 0.778 |
+| WITHOUT context prefix | 0.412 | 0.824 | 0.941 | 0.631 |
+| **WITH context prefix (default)** | **0.471** | **0.882** | 0.941 | **0.681** |
+| **Delta** | **+0.059** | **+0.059** | 0.0 | **+0.050** |
 
-Null result: no measurable difference on this set. The explanation is the same as why BM25 dominates: 12 identifier/keyword queries give the dense channel no paraphrase surface to work with. The feature stays on (it costs nothing at runtime) and the experiment moves to Stage 2 — adding 3–5 paraphrase golden cases where it should matter. See [ADR-0004](../docs/adr/0004-chunk-prefixing-experiment-bar.md) for the full decision and bar.
+Positive result — barely. The entire +0.050 MRR gain comes from one paraphrase case: "folder names that are skipped when walking the project tree" jumped from rank 5 to rank 1 when the prefix added `config.py` as a semantic hint. Two paraphrase cases were unchanged (rank 2 in both modes). One remained a persistent miss regardless of prefix: "dividing files into passages before vectorized" targeting chunkers.py — a harder vocabulary gap where neither "passages" nor "vectorized" appears anywhere in the file or its context prefix.
 
-This is also when the baseline drifted (MRR 0.833→0.778, Hit@1 0.667→0.583): the new ADR and docs/agents files added competing chunks that pushed the "excluded directories" infrastructure query from rank 1 to rank 3 on config.py. Hit@5 held at 1.0 — the right answer was still retrievable, just not the top result. Baseline re-frozen at the new values; the drift is expected living-corpus behavior.
+The verdict: chunk prefixing is validated on paraphrase queries where the filename itself carries semantic signal. It does not help when the vocabulary gap spans concepts unrelated to the filename. The feature ships default-on at zero runtime cost; the stronger validation would require ≥20 paraphrase cases to get variance below ±5pp per missing case. See [ADR-0004](../docs/adr/0004-chunk-prefixing-experiment-bar.md) for the full decision and caveats.
 
 ## The discipline underneath all three
 
