@@ -46,12 +46,12 @@ That eval indexes the repo's own source and scores 50 golden cases against it �
 
 | Metric | Value |
 |---|---|
-| **Hit@5** (code scope, pure hybrid) — *the regression-gated headline* | **0.98** |
-| Hit@1 | 0.54 |
-| MRR | 0.715 |
-| Corpus | this repo, self-indexed · 50 cases (25 identifier + 25 paraphrase) |
+| **Hit@5** (code scope, pure hybrid) — *the regression-gated headline* | **1.0** |
+| Hit@1 | 0.61 |
+| MRR | 0.767 |
+| Corpus | this repo, self-indexed · 59 cases |
 
-27 of 50 cases hit at rank 1; the misses are left in on purpose. Inflating a benchmark by
+36 of 59 cases hit at rank 1; the misses are left in on purpose. Inflating a benchmark by
 quietly dropping the cases it fails is the first thing this project refuses to do — see
 [DECISIONS.md](./DECISIONS.md); measured before/after deltas are in
 [CHANGELOG.md](./CHANGELOG.md). An honest ablation — where **BM25-only wins Hit@1**

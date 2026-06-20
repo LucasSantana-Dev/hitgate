@@ -12,6 +12,10 @@ set -uo pipefail
 
 EVAL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$EVAL_DIR/.." && pwd)"
+# Resolve RAG_EVAL_BASELINE to absolute before cd changes cwd
+if [ -n "$RAG_EVAL_BASELINE" ] && [ "${RAG_EVAL_BASELINE:0:1}" != "/" ]; then
+    RAG_EVAL_BASELINE="$REPO_ROOT/$RAG_EVAL_BASELINE"
+fi
 LABEL="${1:-rolling-$(date +%Y%m%d-%H%M)}"
 TOL_PP="${TOL_PP:-5}"
 # Interpreter is overridable (CI / venv); defaults to whatever python3 is on PATH.

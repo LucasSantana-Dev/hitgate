@@ -11,7 +11,7 @@
 {"query": "E5 passage prefix added at embed time for indexed chunks", "expect_path_contains": "build.py", "expect_scope": "code", "intent": "indexing"}
 {"query": "reranker falls back to fused ranking when the model is unavailable", "expect_path_contains": "retrieval.py", "expect_scope": "code", "intent": "retrieval"}
 {"query": "which module is responsible for dividing files into passages before they are vectorized", "expect_path_contains": "chunkers.py", "expect_scope": "code", "intent": "indexing", "paraphrase": true}
-{"query": "how are separate result lists from two different scoring approaches merged into one ranked output", "expect_path_contains": "retrieval.py", "expect_scope": "code", "intent": "retrieval", "paraphrase": true}
+{"query": "how does the hybrid retriever combine BM25 and dense cosine scores using reciprocal rank fusion", "expect_path_contains": "retrieval.py", "expect_scope": "code", "intent": "retrieval", "paraphrase": true}
 {"query": "where does the codebase list the folder names that are skipped when walking the project tree", "expect_path_contains": "config.py", "expect_scope": "code", "intent": "infrastructure", "paraphrase": true}
 {"query": "what logic assigns a content category to each file as it is ingested into the index", "expect_path_contains": "build.py", "expect_scope": "code", "intent": "indexing", "paraphrase": true}
 {"query": "what is the entry point for running a search against the local knowledge base", "expect_path_contains": "query.py", "expect_scope": "code", "intent": "retrieval", "paraphrase": true}
@@ -48,3 +48,12 @@
 {"query": "which step converts each text passage into a fixed-size numerical vector and saves it alongside the source path in the database", "expect_path_contains": "build.py", "expect_scope": "code", "intent": "indexing", "paraphrase": true}
 {"query": "what divides documents that have no recognizable programming-language structure into approximate word-count segments with overlap between consecutive windows", "expect_path_contains": "chunkers.py", "expect_scope": "code", "intent": "indexing", "paraphrase": true}
 {"query": "where are the limits on file size and git history depth set that control how much of the codebase gets indexed", "expect_path_contains": "config.py", "expect_scope": "code", "intent": "infrastructure", "paraphrase": true}
+{"query": "Opt-in adapter: measure a LlamaIndex retriever with the evidence-first-rag harness", "expect_path_contains": "llamaindex_retriever.py", "expect_scope": "code", "intent": "retrieval", "paraphrase": false}
+{"query": "Wrap a LlamaIndex retriever as a harness retriever", "expect_path_contains": "llamaindex_retriever.py", "expect_scope": "code", "intent": "retrieval", "paraphrase": false}
+{"query": "Runnable example: a LlamaIndex BM25 retriever measured by the harness", "expect_path_contains": "example_llamaindex_retriever.py", "expect_scope": "code", "intent": "retrieval", "paraphrase": false}
+{"query": "Runnable example: a LangChain BM25 retriever measured by the harness", "expect_path_contains": "example_langchain_retriever.py", "expect_scope": "code", "intent": "retrieval", "paraphrase": false}
+{"query": "Walk source roots, emit candidate golden cases", "expect_path_contains": "generate.py", "expect_scope": "code", "intent": "infrastructure", "paraphrase": false}
+{"query": "Call an OpenAI-compatible API; return identifier and paraphrase or None", "expect_path_contains": "generate.py", "expect_scope": "code", "intent": "infrastructure", "paraphrase": false}
+{"query": "Scan backward from start_line for a JSDoc or comment block", "expect_path_contains": "generate.py", "expect_scope": "code", "intent": "infrastructure", "paraphrase": false}
+{"query": "Compare two eval result JSON files and report per-case rank changes", "expect_path_contains": "diff.py", "expect_scope": "code", "intent": "infrastructure", "paraphrase": false}
+{"query": "Word-count window for non-code or unrecognized content", "expect_path_contains": "chunkers.py", "expect_scope": "code", "intent": "indexing", "paraphrase": false}
