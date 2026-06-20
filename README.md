@@ -42,7 +42,9 @@ python eval/run.py --retriever eval.example_external_retriever:retrieve --label 
 That eval indexes the repo's own source and scores 50 golden cases against it — so
 **you can reproduce the number below yourself**, no private data required.
 
-## Results (honest, self-indexed demo)
+## Results
+
+### Self-indexed demo (reproducible)
 
 | Metric | Value |
 |---|---|
@@ -55,14 +57,39 @@ That eval indexes the repo's own source and scores 50 golden cases against it �
 quietly dropping the cases it fails is the first thing this project refuses to do — see
 [DECISIONS.md](./DECISIONS.md); measured before/after deltas are in
 [CHANGELOG.md](./CHANGELOG.md). An honest ablation — where **BM25-only wins Hit@1**
-(0.522) while **hybrid wins Hit@5** (1.0 on the original 50-case corpus, all three intent
-classes covered) — is
-walked through in [docs/METHODOLOGY.md](./docs/METHODOLOGY.md).
+(0.522) while **hybrid wins Hit@5** (1.0) — is walked through in
+[docs/METHODOLOGY.md](./docs/METHODOLOGY.md).
 
 Because the demo indexes **this repo itself**, the corpus grows as the repo does, so
 Hit@1 and MRR drift over time — adding a file can demote a borderline case. That's why
 **Hit@5 is the number under regression gate** (`eval/check.sh`, ±5pp). The drift is the
 honest behavior of a self-indexing benchmark, not noise swept under a frozen number.
+
+### External corpus benchmarks
+
+The same retriever — zero tuning, same `eval/run.py` pipeline — measured against 7 other
+codebases with no corpus-specific configuration:
+
+| Corpus | Language | n | Hit@5 | Hit@1 | MRR |
+|---|---|---|---|---|---|
+| FastAPI v0.115 | Python | 25 | **1.0** | 0.64 | 0.79 |
+| forge-space / mcp-gateway | TypeScript | 20 | **1.0** | 0.70 | 0.821 |
+| portfolio / src | React/TS | 15 | **1.0** | 0.60 | 0.778 |
+| ai-dev-toolkit / packages/core | Python + TS | 20 | **1.0** | 0.85 | 0.925 |
+| homelab / homelab\_manager | Python | 20 | 0.950 | 0.85 | 0.900 |
+| Lucky / packages/backend | TypeScript | 21 | 0.905 | 0.71 | 0.810 |
+| Criativaria / web-app | Next.js/TS | 27 | 0.741 | 0.59 | 0.660 |
+
+Hit@5=1.0 on four of seven corpora. The two lowest-performing corpora have structural
+causes: Lucky has one Category B drift miss (Prometheus registry vs middleware, identical
+vocabulary); Criativaria is a homogeneous Next.js component library where sibling components
+are lexically indistinguishable — a genuine retrieval ceiling, not a tuning problem.
+
+The finding that matters: **corpus module clarity predicts Hit@1 better than language or
+size.** Clean functional boundaries (homelab, ADT) → 0.85. Same-layer UI components
+(portfolio, Criativaria) → 0.59–0.60. Python vs TypeScript is not the variable.
+
+Full methodology, miss taxonomy, and reproduce commands: [docs/METHODOLOGY.md](./docs/METHODOLOGY.md).
 
 ## How it works
 
