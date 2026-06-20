@@ -37,6 +37,17 @@ jobs:
           HF_HUB_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
           TRANSFORMERS_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
         run: bash eval/check.sh ci
+      - name: Auto-rerank gate — production operating point (RAG_RERANK_AUTO_MARGIN=0.015, advisory)
+        # Gates the calibrated auto-trigger path (ADR-0005). Baseline frozen at Hit@5=0.96.
+        # If the reranker model isn't cached, sentence-transformers falls back to the fused
+        # ranking (Hit@5≈0.98) — still within ±5pp of the 0.96 baseline, so CI stays green.
+        env:
+          HF_HUB_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
+          TRANSFORMERS_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
+          RAG_RERANK_AUTO: "on"
+          EVAL_EXTRA_FLAGS: "--auto-rerank"
+          RAG_EVAL_BASELINE: "eval/baseline.auto-rerank.json"
+        run: bash eval/check.sh auto-rerank-ci
       - name: Determinism gate — same query must yield the same top-K ordering
         env:
           HF_HUB_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}

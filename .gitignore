@@ -6,6 +6,7 @@ __pycache__/
 .DS_Store
 eval/*.json
 !eval/baseline.example.json
+!eval/baseline.auto-rerank.json
 corpus-demo/.index/
 *.egg-info/
 .venv/

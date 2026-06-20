@@ -31,7 +31,9 @@ fi
 cd "$EVAL_DIR"
 # Default to the committed demo set + frozen baseline so a fresh clone runs out of the box.
 DATASET="${RAG_EVAL_DATASET:-$EVAL_DIR/golden.demo.jsonl}"
-"$PY" run.py --dataset "$DATASET" --label "$LABEL" >/tmp/eval-run.out 2>&1
+# EVAL_EXTRA_FLAGS lets callers inject additional run.py flags without modifying this script.
+# Example: EVAL_EXTRA_FLAGS=--auto-rerank RAG_RERANK_AUTO=on bash eval/check.sh auto-rerank-ci
+"$PY" run.py --dataset "$DATASET" --label "$LABEL" ${EVAL_EXTRA_FLAGS:-} >/tmp/eval-run.out 2>&1
 status=$?
 cat /tmp/eval-run.out
 [ "$status" -ne 0 ] && exit "$status"

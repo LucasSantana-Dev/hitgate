@@ -1,0 +1,442 @@
+{
+  "n": 50,
+  "mrr": 0.731,
+  "hit@1": 0.6,
+  "hit@3": 0.82,
+  "hit@5": 0.96,
+  "by_scope": {
+    "code": {
+      "n": 50,
+      "mrr": 0.731,
+      "hit@1": 0.6,
+      "hit@3": 0.82,
+      "hit@5": 0.96
+    }
+  },
+  "by_intent": {
+    "indexing": {
+      "n": 14,
+      "mrr": 0.893,
+      "hit@1": 0.786,
+      "hit@3": 1.0,
+      "hit@5": 1.0
+    },
+    "infrastructure": {
+      "n": 19,
+      "mrr": 0.74,
+      "hit@1": 0.632,
+      "hit@3": 0.789,
+      "hit@5": 1.0
+    },
+    "retrieval": {
+      "n": 17,
+      "mrr": 0.587,
+      "hit@1": 0.412,
+      "hit@3": 0.706,
+      "hit@5": 0.882
+    }
+  },
+  "per_case": [
+    {
+      "query": "hybrid retrieval fusing BM25 and cosine with reciprocal rank fusion",
+      "expect": "retrieval.py",
+      "scope": "code",
+      "intent": "retrieval",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/retrieval.py:1"
+    },
+    {
+      "query": "selective cross-encoder reranker applied only to code-scope queries",
+      "expect": "retrieval.py",
+      "scope": "code",
+      "intent": "retrieval",
+      "hit_rank": 2,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/query.py:1"
+    },
+    {
+      "query": "tokenize identifiers into camelCase and snake_case subtokens",
+      "expect": "retrieval.py",
+      "scope": "code",
+      "intent": "retrieval",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/retrieval.py:101"
+    },
+    {
+      "query": "auto rerank weak ambiguous queries below a score threshold",
+      "expect": "retrieval.py",
+      "scope": "code",
+      "intent": "retrieval",
+      "hit_rank": 3,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/run.py:129"
+    },
+    {
+      "query": "environment variable configuration defaults for the index",
+      "expect": "config.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/config.py:1"
+    },
+    {
+      "query": "directories excluded from indexing like node_modules and venv",
+      "expect": "config.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 3,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/example_external_retriever.py:1"
+    },
+    {
+      "query": "chunk and embed source roots into a sqlite index",
+      "expect": "build.py",
+      "scope": "code",
+      "intent": "indexing",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/build.py:1"
+    },
+    {
+      "query": "index recent git commits as subject and body chunks",
+      "expect": "build.py",
+      "scope": "code",
+      "intent": "indexing",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/build.py:1"
+    },
+    {
+      "query": "classify a file into a source type by its path",
+      "expect": "build.py",
+      "scope": "code",
+      "intent": "indexing",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/build.py:72"
+    },
+    {
+      "query": "evaluate retrieval quality Hit at K and MRR against a golden dataset",
+      "expect": "run.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/run.py:1"
+    },
+    {
+      "query": "E5 passage prefix added at embed time for indexed chunks",
+      "expect": "build.py",
+      "scope": "code",
+      "intent": "indexing",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/build.py:212"
+    },
+    {
+      "query": "reranker falls back to fused ranking when the model is unavailable",
+      "expect": "retrieval.py",
+      "scope": "code",
+      "intent": "retrieval",
+      "hit_rank": 2,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/query.py:1"
+    },
+    {
+      "query": "which module is responsible for dividing files into passages before they are vectorized",
+      "expect": "chunkers.py",
+      "scope": "code",
+      "intent": "indexing",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/chunkers.py:1"
+    },
+    {
+      "query": "how are separate result lists from two different scoring approaches merged into one ranked output",
+      "expect": "retrieval.py",
+      "scope": "code",
+      "intent": "retrieval",
+      "hit_rank": null,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/example_external_retriever.py:30"
+    },
+    {
+      "query": "where does the codebase list the folder names that are skipped when walking the project tree",
+      "expect": "config.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 4,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/generate.py:1"
+    },
+    {
+      "query": "what logic assigns a content category to each file as it is ingested into the index",
+      "expect": "build.py",
+      "scope": "code",
+      "intent": "indexing",
+      "hit_rank": 2,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/chunkers.py:1"
+    },
+    {
+      "query": "what is the entry point for running a search against the local knowledge base",
+      "expect": "query.py",
+      "scope": "code",
+      "intent": "retrieval",
+      "hit_rank": 4,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/generate.py:1"
+    },
+    {
+      "query": "which module collects the top search results and formats them as a self-contained bundle of code and documentation for answering a task",
+      "expect": "pack.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 3,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/chunkers.py:1"
+    },
+    {
+      "query": "which file counts how many times the expected document surfaces within the highest-ranked positions across a batch of test questions",
+      "expect": "run.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/run.py:1"
+    },
+    {
+      "query": "what makes it possible to swap in a third-party document finder and have it scored by the same quality gate as the native retriever",
+      "expect": "langchain_retriever.py",
+      "scope": "code",
+      "intent": "retrieval",
+      "hit_rank": 2,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/run.py:1"
+    },
+    {
+      "query": "which file exposes the semantic lookup capability as a callable tool that outside processes can invoke via a message-passing protocol",
+      "expect": "mcp_server.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 2,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/adapters/langchain_retriever.py:1"
+    },
+    {
+      "query": "where is the logic that decides whether an additional scoring pass should be triggered based on how confident the initial ranking is",
+      "expect": "retrieval.py",
+      "scope": "code",
+      "intent": "retrieval",
+      "hit_rank": 5,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/generate.py:244"
+    },
+    {
+      "query": "what breaks source code into smaller fragments at logical declaration boundaries rather than arbitrary line counts",
+      "expect": "chunkers.py",
+      "scope": "code",
+      "intent": "indexing",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/chunkers.py:1"
+    },
+    {
+      "query": "which function loads all indexed content from disk to build the candidate pool for an incoming search query",
+      "expect": "retrieval.py",
+      "scope": "code",
+      "intent": "retrieval",
+      "hit_rank": 5,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/generate.py:1"
+    },
+    {
+      "query": "push eval results into Langfuse Datasets and Experiments with per-item Hit@K scores",
+      "expect": "langfuse_eval.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/adapters/langfuse_eval.py:1"
+    },
+    {
+      "query": "chart Hit@5 per commit by checking out each revision into a git worktree and self-indexing",
+      "expect": "plot_history.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/plot_history.py:1"
+    },
+    {
+      "query": "Python AST chunker produces one chunk per top-level function or class definition",
+      "expect": "chunkers.py",
+      "scope": "code",
+      "intent": "indexing",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/chunkers.py:1"
+    },
+    {
+      "query": "what flags golden-set cases where the file the test expects to find was never added to the search index",
+      "expect": "audit_contamination.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/audit_contamination.py:1"
+    },
+    {
+      "query": "which file shows a deliberately dumb keyword counter wired into the eval gate to prove the harness accepts any document source",
+      "expect": "example_external_retriever.py",
+      "scope": "code",
+      "intent": "retrieval",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/example_external_retriever.py:1"
+    },
+    {
+      "query": "which module auto-scopes a search to the current project root and prints the ranked results to the terminal",
+      "expect": "query.py",
+      "scope": "code",
+      "intent": "retrieval",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/query.py:1"
+    },
+    {
+      "query": "duck-typed LangChain adapter wrapping invoke and get_relevant_documents into the harness retrieve protocol",
+      "expect": "langchain_retriever.py",
+      "scope": "code",
+      "intent": "retrieval",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/adapters/langchain_retriever.py:1"
+    },
+    {
+      "query": "MCP server registers the RAG search function as a named tool over stdio transport",
+      "expect": "mcp_server.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/mcp_server.py:1"
+    },
+    {
+      "query": "compute per-case Hit@K scores and write aggregate and per-intent metrics to a JSON result file",
+      "expect": "run.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 4,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/check.sh:1"
+    },
+    {
+      "query": "token budget limits how many ranked chunks are included in the context pack output",
+      "expect": "pack.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/pack.py:1"
+    },
+    {
+      "query": "symbol boost multiplier raises BM25 score when query tokens match the indexed symbol name",
+      "expect": "retrieval.py",
+      "scope": "code",
+      "intent": "retrieval",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/retrieval.py:182"
+    },
+    {
+      "query": "output format flags control whether search results are printed as JSON or human-readable text with rank",
+      "expect": "query.py",
+      "scope": "code",
+      "intent": "retrieval",
+      "hit_rank": null,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/diff.py:24"
+    },
+    {
+      "query": "classify each golden case as ok scope-mismatch or CONTAMINATED based on whether the expected path is indexed",
+      "expect": "audit_contamination.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/audit_contamination.py:1"
+    },
+    {
+      "query": "walk source trees and skip directories matching the excluded set before chunking and embedding",
+      "expect": "build.py",
+      "scope": "code",
+      "intent": "indexing",
+      "hit_rank": 2,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/generate.py:1"
+    },
+    {
+      "query": "embed text batches with sentence-transformers and insert vectors and metadata into the sqlite chunks table",
+      "expect": "build.py",
+      "scope": "code",
+      "intent": "indexing",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/build.py:291"
+    },
+    {
+      "query": "word-count window fallback chunker produces overlapping 300-word segments for non-code files",
+      "expect": "chunkers.py",
+      "scope": "code",
+      "intent": "indexing",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/chunkers.py:128"
+    },
+    {
+      "query": "which file converts any object that returns documents given a query string into the callable format the quality gate expects",
+      "expect": "langchain_retriever.py",
+      "scope": "code",
+      "intent": "retrieval",
+      "hit_rank": 2,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/run.py:1"
+    },
+    {
+      "query": "where is the logic that records the rank position of the expected document for each test question and summarises the scores across the full evaluation set",
+      "expect": "run.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/run.py:79"
+    },
+    {
+      "query": "which file registers the retrieval capability under a named schema so that an AI assistant can invoke it as part of a tool-calling protocol",
+      "expect": "mcp_server.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/mcp_server.py:1"
+    },
+    {
+      "query": "which module selects the top results from a search and bundles them into a single text payload sized to fit a language model's context window",
+      "expect": "pack.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 5,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/generate.py:193"
+    },
+    {
+      "query": "which function applies extra weight to BM25 rankings when the search phrase contains the same words as the function or class name of the retrieved chunk",
+      "expect": "retrieval.py",
+      "scope": "code",
+      "intent": "retrieval",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/retrieval.py:1"
+    },
+    {
+      "query": "what verifies that every expected answer in an evaluation set is actually present in the search corpus before trusting the benchmark score",
+      "expect": "audit_contamination.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/audit_contamination.py:1"
+    },
+    {
+      "query": "reindex only the files listed on the command line without rebuilding the entire corpus",
+      "expect": "build.py",
+      "scope": "code",
+      "intent": "indexing",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/build.py:291"
+    },
+    {
+      "query": "which step converts each text passage into a fixed-size numerical vector and saves it alongside the source path in the database",
+      "expect": "build.py",
+      "scope": "code",
+      "intent": "indexing",
+      "hit_rank": 2,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/chunkers.py:1"
+    },
+    {
+      "query": "what divides documents that have no recognizable programming-language structure into approximate word-count segments with overlap between consecutive windows",
+      "expect": "chunkers.py",
+      "scope": "code",
+      "intent": "indexing",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/ragcore/chunkers.py:1"
+    },
+    {
+      "query": "where are the limits on file size and git history depth set that control how much of the codebase gets indexed",
+      "expect": "config.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 5,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/evidence-first-rag/eval/plot_history.py:1"
+    }
+  ],
+  "_note": "auto-rerank baseline (RAG_RERANK_AUTO=on, RERANK_AUTO_MARGIN=0.015). Production operating point: fires on queries where cosine margin between rank-1 and rank-2 < 0.015. Frozen 2026-06-20 on 22-file corpus, 50-case golden set. Hit@5 lower than no-rerank (0.96 vs 0.98) due to 2 retrieval-intent cases where the cross-encoder fires on ambiguous queries and demotes the correct result \u2014 documented Category A/B in ADR-0005."
+}
