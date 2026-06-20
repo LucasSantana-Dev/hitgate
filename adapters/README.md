@@ -45,6 +45,25 @@ says the 12-case demo is too easy to discriminate retrievers — see `docs/METHO
 that BM25-over-whole-files is better.) To wire your own, mirror the example: build your retriever,
 `to_harness(...)` it, expose the callable, and point `--retriever` at it.
 
+### LlamaIndex — `adapters/llamaindex_retriever.py`
+
+`to_harness(li_retriever, path_key="file_path")` wraps any LlamaIndex retriever (anything with
+`.retrieve(query)` returning `NodeWithScore` objects) into the protocol. The adapter is
+dependency-free; it duck-types the interface and tries both calling conventions for
+`similarity_top_k`.
+
+Runnable example over this repo (`adapters/example_llamaindex_retriever.py`):
+
+```bash
+pip install llama-index-retrievers-bm25 llama-index-core   # opt-in; NOT core deps
+RAG_SOURCE_ROOTS="$PWD" python eval/run.py \
+    --retriever adapters.example_llamaindex_retriever:retrieve --label llamaindex
+```
+
+To wire your own LlamaIndex retriever, build it, `to_harness(...)` it, and point `--retriever`
+at it. The `path_key` should match whatever metadata key your loader uses for file paths
+(`"file_path"` is the LlamaIndex default; some loaders use `"source"` or `"file_name"`).
+
 ## Eval-tracking adapters (push results to experiment trackers)
 
 An *eval-tracking* adapter takes the output of `eval/run.py` and pushes it into an

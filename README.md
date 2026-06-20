@@ -97,6 +97,43 @@ A runnable, dependency-free example — a deliberately dumb keyword matcher — 
 wrappers (LangChain / LlamaIndex) live under [`adapters/`](./adapters/README.md). Bring your
 own retriever and corpus; keep the measurement discipline.
 
+### Bring your own corpus — 4-step quickstart
+
+**1. Write golden cases** — each is a JSON object with three fields:
+```jsonl
+{"query": "what handles pagination in the API", "expect_path_contains": "api/pagination.py", "expect_scope": "code"}
+{"query": "where are rate limits configured",    "expect_path_contains": "config/limits.yaml", "expect_scope": "code"}
+```
+`expect_path_contains` is a substring of the expected result's path (file name is usually enough).
+Aim for 20–50 cases across a mix of identifier lookups and paraphrase queries. Save as any `.jsonl`.
+
+**2. Run your retriever against the cases:**
+```bash
+python eval/run.py \
+    --retriever mypkg.myretriever:retrieve \
+    --dataset   my_golden.jsonl \
+    --label     baseline-v1
+# writes eval/baseline-v1.json with hit@1/hit@3/hit@5/mrr + per_case breakdown
+```
+
+**3. Freeze the baseline:**
+```bash
+cp eval/baseline-v1.json eval/baseline.my-project.json
+# edit _note to record conditions: corpus, model, date
+```
+
+**4. Gate future runs with check.sh:**
+```bash
+# eval/check.sh already reads BASELINE_FILE env var
+BASELINE_FILE=eval/baseline.my-project.json \
+RAG_SOURCE_ROOTS="/path/to/your/corpus" \
+python eval/run.py --retriever mypkg.myretriever:retrieve --dataset my_golden.jsonl --label ci
+bash eval/check.sh eval/ci.json eval/baseline.my-project.json
+# exits 1 if any metric regresses by more than 5pp
+```
+
+To diff two runs case-by-case: `python eval/diff.py eval/baseline-v1.json eval/ci.json`.
+
 ## What to adopt (and what to skip)
 
 **Adopt the harness.** The reusable thing here is `eval/` — the label-free, regression-gated
