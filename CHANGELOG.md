@@ -10,6 +10,47 @@ Numbers are code-scope, pure hybrid (`RAG_RERANK_AUTO=off`). Because the demo se
 this repo, exact chunk counts drift commit-to-commit; entries cite the stable **file count**
 and the **metric deltas**, not a chunk number that's wrong by the next commit.
 
+## 2026-06-20 — external corpus benchmarks (7 corpora)
+
+### Added
+- **7 external corpus benchmarks** — same retriever, zero tuning, run against codebases this
+  project had no hand in building. Each corpus indexed separately (`RAG_INDEX_DIR`), golden
+  cases generated with `eval/generate.py`, curated manually, audited with
+  `eval/audit_contamination.py`, then frozen into `eval/baseline.<corpus>.json`.
+
+  | Corpus | Language | n | Hit@5 | Hit@1 | MRR |
+  |---|---|---|---|---|---|
+  | FastAPI v0.115 | Python | 25 | **1.0** | 0.64 | 0.790 |
+  | forge-space/mcp-gateway | TypeScript | 20 | **1.0** | 0.70 | 0.821 |
+  | portfolio/src | React/TS | 15 | **1.0** | 0.60 | 0.778 |
+  | ai-dev-toolkit/packages/core | Python+TS | 20 | **1.0** | 0.85 | 0.925 |
+  | homelab/homelab\_manager | Python | 20 | 0.950 | 0.85 | 0.900 |
+  | Lucky/packages/backend | TypeScript | 21 | 0.905 | 0.71 | 0.810 |
+  | Criativaria/web-app | Next.js/TS | 27 | 0.741 | 0.59 | 0.660 |
+
+  **Hit@5=1.0 on four of seven** with no per-corpus tuning. The two non-1.0 corpora have
+  structural causes: Lucky loses to Prometheus registry / middleware vocabulary drift (one
+  true MISS); Criativaria is a homogeneous Next.js component library where sibling
+  components are lexically indistinguishable — a genuine retrieval ceiling (3 true MISSes).
+  **Reopen (Criativaria):** if the reranker (`bge-reranker-v2-m3`) measurably recovers the
+  3 MISS cases without regressing the 24 passing cases.
+
+- **Index bug found and fixed** during the Lucky benchmark: Stryker JS/TS mutation testing
+  creates `.stryker-tmp/sandbox-*/` directories with full source copies, inflating the Lucky
+  index 3× (237 → 79 files). Fixed by adding `.stryker-tmp` to `EXCLUDED_DIR_PARTS` in
+  `ragcore/config.py`. **No metric delta on the self-index** (`.stryker-tmp` was already
+  absent from this repo). **Reopen:** if another mutation-testing tool writes to a different
+  sandbox path pattern.
+
+- **`/rag-eval` skill updated** with a calibration table: when someone runs the skill on a
+  new corpus, it now tells them what Hit@5 range to expect based on corpus structure (clean
+  functional boundaries vs. homogeneous component layer).
+
+- **`docs/METHODOLOGY.md` extended** with per-corpus sections and an 8-row cross-corpus
+  table (including the self-index). Key finding documented: corpus module clarity (functional
+  layer separation vs. same-layer sibling components) is a better predictor of Hit@1 than
+  language or corpus size. **No metric delta on the gated self-index baseline.**
+
 ## 2026-06-17 — cache HF model in CI
 
 ### Changed
