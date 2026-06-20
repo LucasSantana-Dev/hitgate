@@ -27,6 +27,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from chunkers import chunk_file, detect_language
 from config import (
     CHUNK_CONTEXT_PREFIX,
+    CHUNK_PREFIX_FORMAT,
     CODE_EXTS,
     DB,
     EMBED_DIM as DIM,
@@ -236,7 +237,10 @@ def index_files(
         language = detect_language(path)
         for start, end, body, symbol in chunk_file(path, text):
             if CHUNK_CONTEXT_PREFIX:
-                context_prefix = f"{stype} | {repo or ''} | {path.name} | {symbol or ''}"
+                if CHUNK_PREFIX_FORMAT == "symbol":
+                    context_prefix = f"{stype} | {symbol or ''}"
+                else:
+                    context_prefix = f"{stype} | {repo or ''} | {path.name} | {symbol or ''}"
                 contextualized_text = f"{context_prefix}\n{body[:4000]}"
             else:
                 contextualized_text = body[:4000]

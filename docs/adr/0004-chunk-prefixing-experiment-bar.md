@@ -202,6 +202,45 @@ is better than either alone on this case.
 **Remaining open question:** would a prefix that omits the filename and includes only
 the symbol name reduce false positives while retaining precision gains? This is
 deferred — the current evidence doesn't make a strong enough case to change defaults.
+See Stage 4 below for the resolution.
+
+---
+
+## Stage 4 result (run on 2026-06-19) — symbol-only prefix
+
+Golden set at 30 cases (15 identifier + 15 paraphrase). Ablation: hybrid mode,
+`RAG_RERANK_AUTO=off`. New env var `RAG_CHUNK_PREFIX_FORMAT` controls prefix shape:
+`"full"` = current default (`source_type | repo | filename | symbol`),
+`"symbol"` = `source_type | symbol` (omits filename and repo).
+
+| Mode | Hit@1 | Hit@3 | Hit@5 | MRR |
+|---|---|---|---|---|
+| `full` (current default) | **0.500** | **0.900** | 1.0 | **0.701** |
+| `symbol` only | 0.467 | 0.867 | 1.0 | 0.683 |
+| **Delta** | **−0.033** | **−0.033** | **0.0** | **−0.018** |
+
+Per-intent (Hit@5 / MRR):
+
+| Intent | full Hit@5 | symbol Hit@5 | full MRR | symbol MRR |
+|---|---|---|---|---|
+| indexing (n=8) | 1.0 | 1.0 | 0.812 | 0.812 |
+| infrastructure (n=10) | 1.0 | 1.0 | 0.670 | **0.600** |
+| retrieval (n=12) | 1.0 | 1.0 | 0.653 | 0.667 |
+
+**Result: negative. Symbol-only prefix is strictly worse.** MRR −0.018, Hit@1 −0.033,
+infrastructure MRR −0.070. No metric improves. Hit@5 ties at 1.0 across both modes.
+
+The hypothesis was that removing the filename would reduce false positives where
+filename tokens attracted the wrong chunk from the same file (e.g. `build.py` outscoring
+`chunkers.py` on "source code fragments" queries). The measurement does not support it:
+removing the filename hurts infrastructure cases (where the filename WAS the semantic
+anchor that drove gains in Stages 2–3) and does not compensate with improvements
+elsewhere.
+
+**Decision: `full` remains the default; `RAG_CHUNK_PREFIX_FORMAT` ships as a documented
+ablation knob** (`config.py` + `build.py`), not exposed as a user-facing setting. The
+open question from Stage 3 is now formally closed: the filename in the prefix is a net
+positive, not a source of false positives.
 
 ---
 
