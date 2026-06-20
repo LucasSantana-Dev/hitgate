@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -326,3 +327,103 @@ def test_generate_harness_format_only():
         assert set(cleaned.keys()).issubset(_HARNESS)
         assert "_confidence" not in cleaned
         assert "_symbol" not in cleaned
+
+
+# ---------------------------------------------------------------------------
+# _llm_queries — mocked urllib.request.urlopen, no real API calls
+# ---------------------------------------------------------------------------
+
+from generate import _llm_queries  # noqa: E402
+
+
+def _make_urlopen_mock(content: str):
+    """Return a patch-ready mock for urllib.request.urlopen that yields `content`."""
+    resp = MagicMock()
+    resp.read.return_value = json.dumps({
+        "choices": [{"message": {"content": content}}]
+    }).encode()
+    mock = MagicMock()
+    mock.return_value.__enter__.return_value = resp
+    mock.return_value.__exit__.return_value = False
+    return mock
+
+
+_LLM_KWARGS = dict(
+    chunk_text="def build(): ...",
+    filename="build.py",
+    symbol="build",
+    model="gpt-4o-mini",
+    base_url="https://api.openai.com/v1",
+    api_key="sk-test",
+)
+
+
+def test_llm_queries_success():
+    payload = json.dumps({"identifier": "how does the build function work", "paraphrase": "where is the index built from source roots"})
+    with patch("urllib.request.urlopen", _make_urlopen_mock(payload)):
+        result = _llm_queries(**_LLM_KWARGS)
+    assert result is not None
+    assert result["identifier"] == "how does the build function work"
+    assert result["paraphrase"] == "where is the index built from source roots"
+
+
+def test_llm_queries_malformed_json():
+    with patch("urllib.request.urlopen", _make_urlopen_mock("not valid json at all")):
+        result = _llm_queries(**_LLM_KWARGS)
+    assert result is None
+
+
+def test_llm_queries_missing_keys():
+    payload = json.dumps({"something_else": "value"})
+    with patch("urllib.request.urlopen", _make_urlopen_mock(payload)):
+        result = _llm_queries(**_LLM_KWARGS)
+    assert result is None
+
+
+def test_llm_queries_http_error():
+    import urllib.error
+    mock = MagicMock(side_effect=urllib.error.URLError("connection refused"))
+    with patch("urllib.request.urlopen", mock):
+        result = _llm_queries(**_LLM_KWARGS)
+    assert result is None
+
+
+def test_llm_queries_fenced_json_response():
+    """LLM often wraps JSON in ```json fences — the parser must strip them."""
+    raw = '```json\n{"identifier": "build index from source", "paraphrase": "where are documents indexed"}\n```'
+    with patch("urllib.request.urlopen", _make_urlopen_mock(raw)):
+        result = _llm_queries(**_LLM_KWARGS)
+    assert result is not None
+    assert "identifier" in result and "paraphrase" in result
+
+
+# ---------------------------------------------------------------------------
+# generate(llm=True) — integration path; two cases per chunk, _source=llm
+# ---------------------------------------------------------------------------
+
+
+def test_generate_llm_path_emits_two_cases_per_chunk(tmp_path):
+    """With a mocked LLM, generate(llm=True) should emit identifier + paraphrase."""
+    # Write a tiny Python file with a docstring so min_confidence=high is met
+    src = tmp_path / "mymodule.py"
+    src.write_text(
+        'def do_something():\n    """Performs the core transformation step for the pipeline."""\n    pass\n'
+    )
+
+    payload = json.dumps({
+        "identifier": "do something function in mymodule",
+        "paraphrase": "where is the main transformation logic implemented",
+    })
+
+    with patch("urllib.request.urlopen", _make_urlopen_mock(payload)):
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test"}):
+            from generate import generate
+            cases = generate(llm=True, min_confidence="high", limit=0, roots=[tmp_path])
+
+    assert len(cases) == 2
+    sources = {c["_source"] for c in cases}
+    assert sources == {"llm"}
+    query_types = {c["_query_type"] for c in cases}
+    assert query_types == {"identifier", "paraphrase"}
+    paraphrase_cases = [c for c in cases if c.get("paraphrase") is True]
+    assert len(paraphrase_cases) == 1
