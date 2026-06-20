@@ -5,6 +5,7 @@ __pycache__/
 *.sqlite-shm
 .DS_Store
 eval/*.json
+eval/candidates.jsonl
 !eval/baseline.example.json
 !eval/baseline.auto-rerank.json
 !eval/baseline.fastapi.json
