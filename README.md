@@ -76,6 +76,9 @@ honest behavior of a self-indexing benchmark, not noise swept under a frozen num
 - **Config by env var** — zero-setup defaults (`RAG_*`); see [`ragcore/config.py`](./ragcore/config.py).
 - **Eval (the point)** — `eval/run.py` reports Hit@K/MRR for *any* retriever via
   `--retriever`; `eval/check.sh` gates a run against a frozen baseline (±5pp).
+- **Golden set generator** — `eval/generate.py` bootstraps candidate cases from your corpus
+  structure (docstrings, symbol names) with zero dependencies. LLM paraphrase generation is
+  opt-in via `--llm`. Output feeds directly into `eval/run.py --dataset`.
 
 ## Use it on your own retriever
 
@@ -98,6 +101,19 @@ wrappers (LangChain / LlamaIndex) live under [`adapters/`](./adapters/README.md)
 own retriever and corpus; keep the measurement discipline.
 
 ### Bring your own corpus — 4-step quickstart
+
+**0. Bootstrap candidate cases from your corpus (optional):**
+```bash
+RAG_SOURCE_ROOTS="/path/to/your/corpus" python eval/generate.py \
+    --output eval/candidates.jsonl \
+    --min-confidence medium
+
+# LLM-enhanced (identifier + paraphrase per chunk, no extra package needed):
+OPENAI_API_KEY=sk-... RAG_SOURCE_ROOTS="/path/to/your/corpus" \
+    python eval/generate.py --llm --output eval/candidates.jsonl
+```
+Review and curate `eval/candidates.jsonl` — delete cases where the query is too vague
+or the expected file is wrong — then use it as your golden set below.
 
 **1. Write golden cases** — each is a JSON object with three fields:
 ```jsonl

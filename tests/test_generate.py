@@ -1,0 +1,233 @@
+"""Unit tests for eval.generate — public interface is generate() and the heuristic helpers.
+No LLM calls, no disk writes, no index."""
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+
+import pytest
+
+# RAG_SOURCE_ROOTS must be set before config.py is imported (it reads the env at module level).
+# Default to the repo root so integration tests work without an explicit env var.
+_REPO_ROOT = str(Path(__file__).resolve().parent.parent)
+os.environ.setdefault("RAG_SOURCE_ROOTS", _REPO_ROOT)
+
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "ragcore"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "eval"))
+
+from generate import _extract_docstring, _first_comment, _heuristic, _infer_intent, _to_words
+
+# ---------------------------------------------------------------------------
+# _to_words
+# ---------------------------------------------------------------------------
+
+def test_to_words_snake():
+    assert _to_words("chunk_python") == "chunk python"
+
+
+def test_to_words_camel():
+    assert _to_words("getUserProfile") == "get user profile"
+
+
+def test_to_words_mixed():
+    assert _to_words("iter_code_sources") == "iter code sources"
+
+
+# ---------------------------------------------------------------------------
+# _extract_docstring
+# ---------------------------------------------------------------------------
+
+_WITH_DOCSTRING = '''\
+def chunk_python(text: str):
+    """Splits source files into smaller fragments at logical declaration boundaries."""
+    pass
+'''
+
+_WITH_MULTILINE_DOCSTRING = '''\
+def build():
+    """Chunk and embed configured source roots into a local sqlite index.
+
+    For each root in RAG_SOURCE_ROOTS this indexes source code and docs.
+    """
+    pass
+'''
+
+_NO_DOCSTRING = '''\
+def helper():
+    x = 1
+    return x
+'''
+
+_MODULE_DOCSTRING = '''\
+"""Configuration for the retriever — env-var driven, zero external deps."""
+
+import os
+'''
+
+
+def test_extract_docstring_single_line():
+    result = _extract_docstring(_WITH_DOCSTRING)
+    assert result is not None
+    assert "Splits source files" in result
+
+
+def test_extract_docstring_multiline_first_line():
+    result = _extract_docstring(_WITH_MULTILINE_DOCSTRING)
+    assert result is not None
+    assert "Chunk and embed" in result
+
+
+def test_extract_docstring_none_when_absent():
+    assert _extract_docstring(_NO_DOCSTRING) is None
+
+
+def test_extract_docstring_module_level():
+    result = _extract_docstring(_MODULE_DOCSTRING)
+    assert result is not None
+    assert "Configuration" in result
+
+
+def test_extract_docstring_too_short_returns_none():
+    code = 'def f():\n    """Short."""\n    pass\n'
+    assert _extract_docstring(code) is None
+
+
+# ---------------------------------------------------------------------------
+# _first_comment
+# ---------------------------------------------------------------------------
+
+_WITH_COMMENT = '''\
+def is_excluded_path(path):
+    # Skip directories that should never appear in the index
+    for part in path.parts:
+        if part in EXCLUDED:
+            return True
+'''
+
+_NO_COMMENT = 'def simple():\n    return 42\n'
+
+_SHORT_COMMENT = 'def f():\n    # skip\n    pass\n'
+
+
+def test_first_comment_found():
+    result = _first_comment(_WITH_COMMENT)
+    assert result is not None
+    assert "Skip directories" in result
+
+
+def test_first_comment_none_when_absent():
+    assert _first_comment(_NO_COMMENT) is None
+
+
+def test_first_comment_too_short_skipped():
+    assert _first_comment(_SHORT_COMMENT) is None
+
+
+# ---------------------------------------------------------------------------
+# _heuristic
+# ---------------------------------------------------------------------------
+
+def test_heuristic_high_confidence_from_docstring():
+    text = _WITH_DOCSTRING
+    query, conf = _heuristic("chunk_python", text, "chunkers.py")
+    assert conf == "high"
+    assert "Splits source files" in query
+
+
+def test_heuristic_medium_confidence_from_symbol():
+    query, conf = _heuristic("iter_code_sources", _NO_DOCSTRING, "build.py")
+    assert conf == "medium"
+    assert "iter code sources" in query
+
+
+def test_heuristic_medium_with_comment():
+    query, conf = _heuristic("is_excluded_path", _WITH_COMMENT, "build.py")
+    assert conf in ("high", "medium")
+
+
+def test_heuristic_empty_query_on_trivial_module_chunk():
+    trivial = "import os\nimport re\n"
+    query, conf = _heuristic("<module>", trivial, "build.py")
+    # Either empty (caller drops it) or low confidence
+    assert conf == "low" or query == ""
+
+
+def test_heuristic_module_chunk_with_comment():
+    text = "# Skip directories like node_modules and venv from the index walk\nEXCLUDED = {'node_modules'}"
+    query, conf = _heuristic("<module>", text, "config.py")
+    assert conf == "low"
+    assert "Skip directories" in query
+
+
+# ---------------------------------------------------------------------------
+# _infer_intent
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("filename,expected", [
+    ("retrieval.py", "retrieval"),
+    ("query.py", "retrieval"),
+    ("build.py", "indexing"),
+    ("chunkers.py", "indexing"),
+    ("config.py", "infrastructure"),
+    ("mcp_server.py", "infrastructure"),
+    ("run.py", "infrastructure"),
+])
+def test_infer_intent(filename, expected):
+    assert _infer_intent(Path(filename)) == expected
+
+
+# ---------------------------------------------------------------------------
+# generate() integration — no LLM, no external calls, uses repo source roots
+# ---------------------------------------------------------------------------
+
+_ROOTS = [Path(_REPO_ROOT)]  # pass explicitly so tests don't depend on SOURCE_ROOTS env resolution
+
+
+def test_generate_produces_valid_cases():
+    from generate import generate
+
+    cases = generate(min_confidence="high", limit=10, roots=_ROOTS)
+    assert len(cases) > 0
+    for case in cases:
+        assert "query" in case
+        assert "expect_path_contains" in case
+        assert "expect_scope" in case
+        assert case["expect_scope"] == "code"
+        assert case["query"].strip() != ""
+
+
+def test_generate_existing_skips_covered_files(tmp_path):
+    from generate import generate
+
+    # Write a fake existing golden set covering "retrieval.py"
+    existing = tmp_path / "existing.jsonl"
+    existing.write_text(
+        json.dumps({"query": "x", "expect_path_contains": "retrieval.py", "expect_scope": "code"}) + "\n"
+    )
+
+    cases = generate(existing_path=existing, min_confidence="medium", limit=0, roots=_ROOTS)
+    assert len(cases) > 0, "should generate cases for uncovered files"
+    covered = {c["expect_path_contains"] for c in cases}
+    assert "retrieval.py" not in covered
+
+
+def test_generate_respects_limit():
+    from generate import generate
+
+    cases = generate(min_confidence="medium", limit=5, roots=_ROOTS)
+    assert len(cases) <= 5
+
+
+def test_generate_harness_format_only():
+    """Default output (no --full) must contain only harness-recognised fields."""
+    from generate import _harness_fields, generate
+
+    cases = generate(min_confidence="high", limit=5, roots=_ROOTS)
+    _HARNESS = {"query", "expect_path_contains", "expect_scope", "intent", "paraphrase"}
+    for case in cases:
+        cleaned = _harness_fields(case)
+        assert set(cleaned.keys()).issubset(_HARNESS)
+        assert "_confidence" not in cleaned
+        assert "_symbol" not in cleaned
