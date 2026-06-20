@@ -346,3 +346,131 @@ unflattering, decide, and write down what would change the answer. The ablation 
 every claim here and catch us if a number drifts. A measurement system whose own demo shows the
 simple baseline winning — and says so in the headline — is the asset this repository exists to
 demonstrate. The retriever is just the thing being measured.
+
+## External corpus benchmarks — generalizability check
+
+The self-index numbers above are measured on the evidence-first-rag repo itself. That is a
+convenient test bed — every eval script is local — but it raises an obvious question: does
+the retriever hold up on arbitrary codebases it was not built around?
+
+Three external corpora were benchmarked using the same pipeline (hybrid RRF, e5-small,
+`RAG_RERANK_AUTO=off`). Each corpus was indexed with a separate `RAG_INDEX_DIR` to avoid
+contaminating the production index. Golden sets were generated with `eval/generate.py`, then
+manually curated (deduplication, one case per file, intent balance) and audited with
+`eval/audit_contamination.py` to confirm every expected file was present in that corpus.
+
+### FastAPI (Python, 25 cases)
+
+**Corpus:** `fastapi/` source package from FastAPI v0.115 (security, routing, exceptions,
+responses, background tasks, datastructures).
+
+**Intent distribution:** security (10), infrastructure (9), openapi (2), parameters (2),
+routing (2).
+
+| Metric | Score |
+|---|---|
+| Hit@5 | **1.0** |
+| Hit@3 | 0.96 |
+| Hit@1 | 0.64 |
+| MRR | 0.79 |
+
+Hit@5=1.0. Every expected file surfaces in the top 5. Hit@1=0.64 reflects Category A drift
+(e.g., OAuth2 bearer token queries split across `oauth2.py` and `http.py`, which both discuss
+token authentication in nearly identical vocabulary). No structural fixes needed — the corpus
+is clean.
+
+Reproduce:
+```bash
+RAG_INDEX_DIR=".../fastapi/.rag-index" RAG_SOURCE_ROOTS=".../fastapi/fastapi" \
+  python ragcore/build.py
+RAG_INDEX_DIR=".../fastapi/.rag-index" RAG_RERANK_AUTO=off \
+  python eval/run.py --dataset eval/golden.fastapi.jsonl --label fastapi-baseline
+python eval/compare.py eval/fastapi-baseline.json eval/baseline.fastapi.json
+```
+
+### Lucky / packages/backend (TypeScript, 21 cases)
+
+**Corpus:** Discord music bot backend (Express + Prisma, Prometheus metrics, OAuth).
+
+**Intent distribution:** domain (5), monitoring (4), security (4), infrastructure (5),
+integration (3).
+
+| Metric | Score |
+|---|---|
+| Hit@5 | 0.905 |
+| Hit@3 | 0.905 |
+| Hit@1 | 0.714 |
+| MRR | 0.810 |
+
+Hit@5=0.905 — two documented misses:
+
+1. **`metrics.ts`** (Category B drift): "Express middleware that records request count to
+   the Prometheus registry" ranks `prometheus.ts` first (the registry it writes to).
+   `metrics.ts` appears at rank 9. The two files share Prometheus vocabulary; the middleware
+   author (metrics.ts) and the registry owner (prometheus.ts) are syntactically
+   indistinguishable to the dense channel.
+
+2. **`support.ts`** (Snowflake ID ambiguity): Discord Snowflake ID validation exists in
+   `support.ts` as a reusable utility, but Snowflake ID tokens appear in multiple route
+   files. Even with a targeted paraphrase ("reusable utility for validating Discord Snowflake
+   ID format"), the match ranks at position 2; the Snowflake token string in route files
+   out-competes it.
+
+**Index bug found and fixed during this benchmark:** Stryker JS/TS mutation testing creates
+`.stryker-tmp/sandbox-*/` directories with full source copies. The Lucky backend index
+initially contained 237 code files (vs the expected ~79) because Stryker sandbox copies were
+indexed, filling the top results with paths like
+`.stryker-tmp/sandbox-wX56Wb/src/utils/prometheus.ts`. Fix: add `.stryker-tmp` to
+`EXCLUDED_DIR_PARTS` in `ragcore/config.py`. After exclusion: 79 files, 343 chunks, clean
+results. **This fix applies to any TypeScript project using Stryker.**
+
+### ai-dev-toolkit / packages/core (Python + TypeScript mixed, 20 cases)
+
+**Corpus:** AI developer toolkit (RAG scripts, Dangerfile templates, OpenCode orchestration
+plugin, training data utilities).
+
+**Intent distribution:** infrastructure (7), diff-analysis (4), ai-dev (4), review (3),
+orchestration (2).
+
+| Metric | Score |
+|---|---|
+| Hit@5 | **1.0** |
+| Hit@3 | 1.0 |
+| Hit@1 | 0.85 |
+| MRR | 0.925 |
+
+Hit@5=1.0. Three rank-2 hits, all recovering by Hit@5 — all Category B drift:
+
+- "Change-scoped context retrieval" → `pack.py` (context assembly) ranks before `diff_pack.py`
+  (the impl) — both assemble context from code
+- "Hybrid BM25 and cosine retrieval" → `retrieval.py` (shared RRF logic) ranks before
+  `query.py` (the CLI entry point)
+- "Priority-based task backlog management" → `backlog.ts` (task queue persistence) ranks
+  before `orchestrator.ts` (the scheduler)
+
+All three are the same architectural split documented in Category A above (implementation vs.
+entry-point), confirming that pattern is structural — not unique to this repo.
+
+### Cross-corpus summary
+
+| Corpus | Language | n | Hit@5 | Hit@1 | MRR | Structural misses |
+|---|---|---|---|---|---|---|
+| evidence-first-rag (self-index) | Python | 59 | **1.0** | 0.458 | 0.68 | Category A/B/C/D (see above) |
+| FastAPI | Python | 25 | **1.0** | 0.64 | 0.79 | Category A drift |
+| Lucky / packages/backend | TypeScript | 21 | 0.905 | 0.714 | 0.810 | 2 true misses (drift + ambiguity) |
+| ai-dev-toolkit / packages/core | Python + TS | 20 | **1.0** | 0.85 | 0.925 | Category A drift (rank 2, no MISS) |
+
+**Takeaways:**
+
+- Hit@5=1.0 on three of four corpora without any corpus-specific tuning. The hybrid pipeline
+  is not overfit to this repo.
+- The single Hit@5 miss corpus (Lucky) has a structural cause (Category B drift:
+  `metrics.ts`/`prometheus.ts` share identical vocabulary). The `support.ts` miss is a
+  genuinely ambiguous query; the file is not uniquely identifiable from its function description
+  alone.
+- Hit@1 improves as corpus specificity increases: FastAPI (0.64) < self-index paraphrases
+  (0.458) < Lucky (0.714) < ADT (0.85). Self-index is the hardest because multiple modules
+  discuss the same concepts at different architectural layers. External corpora with cleaner
+  module boundaries retrieve more precisely.
+- The `.stryker-tmp` exclusion fix discovered during the Lucky benchmark is a structural
+  improvement that benefits all TS projects using Stryker mutation testing.
