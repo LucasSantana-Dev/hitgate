@@ -194,6 +194,117 @@ describes what it does in natural language. Embedding-pipeline changes (prefixes
 can compensate, but they are indirect; adding the missing vocabulary to the source is direct
 and self-documenting. The docstring is now true *and* retrievable.
 
+## Miss taxonomy — why the 22 non-rank-1 cases miss rank 1
+
+Hit@5=1.0 on the 50-case set: every expected file surfaces somewhere in the top 5. Hit@1=0.56:
+28/50 cases reach rank 1; 22 don't. Understanding *why* the 22 miss rank 1 determines whether
+further investment in the retrieval pipeline is warranted, or whether the ceiling is architectural.
+
+**Finding: none of the 22 misses are vocabulary gaps.** Every miss returns the correct file in
+the top 5 — the dense+BM25 pipeline finds it. The failure is *ranking*: a different, plausible
+file outranks the target. Four structural patterns explain all 22 cases.
+
+### Category A — Implementation vs. entry-point ambiguity (9 cases)
+
+This repo separates *implementation* (`retrieval.py`) from *entry point* (`query.py`) and
+*packaging* (`pack.py`). A query describing behavior that lives in both layers — "RRF fusion",
+"reranker fallback", "selects top results" — can match either module. Dense retrieval has no
+signal to prefer the implementation over the caller or vice versa.
+
+Examples:
+- "hybrid retrieval fusing BM25 and cosine with reciprocal rank fusion" → `query.py` ranks #1
+  (calls RRF), `retrieval.py` ranks #2 (implements it)
+- "entry point for running a search against the local knowledge base" → `retrieval.py` ranks #1
+  (implements search), `query.py` ranks #2 (is the CLI entry point)
+- "selects top results and bundles them into a context window payload" → `retrieval.py` ranks #1
+  (returns top results), `pack.py` ranks #4 (bundles them)
+
+Cases: 1, 12, 14, 17, 18, 30, 32, 36, 44
+
+**What the dense model sees:** the query's vocabulary matches both modules. No architectural-layer
+signal in the query ("entry point", "CLI", "implementation") disambiguates reliably because
+both modules discuss the same domain operations in their docstrings.
+
+### Category B — Eval infrastructure leakage (7 cases)
+
+`audit_contamination.py`, `test_determinism.py`, and `plot_history.py` are indexed alongside
+core code — they are source files in the repo. Each replicates vocabulary from the module it
+exercises: `audit_contamination.py` classifies files (mirrors `build.py`), `plot_history.py`
+re-indexes at each commit (mirrors `build.py`'s indexing), `test_determinism.py` counts
+document occurrences (mirrors `run.py`'s hit counting).
+
+Examples:
+- "index recent git commits as subject and body chunks" → `plot_history.py` ranks #1
+  (re-indexes the repo with git commits per revision), `build.py` ranks #2 (implements it)
+- "classify a file into a source type by its path" → `audit_contamination.py` ranks #1
+  (classifies for contamination check), `build.py` ranks #2 (implements `classify_type`)
+- "counts how many times the expected document surfaces in highest-ranked positions" →
+  `test_determinism.py` ranks #1, `run.py` ranks #5
+
+Cases: 8, 9, 19, 20, 22, 47, 48
+
+**Root cause:** eval utilities are not excluded from the index (by design — they're code
+too). But their vocabulary is a mirror of the core modules they test, creating false-positive
+retrieval matches. The core module wrote the behavior; the eval module described it.
+
+### Category C — Adapter identity confusion (4 cases)
+
+`mcp_server.py` and `langchain_retriever.py` both "expose retrieval as a callable tool."
+`audit_contamination.py` and `retrieval.py` both operate on "the corpus." When a query
+describes the interface (not which interface), the wrong adapter ranks first.
+
+Examples:
+- "exposes semantic lookup as callable tool via message-passing protocol" →
+  `langchain_retriever.py` ranks #1 (also callable), `mcp_server.py` ranks #3 (the target)
+- "verifies every expected answer in an evaluation set is actually present in the corpus" →
+  `retrieval.py` ranks #1 (reads from corpus), `audit_contamination.py` ranks #2 (the target)
+
+Cases: 21, 28, 43, 46
+
+**Root cause:** the query describes the *function* ("expose as tool", "verify corpus presence")
+but multiple modules share that function at different integration layers. The distinguishing
+vocabulary ("stdio transport", "tool-calling protocol schema", "golden-set contamination") is
+present in the query but the same terms appear in related modules that discuss those concepts.
+
+### Category D — Config vs. consumer split (2 cases)
+
+Two cases ask about behavior that is *defined* in one file and *used* in another. The query
+matches the consumer (where the behavior executes) but the golden case targets the definition
+(where the constant or type is declared).
+
+Examples:
+- "directories excluded from indexing like node_modules and venv" → `build.py:63` ranks #1
+  (`is_excluded_path` — the function that uses the exclusion set), `config.py` ranks #3
+  (`EXCLUDED_DIR_PARTS` — where the list is defined)
+- "assigns a content category to each file as it is ingested" → `config.py` ranks #1
+  (has `CODE_EXTS` and type constants), `build.py` ranks #2 (`classify_type` — the function)
+
+Cases: 6, 16
+
+### Implications for ceiling and next investments
+
+**The ceiling is architectural, not vocabulary.** The vocabulary gap problem was solved by
+docstring enrichment (see previous section). The remaining 22 non-rank-1 cases cannot be
+fixed by adding vocabulary — the vocabulary is already there in both the query and the corpus.
+What's missing is a signal for *which module is authoritative* for a given concept at a given
+layer.
+
+**Three fix paths, each with a different cost:**
+
+| Fix | Addresses | Cost | Risk |
+|---|---|---|---|
+| Layer-role prefix in chunks ("entry-point: query.py", "impl: retrieval.py") | Category A | Medium (rebuild index) | May over-disambiguate |
+| Exclude eval utilities from the index | Category B | Low (config change) | Eval queries would miss |
+| Multi-target golden cases (accept query.py OR retrieval.py) | Categories A, C | Low (dataset edit) | Inflates Hit@1 without fixing retrieval |
+| Query rephrasing to name the layer ("which file *implements* RRF") | All categories | Low (dataset edit) | Reduces paraphrase realism |
+
+**None of these is clearly right.** The honest interpretation of the 22 misses: a retriever
+that achieves Hit@1=0.56 on a self-indexing benchmark — where the same concepts are
+deliberately discussed in multiple architectural layers — is performing close to the limit
+of what pure dense+BM25 retrieval can achieve without architectural metadata. The reranker
+addresses some of this (+26pp Hit@1 with bge-v2-m3 forced) but at the coverage cost documented
+in the Pareto table above.
+
 ## The discipline underneath all three
 
 Each section is the same loop, applied: run the real eval, read the delta *especially* when it's
