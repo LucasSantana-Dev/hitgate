@@ -57,3 +57,45 @@
 {"query": "Scan backward from start_line for a JSDoc or comment block", "expect_path_contains": "generate.py", "expect_scope": "code", "intent": "infrastructure", "paraphrase": false}
 {"query": "Compare two eval result JSON files and report per-case rank changes", "expect_path_contains": "diff.py", "expect_scope": "code", "intent": "infrastructure", "paraphrase": false}
 {"query": "Word-count window for non-code or unrecognized content", "expect_path_contains": "chunkers.py", "expect_scope": "code", "intent": "indexing", "paraphrase": false}
+{"query": "compute SHA of each source file and skip re-embedding chunks whose file is unchanged since last build", "expect_path_contains": "build.py", "expect_scope": "code", "intent": "indexing"}
+{"query": "what persists chunk text, path, line range, and embedding vector into the database in a single batch write", "expect_path_contains": "build.py", "expect_scope": "code", "intent": "indexing"}
+{"query": "which function uses the Python ast module to find where each top-level function and class definition begins and ends", "expect_path_contains": "chunkers.py", "expect_scope": "code", "intent": "indexing"}
+{"query": "chunker that handles TypeScript and JavaScript by matching function and class patterns with regular expressions", "expect_path_contains": "chunkers.py", "expect_scope": "code", "intent": "indexing"}
+{"query": "regex-based chunker for shell scripts that uses function definitions as chunk boundaries", "expect_path_contains": "chunkers.py", "expect_scope": "code", "intent": "indexing"}
+{"query": "the set of file extensions treated as source code versus documentation when classifying files for indexing", "expect_path_contains": "config.py", "expect_scope": "code", "intent": "indexing"}
+{"query": "context prefix format prepended to each chunk before embedding to improve semantic matching", "expect_path_contains": "config.py", "expect_scope": "code", "intent": "indexing"}
+{"query": "which tool checks whether the expected file in a golden case is absent from the indexed corpus before trusting the benchmark score", "expect_path_contains": "audit_contamination.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "show which queries improved and which degraded in rank between two eval runs", "expect_path_contains": "diff.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "per-case rank delta report comparing a new retrieval result against an earlier baseline", "expect_path_contains": "diff.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "minimal retrieve function that counts keyword matches without any vector or BM25 machinery", "expect_path_contains": "example_external_retriever.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "heuristic confidence score that filters candidate queries by length, genericity, and symbol overlap", "expect_path_contains": "generate.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "how are candidate query strings extracted from symbol names and docstrings without calling an LLM", "expect_path_contains": "generate.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "which file produces a .jsonl of candidate golden cases from the indexed corpus structure", "expect_path_contains": "generate.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "convert a LangChain Document list into the path-ranked mapping format the harness retrieve protocol expects", "expect_path_contains": "langchain_retriever.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "create or reuse a Langfuse Dataset from a golden .jsonl and upsert items by stable ID", "expect_path_contains": "langfuse_eval.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "record per-query hit@1 hit@3 hit@5 and mrr_contribution into a Langfuse experiment run", "expect_path_contains": "langfuse_eval.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "extract the file path from a LlamaIndex NodeWithScore using metadata keys in priority order", "expect_path_contains": "llamaindex_retriever.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "JSON-RPC dispatcher that routes tools/call requests to the search function and returns ranked results", "expect_path_contains": "mcp_server.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "which module accepts a query and a token budget and returns only as many ranked chunks as fit", "expect_path_contains": "pack.py", "expect_scope": "code", "intent": "retrieval"}
+{"query": "which module bundles the top-ranked retrieval results into a token-budgeted text payload sized for an LLM prompt", "expect_path_contains": "pack.py", "expect_scope": "code", "intent": "retrieval"}
+{"query": "create a temporary git worktree at each historical commit to re-index and measure retrieval quality over time", "expect_path_contains": "plot_history.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "which script generates a SVG showing Hit@5 trend across the repository commit history", "expect_path_contains": "plot_history.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "the --scope CLI argument in the command-line search entry point that filters results to a specific document type", "expect_path_contains": "query.py", "expect_scope": "code", "intent": "retrieval"}
+{"query": "argparse CLI that accepts --scope and --top flags and prints ranked search results to stdout", "expect_path_contains": "query.py", "expect_scope": "code", "intent": "retrieval"}
+{"query": "where is the RRF formula 1 divided by rank plus 60 applied to merge BM25 and dense rankings", "expect_path_contains": "retrieval.py", "expect_scope": "code", "intent": "retrieval"}
+{"query": "which function reads embeddings from SQLite and computes cosine similarity against the query vector", "expect_path_contains": "retrieval.py", "expect_scope": "code", "intent": "retrieval"}
+{"query": "module-level variables caching the loaded BM25 corpus and embedding matrix to avoid disk reads on repeated queries", "expect_path_contains": "retrieval.py", "expect_scope": "code", "intent": "retrieval"}
+{"query": "graceful degradation when the cross-encoder reranker model is not installed or fails to load", "expect_path_contains": "retrieval.py", "expect_scope": "code", "intent": "retrieval"}
+{"query": "filter candidate chunks to only those matching the requested scope before applying ranking", "expect_path_contains": "retrieval.py", "expect_scope": "code", "intent": "retrieval"}
+{"query": "what reads a .jsonl of golden cases and loads the retriever callable specified on the command line", "expect_path_contains": "run.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "which function serializes aggregate hit@k and mrr metrics plus per-case breakdowns to a JSON result file", "expect_path_contains": "run.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "intent field on a golden case controls which by_intent bucket a retrieval result is counted in", "expect_path_contains": "run.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "core comparison returning a structured verdict dict without touching the filesystem", "expect_path_contains": "compare.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "human-readable delta table showing metric changes between a current run and a frozen baseline", "expect_path_contains": "compare.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "exit code 1 when any metric regresses beyond the tolerance, exit 0 on pass or improvement", "expect_path_contains": "compare.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "bash script that builds the index if absent, runs the eval, then calls compare.py to gate the result", "expect_path_contains": "check.sh", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "EVAL_EXTRA_FLAGS environment variable passes additional arguments to run.py without modifying the gate script", "expect_path_contains": "check.sh", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "RAG_EVAL_BASELINE env var overrides which frozen baseline file the gate compares the current run against", "expect_path_contains": "check.sh", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "assert that the same query returns the same top-K document ordering across two identical retrieval runs", "expect_path_contains": "test_determinism.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "ordered path and start_line pairs of top-K results \u2014 the invariant that must not drift between runs", "expect_path_contains": "test_determinism.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "runnable end-to-end example pushing a completed eval run's per-query scores into Langfuse", "expect_path_contains": "example_langfuse_eval.py", "expect_scope": "code", "intent": "infrastructure"}

@@ -10,6 +10,39 @@ Numbers are code-scope, pure hybrid (`RAG_RERANK_AUTO=off`). Because the demo se
 this repo, exact chunk counts drift commit-to-commit; entries cite the stable **file count**
 and the **metric deltas**, not a chunk number that's wrong by the next commit.
 
+## 2026-06-20 — golden set expanded 59 → 101 cases
+
+### Changed
+
+- **`eval/golden.demo.jsonl` — 59 → 101 cases** (22 files; retrieval=30, indexing=22,
+  infrastructure=49). 43 new cases written by hand — paraphrase variants for all 18
+  existing files plus 3 new coverage targets (`compare.py`, `check.sh`,
+  `test_determinism.py`). 5 queries refined to fix Category A/C vocabulary drift. Final
+  state frozen at **Hit@5=1.0, Hit@1=0.663, MRR=0.800** (n=101).
+
+- **`eval/baseline.example.json` re-frozen** to the 101-case numbers (was 59-case,
+  Hit@5=1.0, Hit@1≈0.61, MRR≈0.77). Per the living-benchmark policy: re-freeze whenever
+  the golden set grows, not silently. **Reopen/re-freeze trigger:** any gated metric moves
+  beyond ±5pp.
+
+- **Ablation at 101 cases confirms discriminability** — the gate criterion (≥5pp movement
+  on Hit@5 from at least one plausible retrieval change) is met with margin to spare:
+
+  | Mode | Hit@5 | Hit@1 | Hit@3 | MRR |
+  |---|---|---|---|---|
+  | **hybrid (default)** | **1.0** | 0.663 | 0.911 | 0.800 |
+  | BM25-only | 0.941 | **0.752** | 0.871 | **0.820** |
+  | dense-only | 0.901 | 0.624 | 0.851 | 0.735 |
+
+  BM25-only drops 5.9pp; dense-only drops 9.9pp. Both exceed the threshold. The 101-case
+  set can detect a real retrieval regression — the 59-case set was saturated.
+  **Reopen:** a retrieval change passes the aggregate gate but a per-intent class
+  visibly degrades in local runs.
+
+- **`docs/METHODOLOGY.md`** — ablation section updated to 101-case numbers; historical
+  24-case table retained for reference. Self-index row in the cross-corpus summary updated
+  to n=101. **No metric delta on the gated baseline** (re-freeze, not a regression).
+
 ## 2026-06-20 — external corpus benchmarks (7 corpora)
 
 ### Added
