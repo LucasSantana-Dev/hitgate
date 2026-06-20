@@ -41,8 +41,13 @@ DATASET = ROOT / "eval" / "golden.demo.jsonl"
 Retriever = Callable[[str, int, Optional[str]], Sequence[Mapping]]
 
 
-def builtin_retriever(rerank: bool = False) -> Retriever:
-    """The bundled hybrid retriever (ragcore), wrapped to the harness protocol."""
+def builtin_retriever(rerank: Optional[bool] = False) -> Retriever:
+    """The bundled hybrid retriever (ragcore), wrapped to the harness protocol.
+
+    rerank=False  — never rerank (default eval baseline)
+    rerank=True   — always rerank (forced; use --rerank flag)
+    rerank=None   — auto-trigger path: fires on weak/ambiguous queries (use --auto-rerank flag)
+    """
     from retrieval import search  # ragcore is on sys.path
 
     def _retrieve(query: str, top: int, scope: Optional[str]) -> Sequence[Mapping]:
@@ -51,7 +56,7 @@ def builtin_retriever(rerank: bool = False) -> Retriever:
     return _retrieve
 
 
-def load_retriever(spec: Optional[str], rerank: bool = False) -> Retriever:
+def load_retriever(spec: Optional[str], rerank: Optional[bool] = False) -> Retriever:
     """Resolve --retriever: None -> bundled; 'module.path:callable' -> imported callable."""
     if not spec:
         return builtin_retriever(rerank)
@@ -127,17 +132,19 @@ def main() -> int:
     ap.add_argument("--label", default="baseline")
     ap.add_argument("--dataset", default=str(DATASET), help="path to eval dataset jsonl")
     ap.add_argument("--retriever", default=None, help="'module.path:callable' for your own retriever (default: bundled)")
-    ap.add_argument("--rerank", action="store_true", help="enable cross-encoder reranking (bundled retriever only)")
+    ap.add_argument("--rerank", action="store_true", help="force cross-encoder reranking on all queries (bundled retriever only)")
+    ap.add_argument("--auto-rerank", action="store_true", help="use auto-trigger reranking (rerank=None path; fires on weak/ambiguous queries)")
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
 
-    retriever = load_retriever(args.retriever, rerank=args.rerank)
+    rerank_mode: Optional[bool] = None if args.auto_rerank else (True if args.rerank else False)
+    retriever = load_retriever(args.retriever, rerank=rerank_mode)
     cases = load(Path(args.dataset))
     started = time.time()
     result = run(cases, top=args.top, retriever=retriever)
     elapsed = time.time() - started
 
-    tag = f" [{args.retriever}]" if args.retriever else (" [RERANK]" if args.rerank else " [FAST]")
+    tag = f" [{args.retriever}]" if args.retriever else (" [AUTO-RERANK]" if args.auto_rerank else (" [RERANK]" if args.rerank else " [FAST]"))
     print(
         f"[{args.label}]{tag}  n={result['n']}  MRR={result['mrr']}  "
         f"hit@1={result['hit@1']}  hit@3={result['hit@3']}  hit@5={result['hit@5']}  "

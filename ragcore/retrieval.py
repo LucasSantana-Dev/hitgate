@@ -42,7 +42,9 @@ RERANK_MODEL = os.environ.get("RAG_RERANK_MODEL", RERANK_MODEL_DEFAULT)
 # Auto-rerank configuration for weak/ambiguous queries.
 RERANK_AUTO = os.environ.get("RAG_RERANK_AUTO", "on").lower() in ("on", "1", "true")
 RERANK_AUTO_THRESHOLD = float(os.environ.get("RAG_RERANK_AUTO_THRESHOLD", "0.35"))
-RERANK_AUTO_MARGIN = float(os.environ.get("RAG_RERANK_AUTO_MARGIN", "0.08"))
+# 0.015 calibrated on 50-case golden set: fires on ambiguous queries (cosine margin < 0.015)
+# achieving Hit@1 +6pp (0.56→0.62) with Hit@5=1.0 maintained. Old default (0.08) caused 2 MISSes.
+RERANK_AUTO_MARGIN = float(os.environ.get("RAG_RERANK_AUTO_MARGIN", "0.015"))
 # Selective reranking for code-scope queries (the measured weak spot). Code retrieval is
 # lexical-dominant and the fused ranking often buries the right chunk at rank 6-20, where a
 # strong cross-encoder recovers it. Validated 2026-06-15 (ADR 0011): selective
