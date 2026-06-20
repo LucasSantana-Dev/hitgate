@@ -10,6 +10,10 @@ eval/*.json
 !eval/baseline.fastapi.json
 !eval/baseline.lucky.json
 !eval/baseline.adt.json
+!eval/baseline.criativaria.json
+!eval/baseline.portfolio.json
+!eval/baseline.forge-mcp.json
+!eval/baseline.homelab.json
 corpus-demo/.index/
 *.egg-info/
 .venv/
