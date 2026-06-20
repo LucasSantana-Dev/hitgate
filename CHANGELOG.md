@@ -10,7 +10,7 @@ Numbers are code-scope, pure hybrid (`RAG_RERANK_AUTO=off`). Because the demo se
 this repo, exact chunk counts drift commit-to-commit; entries cite the stable **file count**
 and the **metric deltas**, not a chunk number that's wrong by the next commit.
 
-## Unreleased — cache HF model in CI (branch `ci/cache-hf-model`)
+## 2026-06-17 — cache HF model in CI
 
 ### Changed
 - **CI caches the e5 embedding model** (`actions/cache` on `~/.cache/huggingface`). On a cache
@@ -19,7 +19,7 @@ and the **metric deltas**, not a chunk number that's wrong by the next commit.
   run (cache miss) still downloads online and populates the cache. **No metric delta** (CI plumbing).
   **Reopen:** if the model name changes, bump the cache key.
 
-## Unreleased — pytest in CI (branch `ci/pytest`)
+## 2026-06-17 — pytest in CI
 
 ### Changed
 - **CI now runs the unit suite** (`.github/workflows/eval.yml`) after the eval + determinism
@@ -27,7 +27,7 @@ and the **metric deltas**, not a chunk number that's wrong by the next commit.
   already cached; installs only `pytest` (the adapter tests duck-type LangChain, no extra dep).
   **No metric delta** (CI/test plumbing). **Reopen:** drop it if the suite turns flaky in CI.
 
-## Unreleased — LangChain retriever adapter (branch `feat/langchain-adapter`)
+## 2026-06-17 — LangChain retriever adapter
 
 ### Added
 - **`adapters/langchain_retriever.py`** — `to_harness(lc_retriever, path_key="source")` maps any
@@ -44,7 +44,7 @@ and the **metric deltas**, not a chunk number that's wrong by the next commit.
 - **`adapters/README.md`** — documents the retriever-adapter category + the runnable example.
   `langchain-community` added to `requirements-dev.txt` (optional; **core stays at 3 deps**).
 
-## Unreleased — retriever-agnostic harness (branch `feat/retriever-agnostic-harness`)
+## 2026-06-17 — retriever-agnostic harness
 
 ### Added
 - **`eval/run.py --retriever module.path:callable`** — the eval harness now measures *any*
@@ -68,7 +68,7 @@ and the **metric deltas**, not a chunk number that's wrong by the next commit.
 - **Bundled-retriever behaviour is unchanged** — the gate still reports `Hit@1 0.667 / Hit@5 0.833`
   (rank-by-position is identical to the engine's own rank order). **No metric delta.**
 
-## Unreleased — methodology + ablation (branch `feat/methodology-ablation`)
+## 2026-06-17 — methodology + ablation
 
 ### Added
 - **`RAG_RANK_MODE` (hybrid | dense | bm25)** in `ragcore/retrieval.py` so single-channel
