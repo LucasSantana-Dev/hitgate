@@ -94,28 +94,40 @@ top-1/top-2 margin), with the heavier code-tuned reranker confined to code scope
 
 ## Reranker Pareto table — quality vs size vs latency
 
-Measured on the 17-case golden set, hybrid mode, CPU (Apple M1):
+Measured on the 50-case golden set, hybrid mode, CPU (Apple M1), forced reranking
+on all queries (`--rerank` flag; see note on auto-trigger below):
 
-| Model | Size | Warm latency¹ | Hit@1 | Hit@5 | MRR | Infra Hit@5 |
+| Model | Size | Pipeline time¹ | Hit@1 | Hit@3 | Hit@5 | MRR |
 |---|---|---|---|---|---|---|
-| *(no rerank)* | — | 0 ms | 0.471 | **0.941** | 0.681 | **1.0** |
-| `ms-marco-MiniLM-L-6-v2` *(default)* | 88 MB | 48 ms | 0.529 | **0.941** | 0.696 | 0.75 |
-| `BAAI/bge-reranker-v2-m3` | 2.1 GB | 88 ms | **0.647** | **0.941** | **0.767** | **1.0** |
+| *(no rerank)* | — | 15.5 s | 0.56 | 0.90 | **1.0** | 0.741 |
+| `ms-marco-MiniLM-L-6-v2` *(default)* | 88 MB | 30.2 s | 0.62 | 0.86 | 0.96 | 0.746 |
+| `BAAI/bge-reranker-v2-m3` | 2.1 GB | 194.2 s | **0.82** | **0.94** | 0.96 | **0.875** |
 
-¹ Warm = model already loaded; measured over 5 runs, top-5 candidates per query.
+¹ End-to-end pipeline time for 50 queries (embed + retrieve + rerank); not isolated
+reranker latency. No-rerank baseline is 15.5 s for 50 queries (≈ 310 ms/query).
 
-**Reading the table:** `bge-reranker-v2-m3` is strictly better than `ms-marco-L-6-v2`
-on every quality metric — +12pp Hit@1, +7pp MRR — and crucially does *not* collapse
-infrastructure Hit@5 the way ms-marco does (1.0 vs 0.75). The latency trade is modest:
-88ms vs 48ms warm, both well under any interactive budget. The only reason to prefer
-ms-marco is size: 88MB is a no-friction install; 2.1GB requires the user to have disk
-space and patience. The default therefore stays `ms-marco-L-6-v2`; set
-`RAG_RERANK_MODEL=BAAI/bge-reranker-v2-m3` when you can afford the footprint.
+**Critical finding — forced vs selective reranking.** Both rerankers drop Hit@5 from
+1.0 to 0.96 under forced global reranking: 2 of 50 cases ranked at positions 3–5 via
+hybrid fusion get demoted past rank 5 when the reranker overrides the fused score.
+The production auto-trigger policy (rerank only when top-1 cosine is weak/ambiguous)
+fires on zero queries in the 50-case set — all queries already have strong retrieval
+confidence — so the **effective operating point is the no-rerank row** (Hit@5=1.0,
+MRR=0.741). The reranker rows show the precision ceiling under forced conditions
+that sacrifice two cases of coverage.
 
-**What the table cannot say:** both models were measured only on this repo's 17-case
-code-only set. Neither model's behaviour on prose, memory, or mixed corpora is captured
-here. The private-corpus finding (that reranking regresses prose) was measured with
-ms-marco; whether bge-v2-m3 also regresses prose is unknown and not implied.
+**Reading the table:**
+- `bge-reranker-v2-m3` forced: +26pp Hit@1, +13pp MRR vs no-rerank. Hit@5 1.0→0.96.
+- `ms-marco-MiniLM-L-6-v2` forced: +6pp Hit@1, negligible MRR gain. Same regression.
+- If you force global reranking, bge-v2-m3 is strictly better than ms-marco. The
+  default auto-trigger policy avoids the Hit@5 regression entirely by staying selective.
+
+**Size and the default:** ms-marco (88 MB) installs with no friction; bge-v2-m3
+(2.1 GB) requires patience and disk. The default remains `ms-marco-MiniLM-L-6-v2`;
+set `RAG_RERANK_MODEL=BAAI/bge-reranker-v2-m3` when you can afford the footprint.
+
+**What the table cannot say:** both models were measured on this repo's code-only
+golden set. The private-corpus finding (that ms-marco regresses prose) was measured
+separately; whether bge-v2-m3 also regresses prose is unknown and not implied here.
 
 ## Why Hit@5 is the gated metric
 
