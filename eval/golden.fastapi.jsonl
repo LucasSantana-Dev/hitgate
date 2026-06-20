@@ -1,0 +1,25 @@
+{"query": "API key authentication using a query parameter", "expect_path_contains": "api_key.py", "expect_scope": "code", "intent": "security"}
+{"query": "API key authentication using a header", "expect_path_contains": "api_key.py", "expect_scope": "code", "intent": "security"}
+{"query": "API key authentication using a cookie", "expect_path_contains": "api_key.py", "expect_scope": "code", "intent": "security"}
+{"query": "`FastAPI` app class, the main entrypoint to use FastAPI", "expect_path_contains": "applications.py", "expect_scope": "code", "intent": "routing"}
+{"query": "which class represents the FastAPI application instance that you create to define routes", "expect_path_contains": "applications.py", "expect_scope": "code", "intent": "routing"}
+{"query": "A collection of background tasks that will be called after a response has been sent", "expect_path_contains": "background.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "A file uploaded in a request", "expect_path_contains": "datastructures.py", "expect_scope": "code", "intent": "parameters"}
+{"query": "handling file uploads and form data in requests", "expect_path_contains": "datastructures.py", "expect_scope": "code", "intent": "parameters"}
+{"query": "The OpenAPI URL that Swagger UI should load and use", "expect_path_contains": "docs.py", "expect_scope": "code", "intent": "openapi"}
+{"query": "The OpenAPI URL that ReDoc should load and use", "expect_path_contains": "docs.py", "expect_scope": "code", "intent": "openapi"}
+{"query": "Encodes a Decimal as int if there is no exponent, otherwise float", "expect_path_contains": "encoders.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "how to serialize Python objects including custom types for JSON responses", "expect_path_contains": "responses.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "An HTTP exception you can raise in your own code to show errors to the client", "expect_path_contains": "exceptions.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "A generic, FastAPI-specific error", "expect_path_contains": "exceptions.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "The HTTP Basic credentials given as the result of using HTTPBasic in a dependency", "expect_path_contains": "http.py", "expect_scope": "code", "intent": "security"}
+{"query": "HTTP Basic authentication", "expect_path_contains": "http.py", "expect_scope": "code", "intent": "security"}
+{"query": "The HTTP authorization credentials in the result of using HTTPBearer", "expect_path_contains": "http.py", "expect_scope": "code", "intent": "security"}
+{"query": "OAuth2 flow for authentication using a bearer token obtained with a password", "expect_path_contains": "oauth2.py", "expect_scope": "code", "intent": "security"}
+{"query": "OAuth2 flow for authentication using a bearer token obtained with an OAuth2 code flow", "expect_path_contains": "oauth2.py", "expect_scope": "code", "intent": "security"}
+{"query": "This is the base class for OAuth2 authentication", "expect_path_contains": "oauth2.py", "expect_scope": "code", "intent": "security"}
+{"query": "OpenID Connect authentication class", "expect_path_contains": "open_id_connect_url.py", "expect_scope": "code", "intent": "security"}
+{"query": "JSON response using the ujson library to serialize data to JSON", "expect_path_contains": "responses.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "JSON response using the orjson library to serialize data to JSON", "expect_path_contains": "responses.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "Streaming response with text/event-stream media type", "expect_path_contains": "sse.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "streaming server-sent events in FastAPI", "expect_path_contains": "sse.py", "expect_scope": "code", "intent": "infrastructure"}

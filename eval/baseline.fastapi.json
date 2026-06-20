@@ -1,0 +1,256 @@
+{
+  "n": 25,
+  "mrr": 0.79,
+  "hit@1": 0.64,
+  "hit@3": 0.96,
+  "hit@5": 1.0,
+  "by_scope": {
+    "code": {
+      "n": 25,
+      "mrr": 0.79,
+      "hit@1": 0.64,
+      "hit@3": 0.96,
+      "hit@5": 1.0
+    }
+  },
+  "by_intent": {
+    "infrastructure": {
+      "n": 9,
+      "mrr": 0.815,
+      "hit@1": 0.667,
+      "hit@3": 1.0,
+      "hit@5": 1.0
+    },
+    "openapi": {
+      "n": 2,
+      "mrr": 0.5,
+      "hit@1": 0.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0
+    },
+    "parameters": {
+      "n": 2,
+      "mrr": 0.625,
+      "hit@1": 0.5,
+      "hit@3": 0.5,
+      "hit@5": 1.0
+    },
+    "routing": {
+      "n": 2,
+      "mrr": 1.0,
+      "hit@1": 1.0,
+      "hit@3": 1.0,
+      "hit@5": 1.0
+    },
+    "security": {
+      "n": 10,
+      "mrr": 0.817,
+      "hit@1": 0.7,
+      "hit@3": 1.0,
+      "hit@5": 1.0
+    }
+  },
+  "per_case": [
+    {
+      "query": "API key authentication using a query parameter",
+      "expect": "api_key.py",
+      "scope": "code",
+      "intent": "security",
+      "hit_rank": 3,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/param_functions.py:357"
+    },
+    {
+      "query": "API key authentication using a header",
+      "expect": "api_key.py",
+      "scope": "code",
+      "intent": "security",
+      "hit_rank": 3,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/param_functions.py:701"
+    },
+    {
+      "query": "API key authentication using a cookie",
+      "expect": "api_key.py",
+      "scope": "code",
+      "intent": "security",
+      "hit_rank": 2,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/params.py:387"
+    },
+    {
+      "query": "`FastAPI` app class, the main entrypoint to use FastAPI",
+      "expect": "applications.py",
+      "scope": "code",
+      "intent": "routing",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/applications.py:42"
+    },
+    {
+      "query": "which class represents the FastAPI application instance that you create to define routes",
+      "expect": "applications.py",
+      "scope": "code",
+      "intent": "routing",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/applications.py:42"
+    },
+    {
+      "query": "A collection of background tasks that will be called after a response has been sent",
+      "expect": "background.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/background.py:11"
+    },
+    {
+      "query": "A file uploaded in a request",
+      "expect": "datastructures.py",
+      "scope": "code",
+      "intent": "parameters",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/datastructures.py:21"
+    },
+    {
+      "query": "handling file uploads and form data in requests",
+      "expect": "datastructures.py",
+      "scope": "code",
+      "intent": "parameters",
+      "hit_rank": 4,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/param_functions.py:1653"
+    },
+    {
+      "query": "The OpenAPI URL that Swagger UI should load and use",
+      "expect": "docs.py",
+      "scope": "code",
+      "intent": "openapi",
+      "hit_rank": 2,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/openapi/models.py:419"
+    },
+    {
+      "query": "The OpenAPI URL that ReDoc should load and use",
+      "expect": "docs.py",
+      "scope": "code",
+      "intent": "openapi",
+      "hit_rank": 2,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/openapi/models.py:419"
+    },
+    {
+      "query": "Encodes a Decimal as int if there is no exponent, otherwise float",
+      "expect": "encoders.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/encoders.py:59"
+    },
+    {
+      "query": "how to serialize Python objects including custom types for JSON responses",
+      "expect": "responses.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/responses.py:78"
+    },
+    {
+      "query": "An HTTP exception you can raise in your own code to show errors to the client",
+      "expect": "exceptions.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/exceptions.py:17"
+    },
+    {
+      "query": "A generic, FastAPI-specific error",
+      "expect": "exceptions.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 2,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/applications.py:42"
+    },
+    {
+      "query": "The HTTP Basic credentials given as the result of using HTTPBasic in a dependency",
+      "expect": "http.py",
+      "scope": "code",
+      "intent": "security",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/security/http.py:105"
+    },
+    {
+      "query": "HTTP Basic authentication",
+      "expect": "http.py",
+      "scope": "code",
+      "intent": "security",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/security/http.py:16"
+    },
+    {
+      "query": "The HTTP authorization credentials in the result of using HTTPBearer",
+      "expect": "http.py",
+      "scope": "code",
+      "intent": "security",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/security/http.py:222"
+    },
+    {
+      "query": "OAuth2 flow for authentication using a bearer token obtained with a password",
+      "expect": "oauth2.py",
+      "scope": "code",
+      "intent": "security",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/security/oauth2.py:330"
+    },
+    {
+      "query": "OAuth2 flow for authentication using a bearer token obtained with an OAuth2 code flow",
+      "expect": "oauth2.py",
+      "scope": "code",
+      "intent": "security",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/security/oauth2.py:330"
+    },
+    {
+      "query": "This is the base class for OAuth2 authentication",
+      "expect": "oauth2.py",
+      "scope": "code",
+      "intent": "security",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/security/oauth2.py:330"
+    },
+    {
+      "query": "OpenID Connect authentication class",
+      "expect": "open_id_connect_url.py",
+      "scope": "code",
+      "intent": "security",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/security/open_id_connect_url.py:11"
+    },
+    {
+      "query": "JSON response using the ujson library to serialize data to JSON",
+      "expect": "responses.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/responses.py:48"
+    },
+    {
+      "query": "JSON response using the orjson library to serialize data to JSON",
+      "expect": "responses.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 1,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/responses.py:78"
+    },
+    {
+      "query": "Streaming response with text/event-stream media type",
+      "expect": "sse.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 2,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/openapi/models.py:282"
+    },
+    {
+      "query": "streaming server-sent events in FastAPI",
+      "expect": "sse.py",
+      "scope": "code",
+      "intent": "infrastructure",
+      "hit_rank": 3,
+      "top_hit": "/Volumes/External HD/Desenvolvimento/fastapi/fastapi/applications.py:42"
+    }
+  ],
+  "_note": "FastAPI v0.115+ source (fastapi/ package only). Indexed with ragcore hybrid (e5-small + BM25 + RRF). RAG_RERANK_AUTO=off. 25 curated cases across security/routing/parameters/openapi/infrastructure intents."
+}

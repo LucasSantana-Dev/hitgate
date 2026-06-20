@@ -58,6 +58,7 @@ EXCLUDED_DIR_PARTS = {
     "dist", "build", "coverage", ".git", ".next", ".turbo", "venv", ".venv",
     "__pycache__", ".pytest_cache", ".mypy_cache", "test-results",
     "playwright-report", ".storybook", ".docusaurus", ".worktrees", "worktrees",
+    ".stryker-tmp",  # Stryker JS/TS mutation-testing sandbox — duplicate source copies
     ".rag-index",
     # Test scaffolding is not part of the implementation corpus a "where is X implemented"
     # query searches — indexing it makes the retriever return tests instead of the code.

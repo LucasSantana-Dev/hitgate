@@ -7,6 +7,9 @@ __pycache__/
 eval/*.json
 !eval/baseline.example.json
 !eval/baseline.auto-rerank.json
+!eval/baseline.fastapi.json
+!eval/baseline.lucky.json
+!eval/baseline.adt.json
 corpus-demo/.index/
 *.egg-info/
 .venv/
