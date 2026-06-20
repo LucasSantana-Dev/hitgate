@@ -1,40 +1,40 @@
 {
-  "n": 30,
-  "mrr": 0.699,
-  "hit@1": 0.5,
+  "n": 50,
+  "mrr": 0.741,
+  "hit@1": 0.56,
   "hit@3": 0.9,
   "hit@5": 1.0,
   "by_scope": {
     "code": {
-      "n": 30,
-      "mrr": 0.699,
-      "hit@1": 0.5,
+      "n": 50,
+      "mrr": 0.741,
+      "hit@1": 0.56,
       "hit@3": 0.9,
       "hit@5": 1.0
     }
   },
   "by_intent": {
     "indexing": {
-      "n": 8,
-      "mrr": 0.812,
-      "hit@1": 0.625,
+      "n": 14,
+      "mrr": 0.821,
+      "hit@1": 0.643,
       "hit@3": 1.0,
       "hit@5": 1.0
     },
     "infrastructure": {
-      "n": 10,
-      "mrr": 0.67,
-      "hit@1": 0.5,
-      "hit@3": 0.9,
+      "n": 19,
+      "mrr": 0.695,
+      "hit@1": 0.526,
+      "hit@3": 0.895,
       "hit@5": 1.0
     },
     "retrieval": {
-      "n": 12,
-      "mrr": 0.649,
-      "hit@1": 0.417,
-      "hit@3": 0.833,
+      "n": 17,
+      "mrr": 0.725,
+      "hit@1": 0.529,
+      "hit@3": 0.882,
       "hit@5": 1.0
     }
   },
-  "_note": "Frozen baseline for eval/golden.demo.jsonl: repo self-indexed, pure hybrid (RAG_RERANK_AUTO=off), RAG_CHUNK_CONTEXT_PREFIX=on (default). 30 cases (15 identifier + 15 paraphrase). Per-intent Hit@5=1.0 across all three classes. Re-freeze when any aggregate or per-class Hit@5 moves beyond ±5pp."
+  "_note": "Frozen baseline for eval/golden.demo.jsonl: repo self-indexed, pure hybrid (RAG_RERANK_AUTO=off), RAG_CHUNK_CONTEXT_PREFIX=on, RAG_CHUNK_PREFIX_FORMAT=full. 50 cases (25 identifier + 25 paraphrase). Per-intent Hit@5=1.0 across all three classes. Re-freeze when any aggregate or per-class Hit@5 moves beyond ±5pp."
 }
