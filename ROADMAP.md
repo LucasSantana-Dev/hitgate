@@ -82,19 +82,27 @@ Bonus: stratified measurement immediately exposed a chunker gap — module-level
 constants and docstrings were silently dropped, causing two `infrastructure` cases to
 miss outside top-10. Fixed in the same session; Hit@5 moved from 0.833 → 1.0.
 
-## 5. Reranker tradeoff table ✅ shipped
+## 5. Reranker tradeoff table + auto-trigger calibration ✅ shipped
 
-Two models measured on the 17-case golden set (hybrid mode, CPU):
+Two models measured on the **50-case golden set** (hybrid mode, CPU Apple M1, forced reranking):
 
-| Model | Size | Warm latency | Hit@1 | MRR | Infra Hit@5 |
-|---|---|---|---|---|---|
-| `ms-marco-MiniLM-L-6-v2` *(default)* | 88 MB | 48 ms | 0.529 | 0.696 | 0.75 |
-| `BAAI/bge-reranker-v2-m3` | 2.1 GB | 88 ms | **0.647** | **0.767** | **1.0** |
+| Model | Size | Pipeline time¹ | Hit@1 | Hit@3 | Hit@5 | MRR |
+|---|---|---|---|---|---|---|
+| *(no rerank)* | — | 15.5 s | 0.56 | 0.90 | **1.0** | 0.741 |
+| `ms-marco-MiniLM-L-6-v2` *(default)* | 88 MB | 30.2 s | 0.62 | 0.86 | 0.96 | 0.746 |
+| `BAAI/bge-reranker-v2-m3` | 2.1 GB | 194.2 s | **0.82** | **0.94** | 0.96 | **0.875** |
 
-`bge-reranker-v2-m3` is strictly better on quality (no metric regresses). Default stays
-`ms-marco-L-6-v2` for portability (88MB); the bar for switching is met — set
+¹ End-to-end for 50 queries (embed + retrieve + rerank).
+
+**Critical finding:** forced global reranking drops Hit@5 from 1.0 → 0.96 for *both* models
+— 2 of 50 cases ranked 3–5 by hybrid fusion get demoted past rank 5 by the cross-encoder.
+Calibrated auto-trigger (`RAG_RERANK_AUTO_MARGIN=0.015`) avoids this: fires only on
+genuinely ambiguous queries, maintaining Hit@5=1.0 while gaining Hit@1=0.62 (+6pp) and
+MRR=0.763 (+2.2pp) vs no-rerank baseline.
+
+Default stays `ms-marco-MiniLM-L-6-v2` for portability (88 MB); set
 `RAG_RERANK_MODEL=BAAI/bge-reranker-v2-m3` when footprint is not a constraint. Full
-table and analysis in `docs/METHODOLOGY.md`.
+table, calibration sweep, and miss taxonomy in `docs/METHODOLOGY.md` and `docs/adr/0005`.
 
 ---
 
