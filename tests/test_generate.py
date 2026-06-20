@@ -17,7 +17,14 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "ragcore"))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "eval"))
 
-from generate import _extract_docstring, _first_comment, _heuristic, _infer_intent, _to_words
+from generate import (
+    _extract_docstring,
+    _extract_jsdoc_before,
+    _first_comment,
+    _heuristic,
+    _infer_intent,
+    _to_words,
+)
 
 # ---------------------------------------------------------------------------
 # _to_words
@@ -92,6 +99,94 @@ def test_extract_docstring_module_level():
 def test_extract_docstring_too_short_returns_none():
     code = 'def f():\n    """Short."""\n    pass\n'
     assert _extract_docstring(code) is None
+
+
+_WITH_JSDOC_INLINE = '/** Rejection produced when a withTimeout deadline fires first. */\nexport class TimeoutError {}'
+_WITH_JSDOC_MULTILINE = (
+    '/**\n'
+    ' * Race promise against a deadline and reject with TimeoutError if it fires.\n'
+    ' * @param promise the operation to bound\n'
+    ' */\n'
+    'export const withTimeout = () => {}'
+)
+
+
+def test_extract_docstring_single_line_jsdoc():
+    result = _extract_docstring(_WITH_JSDOC_INLINE)
+    assert result is not None
+    assert "Rejection produced" in result
+
+
+def test_extract_docstring_multiline_jsdoc():
+    result = _extract_docstring(_WITH_JSDOC_MULTILINE)
+    assert result is not None
+    assert "Race promise" in result
+
+
+def test_extract_docstring_jsdoc_skips_at_tags():
+    code = '/** @param x the value */\nexport function f(x) {}'
+    assert _extract_docstring(code) is None
+
+
+# ---------------------------------------------------------------------------
+# _extract_jsdoc_before
+# ---------------------------------------------------------------------------
+
+_JSDOC_MULTILINE_LINES = [
+    "/**",
+    " * Race promise against a deadline — rejects with TimeoutError if fires.",
+    " * @param promise the operation",
+    " */",
+    "export const withTimeout = () => {}",
+]
+
+_JSDOC_INLINE_LINES = [
+    "/** Rejection produced when a withTimeout deadline fires first. */",
+    "export class TimeoutError {}",
+]
+
+_SLASH_COMMENT_LINES = [
+    "// Builds a presigned URL for the given S3 key, expiring after ttlSeconds.",
+    "export function buildPresignedUrl(key: string): string {",
+]
+
+_NO_COMMENT_LINES = [
+    "export function noComment(): void {",
+]
+
+
+def test_jsdoc_before_multiline():
+    result = _extract_jsdoc_before(_JSDOC_MULTILINE_LINES, start_line=5)
+    assert result is not None
+    assert "Race promise" in result
+
+
+def test_jsdoc_before_inline():
+    result = _extract_jsdoc_before(_JSDOC_INLINE_LINES, start_line=2)
+    assert result is not None
+    assert "Rejection produced" in result
+
+
+def test_jsdoc_before_skips_at_tags():
+    lines = ["/** @param x the value */", "export function f(x: number) {}"]
+    result = _extract_jsdoc_before(lines, start_line=2)
+    assert result is None
+
+
+def test_jsdoc_before_slash_comment():
+    result = _extract_jsdoc_before(_SLASH_COMMENT_LINES, start_line=2)
+    assert result is not None
+    assert "presigned URL" in result
+
+
+def test_jsdoc_before_no_comment():
+    result = _extract_jsdoc_before(_NO_COMMENT_LINES, start_line=1)
+    assert result is None
+
+
+def test_jsdoc_before_start_line_one():
+    result = _extract_jsdoc_before(_JSDOC_INLINE_LINES, start_line=1)
+    assert result is None
 
 
 # ---------------------------------------------------------------------------

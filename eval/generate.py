@@ -47,7 +47,12 @@ from config import CODE_EXTS, MAX_FILE_BYTES, SOURCE_ROOTS  # noqa: E402
 
 _CAMEL_RE = re.compile(r"([a-z])([A-Z])")
 _TRIPLE_QUOTE_RE = re.compile(r'"""(.*?)"""|\'\'\'(.*?)\'\'\'', re.DOTALL)
+_JSDOC_RE = re.compile(r"/\*\*\s*(.*?)\s*\*/", re.DOTALL)
+_JSDOC_STAR_RE = re.compile(r"^\s*\*\s?", re.MULTILINE)
 _COMMENT_LINE_RE = re.compile(r"^\s*#\s*(.+)", re.MULTILINE)
+_SLASH_LINE_RE = re.compile(r"^\s*//\s*(.+)$")
+
+_TS_EXTS = frozenset({".ts", ".tsx", ".js", ".jsx", ".mjs"})
 
 
 def _to_words(name: str) -> str:
@@ -57,15 +62,21 @@ def _to_words(name: str) -> str:
 
 
 def _extract_docstring(text: str) -> Optional[str]:
-    """First meaningful sentence from a triple-quoted string in the chunk."""
+    """First meaningful line from a Python triple-quoted or JSDoc block in the chunk."""
     m = _TRIPLE_QUOTE_RE.search(text[:1000])
-    if not m:
-        return None
-    raw = (m.group(1) or m.group(2) or "").strip()
-    for line in raw.splitlines():
-        line = line.strip()
-        if len(line) >= 25:
-            return line.rstrip(".")
+    if m:
+        raw = (m.group(1) or m.group(2) or "").strip()
+        for line in raw.splitlines():
+            line = line.strip()
+            if len(line) >= 25:
+                return line.rstrip(".")
+    m = _JSDOC_RE.search(text[:1000])
+    if m:
+        raw = _JSDOC_STAR_RE.sub("", m.group(1)).strip()
+        for line in raw.splitlines():
+            line = line.strip()
+            if len(line) >= 25 and not line.startswith("@") and not line.startswith("{@"):
+                return line.rstrip(".")
     return None
 
 
@@ -75,6 +86,65 @@ def _first_comment(text: str) -> Optional[str]:
         line = m.group(1).strip()
         if len(line) >= 25 and not line.startswith("type:") and "noqa" not in line:
             return line
+    return None
+
+
+def _extract_jsdoc_before(lines: list, start_line: int) -> Optional[str]:
+    """Scan backward from start_line (1-indexed) for a JSDoc or // comment block."""
+    if start_line <= 1:
+        return None
+
+    idx = start_line - 2  # 0-indexed line immediately before the declaration
+
+    # Skip blank lines
+    while idx >= 0 and not lines[idx].strip():
+        idx -= 1
+
+    if idx < 0:
+        return None
+
+    stripped = lines[idx].strip()
+
+    # Case 1: end of a multi-line JSDoc block  ...  */
+    if stripped.endswith("*/"):
+        end_idx = idx
+        while idx >= 0 and "/**" not in lines[idx]:
+            idx -= 1
+        if idx < 0:
+            return None
+        block = "\n".join(lines[idx : end_idx + 1])
+        m = _JSDOC_RE.search(block)
+        if m:
+            raw = _JSDOC_STAR_RE.sub("", m.group(1)).strip()
+            for line in raw.splitlines():
+                line = line.strip()
+                if len(line) >= 25 and not line.startswith("@") and not line.startswith("{@"):
+                    return line.rstrip(".")
+        return None
+
+    # Case 2: single-line /** description */
+    if stripped.startswith("/**"):
+        m = _JSDOC_RE.match(stripped)
+        if not m:
+            m = _JSDOC_RE.search(stripped)
+        if m:
+            raw = _JSDOC_STAR_RE.sub("", m.group(1)).strip()
+            if len(raw) >= 25 and not raw.startswith("@") and not raw.startswith("{@"):
+                return raw.rstrip(".")
+
+    # Case 3: // comment line(s)
+    if _SLASH_LINE_RE.match(lines[idx]):
+        comment_lines = []
+        j = idx
+        while j >= 0 and _SLASH_LINE_RE.match(lines[j]):
+            text_part = _SLASH_LINE_RE.match(lines[j]).group(1).strip()
+            comment_lines.insert(0, text_part)
+            j -= 1
+        for cl in comment_lines:
+            cl = cl.strip("-").strip()
+            if len(cl) >= 25 and "noqa" not in cl:
+                return cl
+
     return None
 
 
@@ -245,12 +315,17 @@ def generate(
 
         chunks = chunk_file(path, text)
         intent = _infer_intent(path)
+        file_lines = text.splitlines() if path.suffix.lower() in _TS_EXTS else None
 
         for start_line, end_line, chunk_text, symbol in chunks:
             if len(chunk_text.strip()) < 60:
                 continue
 
-            query, confidence = _heuristic(symbol, chunk_text, filename)
+            pre_doc = _extract_jsdoc_before(file_lines, start_line) if file_lines is not None else None
+            if pre_doc:
+                query, confidence = pre_doc, "high"
+            else:
+                query, confidence = _heuristic(symbol, chunk_text, filename)
             if not query or confidence_rank[confidence] < min_rank:
                 continue
 
