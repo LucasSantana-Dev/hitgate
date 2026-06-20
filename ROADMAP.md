@@ -72,11 +72,11 @@ Stays an adapter, never a core dependency, in keeping with [What this is NOT](./
 ## 4. Stratified (per-intent) measurement ✅ shipped
 
 ~~The aggregate Hit@K hides *where* the system is weak.~~ Done. The eval harness now
-reports `by_intent` breakdowns across three classes — `retrieval` (n=5), `indexing`
-(n=4), `infrastructure` (n=3) — alongside the existing `by_scope` rows. Cases without
+reports `by_intent` breakdowns across three classes — `retrieval` (n=21), `indexing`
+(n=15), `infrastructure` (n=23) — alongside the existing `by_scope` rows. Cases without
 an `intent` field fall into `unclassified` for backward compatibility. Per-intent CI
-gating is deliberately deferred until classes are large enough for a 5pp tolerance to
-be meaningful (see `docs/adr/0002` and `docs/adr/0003`).
+gating is **active** (ADR-0003 resolved 2026-06-19); all three classes hold Hit@5=1.0
+at n≥15, making the ±5pp tolerance meaningful.
 
 Bonus: stratified measurement immediately exposed a chunker gap — module-level Python
 constants and docstrings were silently dropped, causing two `infrastructure` cases to
@@ -84,7 +84,7 @@ miss outside top-10. Fixed in the same session; Hit@5 moved from 0.833 → 1.0.
 
 ## 5. Reranker tradeoff table + auto-trigger calibration ✅ shipped
 
-Two models measured on the **50-case golden set** (hybrid mode, CPU Apple M1, forced reranking):
+Two models measured on the **50-case golden set** (hybrid mode, CPU Apple M1, forced reranking; the set has since grown to 59 cases — see item #6):
 
 | Model | Size | Pipeline time¹ | Hit@1 | Hit@3 | Hit@5 | MRR |
 |---|---|---|---|---|---|---|
@@ -103,6 +103,25 @@ MRR=0.763 (+2.2pp) vs no-rerank baseline.
 Default stays `ms-marco-MiniLM-L-6-v2` for portability (88 MB); set
 `RAG_RERANK_MODEL=BAAI/bge-reranker-v2-m3` when footprint is not a constraint. Full
 table, calibration sweep, and miss taxonomy in `docs/METHODOLOGY.md` and `docs/adr/0005`.
+
+## 6. Expand golden set to ~100 cases with LLM-generated paraphrases
+
+**Status: candidate.** The 59-case set is saturated at Hit@5=1.0 — adding new cases that
+also hit at rank 1–5 proves nothing. The set needs to grow to the point where a retrieval
+change can *discriminate* meaningfully across cases, not just hold a ceiling.
+
+The generator's `--llm` path (ADR-0002 plumbing, no extra dep) can produce an
+`identifier + paraphrase` pair per chunk via any OpenAI-compatible API. A 100-case set
+with ~50 paraphrases distributed evenly across intent classes would give each class
+enough sample variance for a 5pp gate swing to signal a real regression, not noise.
+
+**Gate to ship:** a 100-case run where at least one plausible retrieval change (e.g.
+embedding model swap, BM25 weight change) moves Hit@5 by a detectable and reproducible
+5pp in the expected direction. If the set is still too easy to discriminate, it doesn't
+earn a place in the core.
+
+**Reopen trigger:** a retrieval change passes the aggregate Hit@5 gate but a
+per-intent class visibly degrades in local runs — meaning the 59-case set missed it.
 
 ---
 
