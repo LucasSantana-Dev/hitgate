@@ -64,3 +64,29 @@ EXCLUDED_DIR_PARTS = {
     # query searches — indexing it makes the retriever return tests instead of the code.
     "tests", "test", "__tests__", "spec", "specs",
 }
+
+
+def require_hybrid() -> None:
+    """Raise a helpful error if the optional [hybrid] retrieval-engine deps are missing.
+
+    The eval harness core is dependency-free; the bundled hybrid retriever needs
+    numpy + rank-bm25 + sentence-transformers, shipped as the ``[hybrid]`` extra.
+    Call this at the entry of any path that actually loads the engine, so a missing
+    extra surfaces as a clear "install it" message instead of an opaque AttributeError.
+    """
+    import importlib.util
+
+    missing = [
+        pip_name
+        for module, pip_name in (
+            ("numpy", "numpy"),
+            ("rank_bm25", "rank-bm25"),
+            ("sentence_transformers", "sentence-transformers"),
+        )
+        if importlib.util.find_spec(module) is None
+    ]
+    if missing:
+        raise ImportError(
+            "the bundled hybrid retriever needs the optional [hybrid] extra — "
+            "`pip install evidence-first-rag[hybrid]` (missing: " + ", ".join(missing) + ")"
+        )

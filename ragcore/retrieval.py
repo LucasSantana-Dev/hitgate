@@ -11,11 +11,17 @@ import sys
 from pathlib import Path
 from typing import Any
 
-import numpy as np
-from rank_bm25 import BM25Okapi
+try:
+    import numpy as np
+except ImportError:  # numpy ships with the optional [hybrid] extra
+    np = None  # type: ignore[assignment]
+try:
+    from rank_bm25 import BM25Okapi
+except ImportError:  # rank-bm25 ships with the optional [hybrid] extra
+    BM25Okapi = None  # type: ignore[assignment]
 
 sys.path.insert(0, str(Path(__file__).parent))
-from config import DB, QLOG, SOURCE_ROOTS, EMBED_MODEL as MODEL_NAME, EMBED_DIM as DIM
+from config import DB, QLOG, SOURCE_ROOTS, EMBED_MODEL as MODEL_NAME, EMBED_DIM as DIM, require_hybrid
 
 RRF_K = 60
 BM25_WEIGHT = float(os.environ.get("RAG_BM25_WEIGHT", "1.5"))  # >1 favors lexical (code) match
@@ -189,6 +195,7 @@ def search(
 ) -> list[dict]:
     if not query.strip():
         return []
+    require_hybrid()
     if isinstance(scope_types, str):  # defensive: a bare string would char-explode in _load's IN(...)
         scope_types = [scope_types] if scope_types else None
     if scope_repos == ["all"]:

@@ -21,7 +21,10 @@ import sys
 import time
 from pathlib import Path
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # numpy ships with the optional [hybrid] extra
+    np = None  # type: ignore[assignment]
 
 sys.path.insert(0, str(Path(__file__).parent))
 from chunkers import chunk_file, detect_language
@@ -37,6 +40,7 @@ from config import (
     INDEX_DIR,
     MAX_FILE_BYTES,
     SOURCE_ROOTS,
+    require_hybrid,
 )
 
 SCHEMA = """
@@ -294,6 +298,7 @@ def main() -> int:
     ap.add_argument("--no-code", action="store_true", help="skip source code ingestion")
     args = ap.parse_args()
 
+    require_hybrid()
     from sentence_transformers import SentenceTransformer
 
     model = SentenceTransformer(MODEL_NAME)

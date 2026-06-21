@@ -11,7 +11,10 @@ license = { file = "LICENSE" }
 authors = [{ name = "Lucas Santana" }]
 requires-python = ">=3.10"
 keywords = ["rag", "retrieval", "bm25", "reranking", "evaluation", "search"]
-dependencies = [
+dependencies = []  # the eval harness core is dependency-free; the bundled retriever is the [hybrid] extra below
+
+[project.optional-dependencies]
+hybrid = [
     "sentence-transformers>=2.2",
     "rank-bm25>=0.2",
     "numpy>=1.24",
