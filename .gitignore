@@ -19,3 +19,4 @@ corpus-demo/.index/
 *.egg-info/
 build/
 .venv/
+dist/

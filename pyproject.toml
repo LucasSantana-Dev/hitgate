@@ -3,15 +3,20 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "evidence-first-rag"
+name = "hitgate"
 version = "0.1.0"
-description = "Portable hybrid (BM25 + dense + RRF) retrieval engine and a label-free evaluation harness."
+description = "A label-free retrieval-quality regression gate: measure any retriever's ranking (Hit@K/MRR) on your own corpus, no labels, gated in CI like a test."
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{ name = "Lucas Santana" }]
 requires-python = ">=3.10"
-keywords = ["rag", "retrieval", "bm25", "reranking", "evaluation", "search"]
+keywords = ["rag", "retrieval", "evaluation", "hit@k", "mrr", "regression-gate", "ci", "bm25", "reranking", "search"]
 dependencies = []  # the eval harness core is dependency-free; the bundled retriever is the [hybrid] extra below
+
+[project.urls]
+Homepage = "https://github.com/LucasSantana-Dev/evidence-first-rag"
+Repository = "https://github.com/LucasSantana-Dev/evidence-first-rag"
+Methodology = "https://github.com/LucasSantana-Dev/evidence-first-rag/blob/main/docs/METHODOLOGY.md"
 
 [project.optional-dependencies]
 hybrid = [

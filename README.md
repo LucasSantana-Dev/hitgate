@@ -1,6 +1,8 @@
-# evidence-first-rag
+# hitgate
 
 [![eval-gate (advisory)](https://github.com/LucasSantana-Dev/evidence-first-rag/actions/workflows/eval.yml/badge.svg)](https://github.com/LucasSantana-Dev/evidence-first-rag/actions/workflows/eval.yml)
+
+**`pip install hitgate`** — the evaluation harness installs under this name (source repo: `evidence-first-rag`).
 
 > **A pytest-style regression gate for retrieval quality** — plus the small hybrid
 > retriever it was built to measure. Point it at *your* retriever and find out whether a
