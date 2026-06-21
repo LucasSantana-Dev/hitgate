@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""eval/plot_history.py — Hit@5 across git history (per-commit, self-indexed).
+"""hitgate/plot_history.py — Hit@5 across git history (per-commit, self-indexed).
 
 Walks recent commits on the current branch and, for each one that ships the eval
 harness, checks it out into a throwaway `git worktree`, indexes that commit's own
@@ -18,7 +18,7 @@ Charting needs matplotlib (optional dev dependency): `pip install -r requirement
 The eval run itself needs only the three core deps.
 
 Usage:
-  python eval/plot_history.py [--max-commits N] [--branch main]
+  python -m hitgate.plot_history [--max-commits N] [--branch main]
 """
 from __future__ import annotations
 
@@ -31,8 +31,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
-EVAL_REL = "eval/run.py"
-GOLDEN_REL = "eval/golden.demo.jsonl"
+EVAL_REL = "hitgate/run.py"
+GOLDEN_REL = "hitgate/golden.demo.jsonl"
 
 
 def git(*args: str, cwd: Path | None = None) -> str:
@@ -75,12 +75,12 @@ def hit5_at(sha: str) -> float | None:
             if r.returncode != 0:
                 return None
             r = subprocess.run(
-                [sys.executable, EVAL_REL, "--label", "hist"], cwd=str(wt), env=env,
+                [sys.executable, "-m", "hitgate.run", "--label", "hist"], cwd=str(wt), env=env,
                 capture_output=True, text=True,
             )
             if r.returncode != 0:
                 return None
-            out = wt / "eval" / "hist.json"
+            out = wt / "hitgate" / "hist.json"
             if not out.exists():
                 return None
             h5 = json.loads(out.read_text()).get("hit@5")

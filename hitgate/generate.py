@@ -9,21 +9,21 @@ produce a richer paraphrase query alongside the identifier query. Uses stdlib
 urllib — no additional package required. Requires OPENAI_API_KEY (or set
 OPENAI_BASE_URL to point at a local model).
 
-Output is the same .jsonl that eval/run.py --dataset already consumes. Curation
+Output is the same .jsonl that hitgate/run.py --dataset already consumes. Curation
 helper fields (prefixed _) are silently ignored by the harness.
 
 Usage:
     # Heuristic (zero deps):
-    RAG_SOURCE_ROOTS="$PWD" python eval/generate.py --output eval/candidates.jsonl
+    RAG_SOURCE_ROOTS="$PWD" python -m hitgate.generate --output hitgate/candidates.jsonl
 
     # LLM-enhanced (identifier + paraphrase per chunk):
-    OPENAI_API_KEY=sk-... python eval/generate.py --llm --output eval/candidates.jsonl
+    OPENAI_API_KEY=sk-... python -m hitgate.generate --llm --output hitgate/candidates.jsonl
 
     # Skip files already covered by an existing golden set:
-    python eval/generate.py --existing eval/golden.demo.jsonl --output eval/candidates.jsonl
+    python -m hitgate.generate --existing hitgate/golden.demo.jsonl --output hitgate/candidates.jsonl
 
     # Curate the output, then run the eval:
-    python eval/run.py --dataset eval/candidates.jsonl --label my-baseline
+    python -m hitgate.run --dataset hitgate/candidates.jsonl --label my-baseline
 """
 from __future__ import annotations
 
@@ -36,12 +36,9 @@ import urllib.request
 from pathlib import Path
 from typing import Optional
 
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "ragcore"))
-
-from build import is_excluded_path, iter_code_sources  # noqa: E402
-from chunkers import chunk_file  # noqa: E402
-from config import CODE_EXTS, MAX_FILE_BYTES, SOURCE_ROOTS  # noqa: E402
+from ragcore.build import is_excluded_path, iter_code_sources
+from ragcore.chunkers import chunk_file
+from ragcore.config import CODE_EXTS, MAX_FILE_BYTES, SOURCE_ROOTS
 
 # ── query helpers ────────────────────────────────────────────────────────────
 
@@ -384,8 +381,8 @@ def _full_fields(case: dict) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--output", default="eval/candidates.jsonl",
-                    help="path to write candidate cases (default: eval/candidates.jsonl)")
+    ap.add_argument("--output", default="hitgate/candidates.jsonl",
+                    help="path to write candidate cases (default: hitgate/candidates.jsonl)")
     ap.add_argument("--existing", metavar="JSONL",
                     help="existing golden set; files already covered will be skipped")
     ap.add_argument("--llm", action="store_true",
@@ -430,9 +427,9 @@ def main() -> int:
     print(f"  by source     : {by_src}", file=sys.stderr)
     print(f"\nNext steps:", file=sys.stderr)
     print(f"  1. Review and curate {out}", file=sys.stderr)
-    print(f"  2. python eval/run.py --dataset {out} --label baseline-v1", file=sys.stderr)
-    print(f"  3. cp eval/baseline-v1.json eval/baseline.<project>.json", file=sys.stderr)
-    print(f"  4. bash eval/check.sh eval/<run>.json eval/baseline.<project>.json", file=sys.stderr)
+    print(f"  2. python -m hitgate.run --dataset {out} --label baseline-v1", file=sys.stderr)
+    print(f"  3. cp hitgate/baseline-v1.json hitgate/baseline.<project>.json", file=sys.stderr)
+    print(f"  4. bash hitgate/check.sh hitgate/<run>.json hitgate/baseline.<project>.json", file=sys.stderr)
 
     return 0
 

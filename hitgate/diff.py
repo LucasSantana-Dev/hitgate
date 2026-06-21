@@ -2,8 +2,8 @@
 """Compare two eval result JSON files and report per-case rank changes.
 
 Usage:
-  python eval/diff.py eval/baseline.example.json eval/head.json
-  python eval/diff.py eval/A.json eval/B.json --quiet   # summary only
+  python -m hitgate.diff hitgate/baseline.example.json hitgate/head.json
+  python -m hitgate.diff hitgate/A.json hitgate/B.json --quiet   # summary only
 """
 from __future__ import annotations
 

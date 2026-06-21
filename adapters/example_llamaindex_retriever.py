@@ -5,7 +5,7 @@ Strictly opt-in — requires `pip install llama-index-retrievers-bm25 llama-inde
 files, wraps it via `adapters.llamaindex_retriever.to_harness`, and exposes `retrieve`:
 
     pip install llama-index-retrievers-bm25 llama-index-core
-    RAG_SOURCE_ROOTS="$PWD" python eval/run.py \\
+    RAG_SOURCE_ROOTS="$PWD" python -m hitgate.run \\
         --retriever adapters.example_llamaindex_retriever:retrieve --label llamaindex
 
 The point is not the number — a BM25 baseline over whole files is a rough instrument

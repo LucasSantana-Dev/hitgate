@@ -10,7 +10,7 @@ even when LangChain isn't installed. It turns any LangChain retriever (anything 
 Wire it up in a tiny module that builds your retriever and exposes the callable, then point
 the gate at it:
 
-    python eval/run.py --retriever yourmod:retrieve
+    python -m hitgate.run --retriever yourmod:retrieve
 
 A runnable example using LangChain's BM25Retriever is in
 `adapters/example_langchain_retriever.py`. See `adapters/README.md`.

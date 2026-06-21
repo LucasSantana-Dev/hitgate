@@ -3,11 +3,11 @@
 The retriever in this repo is ordinary — dense embeddings, BM25, reciprocal rank fusion.
 The part worth your attention is how every claim about it is *checked*: with a small golden
 set, a frozen baseline, and a refusal to assert any number that didn't come out of an actual
-`eval/run.py` run. This page is the worked argument for three design choices, each backed by a
+`hitgate/run.py` run. This page is the worked argument for three design choices, each backed by a
 real ablation — including, prominently, the places where the measurement **contradicts** the
 design. That contradiction is the point.
 
-Every number below is reproducible with the commands shown, on `eval/golden.demo.jsonl`
+Every number below is reproducible with the commands shown, on `hitgate/golden.demo.jsonl`
 (101 cases as of 2026-06-20), self-indexed over this repo, pure hybrid unless stated.
 The golden set was expanded from 12 → 17 → 23 → 24 → 59 → 101 cases across six sessions;
 numbers reflect the 101-case set unless a section explicitly notes an earlier snapshot.
@@ -15,10 +15,10 @@ numbers reflect the 101-case set unless a section explicitly notes an earlier sn
 ## The ablation
 
 ```bash
-RAG_SOURCE_ROOTS="$PWD" python ragcore/build.py
-RAG_RANK_MODE=bm25   RAG_RERANK_AUTO=off python eval/run.py --dataset eval/golden.demo.jsonl --label abl-bm25
-RAG_RANK_MODE=dense  RAG_RERANK_AUTO=off python eval/run.py --dataset eval/golden.demo.jsonl --label abl-dense
-RAG_RANK_MODE=hybrid RAG_RERANK_AUTO=off python eval/run.py --dataset eval/golden.demo.jsonl --label abl-hybrid
+RAG_SOURCE_ROOTS="$PWD" python -m ragcore.build
+RAG_RANK_MODE=bm25   RAG_RERANK_AUTO=off python -m hitgate.run --dataset hitgate/golden.demo.jsonl --label abl-bm25
+RAG_RANK_MODE=dense  RAG_RERANK_AUTO=off python -m hitgate.run --dataset hitgate/golden.demo.jsonl --label abl-dense
+RAG_RANK_MODE=hybrid RAG_RERANK_AUTO=off python -m hitgate.run --dataset hitgate/golden.demo.jsonl --label abl-hybrid
 ```
 
 **101-case ablation (current baseline, retrieval=30, indexing=22, infrastructure=49):**
@@ -147,7 +147,7 @@ drops Hit@5 from 1.0 to 0.96: 2 cases that hybrid fusion placed at ranks 3–5 g
 past rank 5 by the cross-encoder. The auto-trigger's original default margin (`RAG_RERANK_AUTO_MARGIN=0.08`)
 fires too aggressively — it matched the same 2 problematic cases and caused the same regression.
 
-**Method.** Swept `RAG_RERANK_AUTO_MARGIN` from 0.005 to 0.08 using `eval/run.py --auto-rerank`.
+**Method.** Swept `RAG_RERANK_AUTO_MARGIN` from 0.005 to 0.08 using `hitgate/run.py --auto-rerank`.
 Trigger fires when cosine similarity gap between top-1 and top-2 corpus results is below the
 margin — i.e., when the retriever is "unsure" which document to rank first.
 
@@ -173,7 +173,7 @@ At margin=0.015, both fall below the trigger and stay at their hybrid-fusion pos
 
 **New defaults:** `RAG_RERANK_AUTO_MARGIN=0.015`. The eval gate still measures the
 no-rerank baseline for reproducibility (no reranker required to run the eval). Use
-`python eval/run.py --auto-rerank` to measure the calibrated production operating point.
+`python -m hitgate.run --auto-rerank` to measure the calibrated production operating point.
 
 ## Why Hit@5 is the gated metric
 
@@ -184,7 +184,7 @@ Hit@1 ranges from 0.333 to 0.522 across modes (0.458 for hybrid on the 24-case s
 0.826 for BM25 and dense, 1.0 for hybrid (after the docstring fix). On a set this small,
 Hit@1 and MRR are noise-prone and Hit@5 is the stable signal. A regression gate should fire
 on real degradation, not on a borderline case slipping from rank 1 to rank 2 — so the gate
-(`eval/check.sh`, ±5pp) is anchored on Hit@5 and the README leads with it. The other
+(`hitgate/check.sh`, ±5pp) is anchored on Hit@5 and the README leads with it. The other
 metrics are always reported, never hidden; they're just not what the gate trusts.
 
 ## Contextual chunk prefixing — three-stage experiment
@@ -355,7 +355,7 @@ in the Pareto table above.
 
 Each section is the same loop, applied: run the real eval, read the delta *especially* when it's
 unflattering, decide, and write down what would change the answer. The ablation knob
-(`RAG_RANK_MODE`) and the history script (`eval/plot_history.py`) exist so a reader can re-run
+(`RAG_RANK_MODE`) and the history script (`hitgate/plot_history.py`) exist so a reader can re-run
 every claim here and catch us if a number drifts. A measurement system whose own demo shows the
 simple baseline winning — and says so in the headline — is the asset this repository exists to
 demonstrate. The retriever is just the thing being measured.
@@ -368,9 +368,9 @@ the retriever hold up on arbitrary codebases it was not built around?
 
 Three external corpora were benchmarked using the same pipeline (hybrid RRF, e5-small,
 `RAG_RERANK_AUTO=off`). Each corpus was indexed with a separate `RAG_INDEX_DIR` to avoid
-contaminating the production index. Golden sets were generated with `eval/generate.py`, then
+contaminating the production index. Golden sets were generated with `hitgate/generate.py`, then
 manually curated (deduplication, one case per file, intent balance) and audited with
-`eval/audit_contamination.py` to confirm every expected file was present in that corpus.
+`hitgate/audit_contamination.py` to confirm every expected file was present in that corpus.
 
 ### FastAPI (Python, 25 cases)
 
@@ -395,10 +395,10 @@ is clean.
 Reproduce:
 ```bash
 RAG_INDEX_DIR=".../fastapi/.rag-index" RAG_SOURCE_ROOTS=".../fastapi/fastapi" \
-  python ragcore/build.py
+  python -m ragcore.build
 RAG_INDEX_DIR=".../fastapi/.rag-index" RAG_RERANK_AUTO=off \
-  python eval/run.py --dataset eval/golden.fastapi.jsonl --label fastapi-baseline
-python eval/compare.py eval/fastapi-baseline.json eval/baseline.fastapi.json
+  python -m hitgate.run --dataset hitgate/golden.fastapi.jsonl --label fastapi-baseline
+python hitgate/compare.py hitgate/fastapi-baseline.json hitgate/baseline.fastapi.json
 ```
 
 ### Lucky / packages/backend (TypeScript, 21 cases)

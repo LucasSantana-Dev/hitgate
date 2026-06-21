@@ -11,8 +11,7 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "eval"))
-from compare import compare
+from hitgate.compare import compare
 
 
 def _result(hit5=1.0, hit3=0.9, hit1=0.6, mrr=0.75, by_intent=None) -> dict:

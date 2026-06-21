@@ -28,15 +28,15 @@ jobs:
         with:
           path: ~/.cache/huggingface
           key: hf-models-multilingual-e5-small-v1
-      - name: Install the three deps the README quickstart lists
-        run: pip install -r requirements.txt
+      - name: Install the harness + bundled retriever (editable, [hybrid] extra)
+        run: pip install -e ".[hybrid]"
       # On a cache hit, go fully offline so HF isn't contacted at all (no HEAD -> no 429).
       # On a cache miss (first run), stay online to download + populate the cache.
       - name: Eval gate — auto-builds the index, compares Hit@K to the frozen baseline (±5pp)
         env:
           HF_HUB_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
           TRANSFORMERS_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
-        run: bash eval/check.sh ci
+        run: bash hitgate/check.sh ci
       - name: Auto-rerank gate — production operating point (RAG_RERANK_AUTO_MARGIN=0.015, advisory)
         # Gates the calibrated auto-trigger path (ADR-0005). Baseline frozen at Hit@5=0.96.
         # If the reranker model isn't cached, sentence-transformers falls back to the fused
@@ -46,13 +46,13 @@ jobs:
           TRANSFORMERS_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
           RAG_RERANK_AUTO: "on"
           EVAL_EXTRA_FLAGS: "--auto-rerank"
-          RAG_EVAL_BASELINE: "eval/baseline.auto-rerank.json"
-        run: bash eval/check.sh auto-rerank-ci
+          RAG_EVAL_BASELINE: "hitgate/baseline.auto-rerank.json"
+        run: bash hitgate/check.sh auto-rerank-ci
       - name: Determinism gate — same query must yield the same top-K ordering
         env:
           HF_HUB_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
           TRANSFORMERS_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
-        run: RAG_SOURCE_ROOTS="$PWD" python eval/test_determinism.py
+        run: RAG_SOURCE_ROOTS="$PWD" python -m hitgate.test_determinism
       - name: Unit tests — tokenizer, rank modes, harness, adapter
         # Reuses the e5 model the eval gate already cached; tests duck-type LangChain so the
         # adapter suite needs no extra install.

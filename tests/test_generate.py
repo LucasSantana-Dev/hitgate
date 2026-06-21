@@ -14,11 +14,7 @@ import pytest
 _REPO_ROOT = str(Path(__file__).resolve().parent.parent)
 os.environ.setdefault("RAG_SOURCE_ROOTS", _REPO_ROOT)
 
-import sys
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "ragcore"))
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "eval"))
-
-from generate import (
+from hitgate.generate import (
     _extract_docstring,
     _extract_jsdoc_before,
     _first_comment,
@@ -282,7 +278,7 @@ _ROOTS = [Path(_REPO_ROOT)]  # pass explicitly so tests don't depend on SOURCE_R
 
 
 def test_generate_produces_valid_cases():
-    from generate import generate
+    from hitgate.generate import generate
 
     cases = generate(min_confidence="high", limit=10, roots=_ROOTS)
     assert len(cases) > 0
@@ -295,7 +291,7 @@ def test_generate_produces_valid_cases():
 
 
 def test_generate_existing_skips_covered_files(tmp_path):
-    from generate import generate
+    from hitgate.generate import generate
 
     # Write a fake existing golden set covering "retrieval.py"
     existing = tmp_path / "existing.jsonl"
@@ -310,7 +306,7 @@ def test_generate_existing_skips_covered_files(tmp_path):
 
 
 def test_generate_respects_limit():
-    from generate import generate
+    from hitgate.generate import generate
 
     cases = generate(min_confidence="medium", limit=5, roots=_ROOTS)
     assert len(cases) <= 5
@@ -318,7 +314,7 @@ def test_generate_respects_limit():
 
 def test_generate_harness_format_only():
     """Default output (no --full) must contain only harness-recognised fields."""
-    from generate import _harness_fields, generate
+    from hitgate.generate import _harness_fields, generate
 
     cases = generate(min_confidence="high", limit=5, roots=_ROOTS)
     _HARNESS = {"query", "expect_path_contains", "expect_scope", "intent", "paraphrase"}
@@ -333,7 +329,7 @@ def test_generate_harness_format_only():
 # _llm_queries — mocked urllib.request.urlopen, no real API calls
 # ---------------------------------------------------------------------------
 
-from generate import _llm_queries  # noqa: E402
+from hitgate.generate import _llm_queries  # noqa: E402
 
 
 def _make_urlopen_mock(content: str):
@@ -417,7 +413,7 @@ def test_generate_llm_path_emits_two_cases_per_chunk(tmp_path):
 
     with patch("urllib.request.urlopen", _make_urlopen_mock(payload)):
         with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test"}):
-            from generate import generate
+            from hitgate.generate import generate
             cases = generate(llm=True, min_confidence="high", limit=0, roots=[tmp_path])
 
     assert len(cases) == 2

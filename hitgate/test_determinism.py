@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""eval/test_determinism.py — prove the retrieval pipeline is deterministic.
+"""hitgate/test_determinism.py — prove the retrieval pipeline is deterministic.
 
 If evaluation is non-deterministic, the numbers can't be trusted — a Hit@5 of
 0.833 means nothing if re-running the same query against the same index can
@@ -10,8 +10,8 @@ Exit 0 if every query is stable, 1 if any ordering drifts. No baseline file, no
 model download beyond what build.py already cached — just same-input/same-output.
 
 Usage:
-  RAG_SOURCE_ROOTS="$PWD" python ragcore/build.py     # build the index first
-  RAG_SOURCE_ROOTS="$PWD" python eval/test_determinism.py
+  RAG_SOURCE_ROOTS="$PWD" python -m ragcore.build     # build the index first
+  RAG_SOURCE_ROOTS="$PWD" python -m hitgate.test_determinism
 """
 from __future__ import annotations
 
@@ -20,10 +20,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
-from ragcore.retrieval import search  # noqa: E402
+from ragcore.retrieval import search
 
-DATASET = ROOT / "eval" / "golden.demo.jsonl"
+DATASET = ROOT / "hitgate" / "golden.demo.jsonl"
 TOP = 5
 RUNS = 2
 

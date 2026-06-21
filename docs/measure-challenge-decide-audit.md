@@ -4,7 +4,7 @@
 challenge → decide → record the trigger that would reopen it* — and names the
 contamination audit as the decision everything else depends on. This page makes that
 one loop concrete and hands you the script to run it yourself
-([`eval/audit_contamination.py`](../eval/audit_contamination.py)).
+([`hitgate/audit_contamination.py`](../hitgate/audit_contamination.py)).
 
 The point isn't the contamination finding. It's that "is my benchmark honest?" is a
 question you can *answer mechanically* instead of assuming.
@@ -33,7 +33,7 @@ whether any indexed chunk's path matches the expected path. Three outcomes:
   (a softer problem: the case or the scope label is wrong, but it isn't un-winnable).
 - **CONTAMINATED** — the answer isn't in the corpus at all. Un-winnable.
 
-That is the entire logic of [`eval/audit_contamination.py`](../eval/audit_contamination.py).
+That is the entire logic of [`hitgate/audit_contamination.py`](../hitgate/audit_contamination.py).
 
 ## Decide
 
@@ -60,10 +60,10 @@ The audit isn't a thing you did once; it's a gate you re-run. Reopen it when:
 ## Run it on your own eval set
 
 ```bash
-# Index a corpus, then audit any eval set with the same schema as eval/golden.demo.jsonl
-RAG_SOURCE_ROOTS="$PWD" python ragcore/build.py
-RAG_SOURCE_ROOTS="$PWD" python eval/audit_contamination.py                       # audits eval/golden.demo.jsonl
-RAG_SOURCE_ROOTS="$PWD" python eval/audit_contamination.py --dataset your_eval.jsonl
+# Index a corpus, then audit any eval set with the same schema as hitgate/golden.demo.jsonl
+RAG_SOURCE_ROOTS="$PWD" python -m ragcore.build
+RAG_SOURCE_ROOTS="$PWD" python -m hitgate.audit_contamination                       # audits hitgate/golden.demo.jsonl
+RAG_SOURCE_ROOTS="$PWD" python -m hitgate.audit_contamination --dataset your_eval.jsonl
 ```
 
 Exit code is the contract: **0** if every case's answer is in the corpus, **1** if any
@@ -73,7 +73,7 @@ case is un-winnable — so you can wire it into a build the same way as the eval
 
 - It proves the expected answer **is in the corpus** — the necessary condition for a
   case to be winnable. It does **not** prove the answer is *correct* or that the
-  retriever *ranks* it well; that's what the eval (`eval/run.py`) measures.
+  retriever *ranks* it well; that's what the eval (`hitgate/run.py`) measures.
 - **scope-mismatch** is a warning, not a failure — it usually means a mislabeled scope,
   not a poisoned benchmark, so the gate doesn't fail on it.
 - It checks path membership, so its precision is only as good as your

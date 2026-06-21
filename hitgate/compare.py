@@ -2,7 +2,7 @@
 """compare.py — compare two eval result JSON files and emit a structured verdict.
 
 Usage:
-    python eval/compare.py <current.json> <baseline.json> [tol_pp=5]
+    python hitgate/compare.py <current.json> <baseline.json> [tol_pp=5]
 
 Prints the human-readable delta table to stdout (same format as before).
 Writes <current>.verdict.json alongside the current result.

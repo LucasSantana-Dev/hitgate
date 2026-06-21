@@ -4,10 +4,10 @@ Prerequisites
 -------------
 1.  Run an eval:
 
-        RAG_SOURCE_ROOTS="$PWD" python ragcore/build.py
-        python eval/run.py --label my-run
+        RAG_SOURCE_ROOTS="$PWD" python -m ragcore.build
+        python -m hitgate.run --label my-run
 
-    This writes ``eval/my-run.json``.
+    This writes ``hitgate/my-run.json``.
 
 2.  Install Langfuse and set credentials:
 
@@ -33,8 +33,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from adapters.langfuse_eval import push
 
 # Paths relative to repo root.
-GOLDEN = Path("eval/golden.demo.jsonl")
-RESULTS = Path("eval/my-run.json")
+GOLDEN = Path("hitgate/golden.demo.jsonl")
+RESULTS = Path("hitgate/my-run.json")
 
 push(
     golden_path=GOLDEN,

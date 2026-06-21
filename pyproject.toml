@@ -23,6 +23,10 @@ hybrid = [
 [project.scripts]
 rag-query = "ragcore.query:main"
 rag-build = "ragcore.build:main"
+hitgate-run = "hitgate.run:main"
+hitgate-compare = "hitgate.compare:main"
+hitgate-diff = "hitgate.diff:main"
+hitgate-generate = "hitgate.generate:main"
 
 [tool.setuptools]
-packages = ["ragcore"]
+packages = ["ragcore", "hitgate"]

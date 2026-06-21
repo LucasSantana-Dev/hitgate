@@ -5,7 +5,7 @@ Run the retrieval regression gate against the current repo state and report whet
 ## When to invoke
 
 - User runs `/rag-eval` or `/rag-eval <label>`
-- User has changed files under `ragcore/`, `eval/`, or retrieval config and is about to commit or push
+- User has changed files under `ragcore/`, `hitgate/`, or retrieval config and is about to commit or push
 - User asks "did this change affect retrieval quality?" or "is it safe to ship?"
 
 ## Steps
@@ -17,14 +17,14 @@ Use the argument if provided, otherwise use `rolling`.
 ### 2 — Run the gate
 
 ```bash
-bash eval/check.sh <label>
+bash hitgate/check.sh <label>
 ```
 
 Set env vars if configured for a non-default corpus or retriever (see `README.md` in this skill folder):
 
 ```bash
 RAG_SOURCE_ROOTS="..." RAG_EVAL_DATASET="..." RAG_EVAL_BASELINE="..." EVAL_EXTRA_FLAGS="..." \
-  bash eval/check.sh <label>
+  bash hitgate/check.sh <label>
 ```
 
 If the command exits non-zero AND no baseline file exists at the configured path, skip to the **No baseline** branch below.
@@ -32,7 +32,7 @@ If the command exits non-zero AND no baseline file exists at the configured path
 ### 3 — Read the structured verdict
 
 ```bash
-cat eval/<label>.verdict.json
+cat hitgate/<label>.verdict.json
 ```
 
 ### 4 — Report in plain language
@@ -43,27 +43,27 @@ cat eval/<label>.verdict.json
 **Improvement** (`verdict: "improvement"`, `refreeze_recommended: true`):
 > Gate passed and Hit@5 improved [base → current, +Xpp]. The frozen baseline is now stale in the positive direction — consider re-freezing:
 > ```bash
-> cp eval/<label>.json eval/baseline.example.json
+> cp hitgate/<label>.json hitgate/baseline.example.json
 > ```
 
 **Regression** (`verdict: "regression"`):
 > Regression: [for each item in `regressions`, state scope + metric + delta in pp]. Next: run the eval in verbose mode to see which cases are now missing:
 > ```bash
-> python eval/run.py --verbose --label <label>
+> python -m hitgate.run --verbose --label <label>
 > ```
 > Then inspect the MISS rows for the affected intent class.
 
 **No baseline found** (baseline path does not exist):
 > No baseline at [path]. To create one:
 > ```bash
-> python eval/run.py --label baseline-v1
-> cp eval/baseline-v1.json eval/baseline.example.json
+> python -m hitgate.run --label baseline-v1
+> cp hitgate/baseline-v1.json hitgate/baseline.example.json
 > ```
 > Then re-run `/rag-eval` to compare against it.
 
 ### 5 — Surface failing cases on regression
 
-Read `eval/<label>.json` → `per_case`. Filter to entries where `hit_rank` is null and `intent` matches the regressed class. Show up to 3 as:
+Read `hitgate/<label>.json` → `per_case`. Filter to entries where `hit_rank` is null and `intent` matches the regressed class. Show up to 3 as:
 
 ```
 MISS  intent:indexing  "how does the chunker handle AST symbols"  → expected: chunkers.py
@@ -95,5 +95,5 @@ when setting expectations for a new corpus:
 - Homogeneous UI component layer (sibling components share vocabulary) → Hit@5 ~0.74, consider reranker
 - Hit@1 below 0.65 is normal and not a tuning failure — it reflects architectural ambiguity
 
-Each baseline lives at `eval/baseline.<corpus>.json` in the evidence-first-rag repo.
-Run `/rag-eval` with `RAG_EVAL_BASELINE=eval/baseline.<corpus>.json` to compare against any of them.
+Each baseline lives at `hitgate/baseline.<corpus>.json` in the evidence-first-rag repo.
+Run `/rag-eval` with `RAG_EVAL_BASELINE=hitgate/baseline.<corpus>.json` to compare against any of them.

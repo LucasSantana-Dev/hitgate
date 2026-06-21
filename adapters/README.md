@@ -21,9 +21,9 @@ adapter only has to *find* and *label* content.
 ## Retriever adapters (measure an external retriever)
 
 A *source* adapter feeds the index; a *retriever* adapter goes the other way — it lets the eval
-harness (`eval/run.py`) measure a retriever from another ecosystem. The harness protocol is any
+harness (`hitgate/run.py`) measure a retriever from another ecosystem. The harness protocol is any
 callable `retrieve(query, top, scope) -> list[{"path": ...}]`, ranked best-first (see
-`eval/run.py`). An adapter just maps a foreign retriever onto it, and stays **opt-in** — the
+`hitgate/run.py`). An adapter just maps a foreign retriever onto it, and stays **opt-in** — the
 core never imports the vendor library.
 
 ### LangChain — `adapters/langchain_retriever.py`
@@ -36,7 +36,7 @@ Runnable example over this repo (`adapters/example_langchain_retriever.py`):
 
 ```bash
 pip install langchain-community           # opt-in; NOT a core dependency
-RAG_SOURCE_ROOTS="$PWD" python eval/run.py \
+RAG_SOURCE_ROOTS="$PWD" python -m hitgate.run \
     --retriever adapters.example_langchain_retriever:retrieve --label langchain
 ```
 
@@ -56,7 +56,7 @@ Runnable example over this repo (`adapters/example_llamaindex_retriever.py`):
 
 ```bash
 pip install llama-index-retrievers-bm25 llama-index-core   # opt-in; NOT core deps
-RAG_SOURCE_ROOTS="$PWD" python eval/run.py \
+RAG_SOURCE_ROOTS="$PWD" python -m hitgate.run \
     --retriever adapters.example_llamaindex_retriever:retrieve --label llamaindex
 ```
 
@@ -66,7 +66,7 @@ at it. The `path_key` should match whatever metadata key your loader uses for fi
 
 ## Eval-tracking adapters (push results to experiment trackers)
 
-An *eval-tracking* adapter takes the output of `eval/run.py` and pushes it into an
+An *eval-tracking* adapter takes the output of `hitgate/run.py` and pushes it into an
 experiment-tracking tool so before/after comparisons are versioned and drillable
 instead of hand-diffed JSON. The adapter is strictly opt-in — the core never imports
 the vendor library.
@@ -85,10 +85,10 @@ export LANGFUSE_PUBLIC_KEY="pk-lf-..."
 export LANGFUSE_SECRET_KEY="sk-lf-..."
 
 # Run an eval, then push the results:
-python eval/run.py --label feat/my-experiment
+python -m hitgate.run --label feat/my-experiment
 python adapters/langfuse_eval.py \
-    --dataset eval/golden.demo.jsonl \
-    --results  eval/feat-my-experiment.json \
+    --dataset hitgate/golden.demo.jsonl \
+    --results  hitgate/feat-my-experiment.json \
     --run-name "feat/my-experiment"
 ```
 

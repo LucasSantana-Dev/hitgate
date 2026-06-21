@@ -9,8 +9,8 @@ Usage (CLI):
 
     # After an eval run, push the dataset + results to Langfuse:
     python adapters/langfuse_eval.py \\
-        --dataset eval/golden.demo.jsonl \\
-        --results  eval/my-run.json \\
+        --dataset hitgate/golden.demo.jsonl \\
+        --results  hitgate/my-run.json \\
         --run-name "feat/chunk-prefixing"
 
     # Langfuse reads credentials from env (or .env):
@@ -51,7 +51,7 @@ def push(
     golden_path:
         Path to the golden JSONL file used for the eval run.
     results_path:
-        Path to the JSON output of ``eval/run.py``.
+        Path to the JSON output of ``hitgate/run.py``.
     run_name:
         Experiment / run name shown in the Langfuse UI.
     dataset_name:

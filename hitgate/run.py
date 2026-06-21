@@ -9,15 +9,15 @@ own retriever, not just the bundled one. A retriever is any callable
 returning results ranked best-first, each a mapping with at least a "path" key (and
 optionally "start_line"). Rank is assigned by position, so an external retriever doesn't
 compute it. The harness scores Hit@1/@3/@5 + MRR by where the expected path first appears
-and writes eval/<label>.json.
+and writes hitgate/<label>.json.
 
-Inputs:  eval/golden.demo.jsonl  (one JSON per line: query, expect_path_contains, expect_scope)
+Inputs:  hitgate/golden.demo.jsonl  (one JSON per line: query, expect_path_contains, expect_scope)
 
 Usage:
-  python eval/run.py                                            # bundled retriever, demo set
-  python eval/run.py --label wider --top 10
-  python eval/run.py --rerank                                   # bundled + cross-encoder rerank
-  python eval/run.py --retriever mypkg.myretriever:retrieve     # YOUR retriever (see adapters/)
+  python -m hitgate.run                                            # bundled retriever, demo set
+  python -m hitgate.run --label wider --top 10
+  python -m hitgate.run --rerank                                   # bundled + cross-encoder rerank
+  python -m hitgate.run --retriever mypkg.myretriever:retrieve     # YOUR retriever (see adapters/)
 """
 from __future__ import annotations
 
@@ -30,11 +30,8 @@ from pathlib import Path
 from typing import Callable, Mapping, Optional, Sequence
 
 ROOT = Path(__file__).resolve().parent.parent
-for _p in (str(ROOT), str(ROOT / "ragcore")):
-    if _p not in sys.path:
-        sys.path.insert(0, _p)
 
-DATASET = ROOT / "eval" / "golden.demo.jsonl"
+DATASET = ROOT / "hitgate" / "golden.demo.jsonl"
 
 # A retriever takes (query, top, scope) and returns results ranked best-first; each result
 # is a mapping with at least "path". Rank is assigned by position.
@@ -48,7 +45,7 @@ def builtin_retriever(rerank: Optional[bool] = False) -> Retriever:
     rerank=True   — always rerank (forced; use --rerank flag)
     rerank=None   — auto-trigger path: fires on weak/ambiguous queries (use --auto-rerank flag)
     """
-    from retrieval import search  # ragcore is on sys.path
+    from ragcore.retrieval import search
 
     def _retrieve(query: str, top: int, scope: Optional[str]) -> Sequence[Mapping]:
         return search(query, top=top, scope_types=scope, scope_repos=["all"], cwd=None, rerank=rerank)
@@ -159,7 +156,7 @@ def main() -> int:
             status = "✓" if c["hit_rank"] else "✗"
             rank = f"#{c['hit_rank']}" if c["hit_rank"] else "MISS"
             print(f"  {status} {rank:>4}  {c['query'][:60]}  → {c['top_hit']}")
-    out_path = ROOT / "eval" / f"{args.label}.json"
+    out_path = ROOT / "hitgate" / f"{args.label}.json"
     out_path.write_text(json.dumps(result, indent=2))
     print(f"wrote {out_path}")
     return 0

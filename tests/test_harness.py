@@ -2,7 +2,7 @@
 math directly, with a stub retriever — no model, no index, no built-in coupling."""
 import pytest
 
-from eval.run import load_retriever, run
+from hitgate.run import load_retriever, run
 
 
 def test_run_is_retriever_agnostic_and_computes_metrics():
@@ -32,7 +32,7 @@ def test_default_loads_builtin():
 
 
 def test_spec_imports_external_callable():
-    r = load_retriever("eval.example_external_retriever:retrieve")
+    r = load_retriever("hitgate.example_external_retriever:retrieve")
     assert callable(r)
 
 
@@ -50,7 +50,7 @@ def test_example_retriever_returns_protocol_shape(tmp_path, monkeypatch):
     (tmp_path / "fusion.py").write_text("def reciprocal_rank_fusion():\n    return None\n")
     (tmp_path / "other.py").write_text("def unrelated():\n    return None\n")
     monkeypatch.setenv("RAG_SOURCE_ROOTS", str(tmp_path))
-    from eval.example_external_retriever import retrieve
+    from hitgate.example_external_retriever import retrieve
 
     res = retrieve("reciprocal rank fusion", top=3, scope="code")
     assert res and all("path" in r for r in res)

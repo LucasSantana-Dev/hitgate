@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# eval/check.sh — run the eval suite and compare against baseline.json.
+# hitgate/check.sh — run the eval suite and compare against baseline.json.
 # Exit 0 if delta within tolerance, 1 if any metric regresses by >5pp.
 # Designed to be called manually or chained from build.py after full reindex.
 #
@@ -32,12 +32,12 @@ if [ ! -f "$RAG_INDEX_DIR/index.sqlite" ]; then
     "$PY" "$REPO_ROOT/ragcore/build.py" >/tmp/eval-build.out 2>&1 || { cat /tmp/eval-build.out; exit 1; }
 fi
 
-cd "$EVAL_DIR"
+cd "$REPO_ROOT"
 # Default to the committed demo set + frozen baseline so a fresh clone runs out of the box.
 DATASET="${RAG_EVAL_DATASET:-$EVAL_DIR/golden.demo.jsonl}"
-# EVAL_EXTRA_FLAGS lets callers inject additional run.py flags without modifying this script.
-# Example: EVAL_EXTRA_FLAGS=--auto-rerank RAG_RERANK_AUTO=on bash eval/check.sh auto-rerank-ci
-"$PY" run.py --dataset "$DATASET" --label "$LABEL" ${EVAL_EXTRA_FLAGS:-} >/tmp/eval-run.out 2>&1
+# EVAL_EXTRA_FLAGS lets callers inject additional run flags without modifying this script.
+# Example: EVAL_EXTRA_FLAGS=--auto-rerank RAG_RERANK_AUTO=on bash hitgate/check.sh auto-rerank-ci
+"$PY" -m hitgate.run --dataset "$DATASET" --label "$LABEL" ${EVAL_EXTRA_FLAGS:-} >/tmp/eval-run.out 2>&1
 status=$?
 cat /tmp/eval-run.out
 [ "$status" -ne 0 ] && exit "$status"
@@ -47,4 +47,4 @@ BASELINE="${RAG_EVAL_BASELINE:-$EVAL_DIR/baseline.example.json}"
 [ -f "$BASELINE" ] || { echo "(no baseline at $BASELINE — skipping comparison)"; exit 0; }
 [ -f "$CURRENT" ]  || { echo "(no $CURRENT — eval may have failed)"; exit 1; }
 
-"$PY" "$EVAL_DIR/compare.py" "$CURRENT" "$BASELINE" "$TOL_PP"
+"$PY" -m hitgate.compare "$CURRENT" "$BASELINE" "$TOL_PP"

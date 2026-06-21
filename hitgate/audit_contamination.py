@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""eval/audit_contamination.py — find un-winnable cases in an eval set.
+"""hitgate/audit_contamination.py — find un-winnable cases in an eval set.
 
 The most insidious way a retrieval benchmark lies is *contamination*: a "golden"
 case whose expected answer isn't in the indexed corpus at all. Such a case can
@@ -8,7 +8,7 @@ quality floor — and every decision made on that number inherits the lie. (This
 the audit that moved this project's own baseline ~8pp; see DECISIONS.md.)
 
 This script makes that audit reusable. Point it at any eval set (same schema as
-eval/golden.demo.jsonl) and an index, and it classifies every case:
+hitgate/golden.demo.jsonl) and an index, and it classifies every case:
 
   ok             — the expected path is indexed within the case's declared scope
   scope-mismatch — the path is indexed, but only OUTSIDE the declared scope
@@ -18,9 +18,9 @@ Exit 0 if no contamination, 1 if any case is un-winnable (so it can gate a build
 scope-mismatch is reported as a warning, not a failure.
 
 Usage:
-  RAG_SOURCE_ROOTS="$PWD" python ragcore/build.py          # build the index first
-  RAG_SOURCE_ROOTS="$PWD" python eval/audit_contamination.py
-  python eval/audit_contamination.py --dataset path/to/your.jsonl
+  RAG_SOURCE_ROOTS="$PWD" python -m ragcore.build          # build the index first
+  RAG_SOURCE_ROOTS="$PWD" python -m hitgate.audit_contamination
+  python -m hitgate.audit_contamination --dataset path/to/your.jsonl
 """
 from __future__ import annotations
 
@@ -31,10 +31,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
-from ragcore.config import DB  # honors RAG_INDEX_DIR  # noqa: E402
+from ragcore.config import DB  # honors RAG_INDEX_DIR
 
-DEFAULT_DATASET = ROOT / "eval" / "golden.demo.jsonl"
+DEFAULT_DATASET = ROOT / "hitgate" / "golden.demo.jsonl"
 
 
 def _expected_substrings(case: dict) -> list[str]:

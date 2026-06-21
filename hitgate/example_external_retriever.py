@@ -6,7 +6,7 @@ This one is deliberately dumb (ranks files by how many distinct query words they
 no embeddings, no index) to prove the harness measures ANY retriever, not just the bundled
 hybrid one. Score it through the exact same eval:
 
-    RAG_SOURCE_ROOTS="$PWD" python eval/run.py --retriever eval.example_external_retriever:retrieve
+    RAG_SOURCE_ROOTS="$PWD" python -m hitgate.run --retriever hitgate.example_external_retriever:retrieve
 
 To wire your own retriever, copy this signature and return results ranked best-first, each a
 mapping with a "path" (and optionally "start_line"). See adapters/ for ecosystem wrappers.

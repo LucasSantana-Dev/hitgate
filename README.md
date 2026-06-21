@@ -24,19 +24,19 @@ and be ruthlessly honest about what the numbers do and don't prove.
 ## Quickstart (reproducible in ~10 seconds)
 
 ```bash
-pip install sentence-transformers rank-bm25 numpy
+pip install -e ".[hybrid]"   # harness core is dependency-free; [hybrid] adds the bundled retriever
 
 # Index this repo into a local ./.rag-index/ (the tool indexes itself)
-RAG_SOURCE_ROOTS="$PWD" python ragcore/build.py
+RAG_SOURCE_ROOTS="$PWD" python -m ragcore.build
 
 # Ask it something
-RAG_SOURCE_ROOTS="$PWD" python ragcore/query.py --scope code "how does the reranker fall back"
+RAG_SOURCE_ROOTS="$PWD" python -m ragcore.query --scope code "how does the reranker fall back"
 
 # Run the eval gate (bundled retriever)
-RAG_RERANK_AUTO=off python eval/run.py --label demo
+RAG_RERANK_AUTO=off python -m hitgate.run --label demo
 
 # ...or point the SAME gate at YOUR retriever — any callable (query, top, scope) -> [{"path": ...}]
-python eval/run.py --retriever eval.example_external_retriever:retrieve --label mine
+python -m hitgate.run --retriever hitgate.example_external_retriever:retrieve --label mine
 ```
 
 That eval indexes the repo's own source and scores 50 golden cases against it — so
@@ -62,12 +62,12 @@ quietly dropping the cases it fails is the first thing this project refuses to d
 
 Because the demo indexes **this repo itself**, the corpus grows as the repo does, so
 Hit@1 and MRR drift over time — adding a file can demote a borderline case. That's why
-**Hit@5 is the number under regression gate** (`eval/check.sh`, ±5pp). The drift is the
+**Hit@5 is the number under regression gate** (`hitgate/check.sh`, ±5pp). The drift is the
 honest behavior of a self-indexing benchmark, not noise swept under a frozen number.
 
 ### External corpus benchmarks
 
-The same retriever — zero tuning, same `eval/run.py` pipeline — measured against 7 other
+The same retriever — zero tuning, same `hitgate/run.py` pipeline — measured against 7 other
 codebases with no corpus-specific configuration:
 
 | Corpus | Language | n | Hit@5 | Hit@1 | MRR |
@@ -102,11 +102,11 @@ Full methodology, miss taxonomy, and reproduce commands: [docs/METHODOLOGY.md](.
 - **Language-aware chunking** — Python by AST symbol, TS/JS/Shell by regex, with a
   word-count fallback.
 - **Config by env var** — zero-setup defaults (`RAG_*`); see [`ragcore/config.py`](./ragcore/config.py).
-- **Eval (the point)** — `eval/run.py` reports Hit@K/MRR for *any* retriever via
-  `--retriever`; `eval/check.sh` gates a run against a frozen baseline (±5pp).
-- **Golden set generator** — `eval/generate.py` bootstraps candidate cases from your corpus
+- **Eval (the point)** — `hitgate/run.py` reports Hit@K/MRR for *any* retriever via
+  `--retriever`; `hitgate/check.sh` gates a run against a frozen baseline (±5pp).
+- **Golden set generator** — `hitgate/generate.py` bootstraps candidate cases from your corpus
   structure (docstrings, symbol names) with zero dependencies. LLM paraphrase generation is
-  opt-in via `--llm`. Output feeds directly into `eval/run.py --dataset`.
+  opt-in via `--llm`. Output feeds directly into `hitgate/run.py --dataset`.
 
 ## Use it on your own retriever
 
@@ -120,11 +120,11 @@ retrieve(query: str, top: int, scope: str | None) -> Sequence[Mapping]
 Point the gate at yours with `--retriever module.path:callable`:
 
 ```bash
-python eval/run.py --retriever mypkg.myretriever:retrieve --label mine
+python -m hitgate.run --retriever mypkg.myretriever:retrieve --label mine
 ```
 
 A runnable, dependency-free example — a deliberately dumb keyword matcher — is in
-[`eval/example_external_retriever.py`](./eval/example_external_retriever.py). Ecosystem
+[`hitgate/example_external_retriever.py`](./hitgate/example_external_retriever.py). Ecosystem
 wrappers (LangChain / LlamaIndex) live under [`adapters/`](./adapters/README.md). Bring your
 own retriever and corpus; keep the measurement discipline.
 
@@ -132,15 +132,15 @@ own retriever and corpus; keep the measurement discipline.
 
 **0. Bootstrap candidate cases from your corpus (optional):**
 ```bash
-RAG_SOURCE_ROOTS="/path/to/your/corpus" python eval/generate.py \
-    --output eval/candidates.jsonl \
+RAG_SOURCE_ROOTS="/path/to/your/corpus" python -m hitgate.generate \
+    --output hitgate/candidates.jsonl \
     --min-confidence medium
 
 # LLM-enhanced (identifier + paraphrase per chunk, no extra package needed):
 OPENAI_API_KEY=sk-... RAG_SOURCE_ROOTS="/path/to/your/corpus" \
-    python eval/generate.py --llm --output eval/candidates.jsonl
+    python -m hitgate.generate --llm --output hitgate/candidates.jsonl
 ```
-Review and curate `eval/candidates.jsonl` — delete cases where the query is too vague
+Review and curate `hitgate/candidates.jsonl` — delete cases where the query is too vague
 or the expected file is wrong — then use it as your golden set below.
 
 **1. Write golden cases** — each is a JSON object with three fields:
@@ -153,34 +153,34 @@ Aim for 20–50 cases across a mix of identifier lookups and paraphrase queries.
 
 **2. Run your retriever against the cases:**
 ```bash
-python eval/run.py \
+python -m hitgate.run \
     --retriever mypkg.myretriever:retrieve \
     --dataset   my_golden.jsonl \
     --label     baseline-v1
-# writes eval/baseline-v1.json with hit@1/hit@3/hit@5/mrr + per_case breakdown
+# writes hitgate/baseline-v1.json with hit@1/hit@3/hit@5/mrr + per_case breakdown
 ```
 
 **3. Freeze the baseline:**
 ```bash
-cp eval/baseline-v1.json eval/baseline.my-project.json
+cp hitgate/baseline-v1.json hitgate/baseline.my-project.json
 # edit _note to record conditions: corpus, model, date
 ```
 
 **4. Gate future runs with check.sh:**
 ```bash
-# eval/check.sh already reads BASELINE_FILE env var
-BASELINE_FILE=eval/baseline.my-project.json \
+# hitgate/check.sh already reads BASELINE_FILE env var
+BASELINE_FILE=hitgate/baseline.my-project.json \
 RAG_SOURCE_ROOTS="/path/to/your/corpus" \
-python eval/run.py --retriever mypkg.myretriever:retrieve --dataset my_golden.jsonl --label ci
-bash eval/check.sh eval/ci.json eval/baseline.my-project.json
+python -m hitgate.run --retriever mypkg.myretriever:retrieve --dataset my_golden.jsonl --label ci
+bash hitgate/check.sh hitgate/ci.json hitgate/baseline.my-project.json
 # exits 1 if any metric regresses by more than 5pp
 ```
 
-To diff two runs case-by-case: `python eval/diff.py eval/baseline-v1.json eval/ci.json`.
+To diff two runs case-by-case: `python -m hitgate.diff hitgate/baseline-v1.json hitgate/ci.json`.
 
 ## What to adopt (and what to skip)
 
-**Adopt the harness.** The reusable thing here is `eval/` — the label-free, regression-gated
+**Adopt the harness.** The reusable thing here is `hitgate/` — the label-free, regression-gated
 quality check and the `--retriever` interface. The bundled hybrid engine is a reference
 implementation, not the product. What this is **not**:
 

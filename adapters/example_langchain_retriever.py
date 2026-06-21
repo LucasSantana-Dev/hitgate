@@ -5,7 +5,7 @@ builds a LangChain `BM25Retriever` over this repo's code files, wraps it via
 `adapters.langchain_retriever.to_harness`, and exposes `retrieve` for the gate:
 
     pip install langchain-community
-    RAG_SOURCE_ROOTS="$PWD" python eval/run.py \
+    RAG_SOURCE_ROOTS="$PWD" python -m hitgate.run \
         --retriever adapters.example_langchain_retriever:retrieve --label langchain
 
 On the 12-case code demo it measures `Hit@5 0.917 / Hit@1 0.75 / MRR 0.833` — slightly *above*
