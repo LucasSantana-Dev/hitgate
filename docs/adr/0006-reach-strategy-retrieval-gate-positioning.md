@@ -6,6 +6,10 @@ Accepted (2026-06-20). Decided via `research-and-decide`: 3-agent web/repo resea
 adversarial review (verdict: ENDORSE-WITH-CHANGES) → orchestrator verification of the critic's
 Claims-To-Verify → this record.
 
+**Amended 2026-06-21** (see *Update 2026-06-21* at the end): a second research+critique pass verified the
+Show HN base-rate and **revised Move 3** and **reset the primary goal to reference + usage** (reach is a
+bonus, not the objective). Moves 1 and 2 are unchanged and reinforced.
+
 ## Context
 
 The project has the substance of a good tool but no reach: it reads as "one more RAG repo." The
@@ -125,3 +129,69 @@ packaging, docs, and outreach.
 - **An incumbent ships label-free retrieval-ranking regression gating** → the gap is closed; re-evaluate the
   wedge (likely pivot to the honesty/reproducibility angle alone, or to the durability path).
 - **A heavy user adopts and cites the gate** → double down on the durability path over further media pushes.
+
+## Update 2026-06-21 — base-rate verified; primary goal reset to reference + usage; Move 3 revised
+
+A second `research-and-decide` pass verified the one claim ADR-0006 left open (Show HN as the primary reach
+lever) with a 4-agent web-research fan-out, and a second `decision-critic` review (ENDORSE-WITH-CHANGES)
+challenged the result. The findings changed the **goal** and **Move 3**. Moves 1 and 2 are unchanged and
+reinforced (a reference/usage strategy needs the standalone harness as its credible artifact even more than
+a media strategy did).
+
+**Verified base rates.**
+- arXiv 2511.04453 is real but reports the **mean** (121/189/289 stars at 24h/48h/1wk) on a
+  survivorship-filtered AI-tool sample; it states the median is "much lower." Cross-sourced (Daniel King's
+  188k-post analysis, Sturdy Statistics 2025, Anton Tarasenko): **median Show HN post ≈ 2 points ≈ ~3
+  GitHub stars; ~89% score below 10 points; ~94% below 50.** A niche tool's *expected* outcome is a flop —
+  the 289 was the mean of the winners. **Show HN is a lottery, not a reliable lever.**
+- Traced case studies (RAGAS, Promptfoo, Instructor, Ollama, LiteLLM): sustained reference came from
+  **credible-founder voice + ecosystem embedding (being cited/integrated by a bigger project) + (for eval
+  tools) an academic/methodology artifact.** *Show HN was no one's primary lever — "a spike amplifier, not
+  a reach builder."*
+- The "simple baseline wins" honesty angle **did travel** 2024–26 but has decayed from contrarian to
+  **resolved consensus** (hybrid is table-stakes) — the hook must be sharper than "BM25 beats dense."
+- Contrarian methodology **posts** travel further than tool launches but are themselves survivorship-filtered
+  and convert worse; the "2–4×" travel figure and a "~30–40% Simon Willison pickup" are **soft inferences,
+  treated as upside, not plan** (Willison has never reviewed RAG-eval tools — only evals-as-practice).
+- **Meta-finding: there is no reliable high-yield reach lever for a solo unfunded niche tool.** Every
+  high-upside path is a lottery; the reliable paths produce small reach.
+
+**Primary goal (owner decision, 2026-06-21): reference + usage.** Optimize to be the cited reference for
+label-free retrieval-eval / drift detection **and** to get a handful of teams running the gate in CI. A
+viral post or Show HN spike is a **bonus**, not the objective. (Supersedes ADR-0006's implicit reach/stars
+framing.)
+
+**Move 3 — REVISED (supersedes the original Move 3).**
+- *Spine (primary — reference + usage):*
+  1. **Ecosystem embedding.** Concrete first step (not luck): the repo already ships `adapters/` for
+     LangChain + LlamaIndex — submit integration examples to their eval docs, open a "retrieval evaluation"
+     subsection PR to the Awesome-RAG lists, and scout 3–5 actively-maintained RAG frameworks' issue
+     trackers for retrieval-eval gaps to integrate against. This is the LiteLLM/Instructor "cited-in-docs"
+     pattern — the only lever that produced *sustained* reference in the case studies.
+  2. **arXiv methodology note** (the RAGAS legitimacy-backfill pattern): a short write-up of the label-free
+     regression-gate methodology + the honest cross-corpus ablation (including where the system loses).
+     Treat as a 6–18-month citation bet; sequence so the blog post can precede formal publication.
+- *Opportunistic reach (bonus, cheap shots):*
+  3. **Methodology post** with a sharper hook than "BM25 wins": *"a label-free regression gate that catches
+     retrieval drift without labels — here's the honest ablation, including where our own system loses."*
+     Own blog + Medium + dev.to.
+  4. **Show HN** of the standalone harness, 1–2 weeks after the post, as a *conversion* step. Calibrate to
+     the median: base case is a flop (~3–7 stars); pre-set floor (10 pts @ T+4h, 40 @ T+12h); exceeding it
+     is upside.
+- *Mandatory cheap gates before committing (from the second critic review):*
+  - **Resonance test (~2h):** post the hook to a relevant subreddit; if <5 upvotes / 0 comments, rework the
+    hook before the post.
+  - **Ecosystem scout (~3h):** identify 3–5 viable integration targets and cold-contact 2 maintainers to
+    validate appetite *before* investing weeks in embedding.
+- **Badge:** unchanged — proof-of-practice only, never marketed as growth.
+
+**Plan D (if spine + reach both disappoint):** narrow to the micro-niche — be the reference implementation
+and cited methodology for label-free retrieval drift detection, accept small reach, and let usage accrue
+from the few genuinely label-constrained teams. Do not chase virality on retries.
+
+**New revisit triggers.**
+- Resonance test fails → rework the hook before any launch.
+- Ecosystem scout finds no viable target in ~3h → Phase C isn't yet actionable; lead with the arXiv note +
+  post only.
+- Methodology post median-flops **and** Show HN flops → execute Plan D; do not re-attempt the same launch.
+- A heavy user adopts/cites the gate → double down on embedding over media.
