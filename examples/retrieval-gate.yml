@@ -1,0 +1,53 @@
+# Drop-in: gate retrieval quality in CI — label-free, against a FROZEN baseline.
+#
+# Fails the PR if Hit@5 regresses beyond TOLERANCE. No labeled data, no LLM judge —
+# this gates retrieval *ranking* (vs RAGAS/DeepEval/Braintrust, which gate *answer*
+# quality with labels). hitgate auto-generates a golden set from your corpus.
+#
+# ── ONE-TIME SETUP (do once, commit the two artifacts) ──────────────────────────
+#   pip install "hitgate[hybrid]"
+#   RAG_SOURCE_ROOTS="$PWD" python -m ragcore.build
+#   python -m hitgate.generate --output eval/golden.jsonl --min-confidence medium   # freeze the golden set
+#   RAG_SOURCE_ROOTS="$PWD" python -m hitgate.run --dataset eval/golden.jsonl --label baseline  # note the Hit@5
+#   # commit eval/golden.jsonl  AND  set BASELINE_HIT5 below to that run's Hit@5.
+# A frozen golden set is what makes the gate deterministic — don't regenerate it per run.
+#
+# ── ADAPT ───────────────────────────────────────────────────────────────────────
+#   • Gating YOUR retriever (not the bundled one): set RETRIEVER=yourmodule:retrieve
+#     (any callable (query, top, scope) -> [{"path": ...}]).
+#   • Re-freeze the baseline deliberately (never silently) when you intend a change.
+name: retrieval-gate
+on:
+  pull_request:
+    paths: ["**/*.py", "eval/golden.jsonl", "pyproject.toml"]   # tune to your retrieval layer
+
+jobs:
+  retrieval-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install "hitgate[hybrid]"
+      - name: Gate Hit@5 vs frozen baseline (±TOLERANCE pp)
+        env:
+          RAG_SOURCE_ROOTS: ${{ github.workspace }}
+          BASELINE_HIT5: "0.95"   # ← from your one-time baseline run; commit eval/golden.jsonl too
+          TOLERANCE: "0.05"
+          # RETRIEVER: yourmodule:retrieve   # ← uncomment to gate your own retriever
+        run: |
+          python -m ragcore.build
+          out=$(python -m hitgate.run --dataset eval/golden.jsonl --label ci ${RETRIEVER:+--retriever "$RETRIEVER"})
+          echo "$out"
+          hit5=$(echo "$out" | grep -oE 'hit@5=[0-9.]+' | head -1 | cut -d= -f2)
+          python - "$hit5" "$BASELINE_HIT5" "$TOLERANCE" <<'PY'
+          import sys
+          hit5, base, tol = map(float, sys.argv[1:4])
+          drop = base - hit5
+          print(f"Hit@5={hit5}  baseline={base}  drop={drop:+.3f}  tolerance={tol}")
+          if drop > tol:
+              print(f"::error::retrieval REGRESSED — Hit@5 dropped {drop:.3f} > {tol} tolerance")
+              sys.exit(1)
+          print("retrieval gate: OK")
+          PY
+# Note: for the fuller per-intent gate hitgate uses on its own repo, see hitgate/check.sh.

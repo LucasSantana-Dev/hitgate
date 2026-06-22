@@ -9,6 +9,8 @@
 > retriever it was built to measure. Point it at *your* retriever and find out whether a
 > change helped or hurt, when you have **no labeled data and no users to A/B against**.
 
+**vs the RAG-eval tools you know:** RAGAS / DeepEval / Braintrust gate RAG *answer* quality (faithfulness, relevancy) — with **labeled golden sets or an LLM judge**, and some ship CI actions for it. hitgate gates **retrieval *ranking*, label-free**. Different layer, complementary — and the only one you can run with no labels at all. Drop-in CI: [`examples/retrieval-gate.yml`](examples/retrieval-gate.yml).
+
 **Status:** working · stable · single-author personal tooling, published for the
 *methodology*. The adoptable part is the **harness**: a label-free, regression-gated quality
 check for any retriever (`--retriever module:callable`). The bundled hybrid engine is just
