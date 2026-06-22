@@ -195,3 +195,14 @@ from the few genuinely label-constrained teams. Do not chase virality on retries
   post only.
 - Methodology post median-flops **and** Show HN flops → execute Plan D; do not re-attempt the same launch.
 - A heavy user adopts/cites the gate → double down on embedding over media.
+
+## Update 2026-06-21 (third pass — channel re-derivation, reconciled to this ADR)
+
+A third `research-and-decide` pass (question: *"launch hitgate via Show HN vs a niche RAG community first?"*) independently re-derived this ADR and is recorded here rather than as a competing ADR (One Brain SoT discipline). 3-agent channel research → `decision-critic` (NEEDS_REVISION; pushed **HN-first**) → orchestrator reconciliation against this ADR's verified base rates.
+
+**Outcome: this ADR stands; spine unchanged.** The pass added two verified facts and resolved one fragmentation:
+
+1. **The critic's "HN-first" recommendation is REFUTED by this ADR's already-verified base rates** (Show HN median ≈ 2 pts; ~89% < 10; lottery, not a reach lever). HN-first-as-primary is exactly what the evidence rejects; the artifact-only critic lacked these base rates. Recorded as reconciliation, not a flip.
+2. **New verified fact — Show HN is NOT a literal one-shot card.** HN permits reposts of low-traction stories (a few; ~1/week) and runs a *second-chance pool* that resurfaces good ignored posts. → Soften the revisit rule *"do not re-attempt the same launch"* to: **one re-attempt is acceptable with a *changed hook*** (HN norm), not a fresh identical post.
+3. **Concrete venues for the mandatory resonance test** (revised Move 3): **r/LocalLLaMA (755k) + r/MLOps** = highest-intent practitioner venues; r/MachineLearning demands academic external-validation (low adoption signal); LlamaIndex/LangChain Discord = real-time iteration, complements the ecosystem-embedding spine ([ADR-0008](0008-ecosystem-embedding-credibility-first.md)).
+4. **Fragmentation resolved:** a positioning ADR (`adr_0031`) was created in the knowledge-brain vault; reach/channel/launch decisions are authoritatively held **here** (ADR-0006/0008/0009). The vault ADR now defers to this sequence (cross-linked) per ADR-0030 (One Brain).
