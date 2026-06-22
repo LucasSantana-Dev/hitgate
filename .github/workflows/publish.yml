@@ -1,0 +1,42 @@
+# Publish `hitgate` to PyPI via Trusted Publishing (OIDC) — NO API token, ever.
+#
+# ONE-TIME PyPI SETUP (do this once, on pypi.org):
+#   pypi.org -> your account -> Publishing -> "Add a pending publisher" (works even
+#   though `hitgate` isn't on PyPI yet — the first run creates the project), with:
+#     PyPI Project Name:  hitgate
+#     Owner:              LucasSantana-Dev
+#     Repository name:    evidence-first-rag
+#     Workflow filename:  publish.yml
+#     Environment name:   pypi
+#
+# THEN: cut a GitHub Release (or run this workflow manually) and it publishes.
+# No token is stored anywhere — GitHub mints a short-lived OIDC identity PyPI trusts.
+name: publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch: {}
+
+jobs:
+  pypi-publish:
+    runs-on: ubuntu-latest
+    environment: pypi            # binds the trusted publisher + lets you add release protection
+    permissions:
+      id-token: write            # REQUIRED for OIDC trusted publishing
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build sdist + wheel
+        run: |
+          python -m pip install --upgrade build
+          python -m build
+      - name: Validate metadata
+        run: |
+          python -m pip install --upgrade twine
+          python -m twine check dist/*
+      - name: Publish to PyPI (Trusted Publishing, no token)
+        uses: pypa/gh-action-pypi-publish@release/v1
