@@ -5,7 +5,7 @@
 #   though `hitgate` isn't on PyPI yet — the first run creates the project), with:
 #     PyPI Project Name:  hitgate
 #     Owner:              LucasSantana-Dev
-#     Repository name:    evidence-first-rag
+#     Repository name:    hitgate            # repo was renamed evidence-first-rag -> hitgate; OIDC uses the CURRENT name
 #     Workflow filename:  publish.yml
 #     Environment name:   pypi
 #
