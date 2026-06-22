@@ -32,6 +32,22 @@ def compare(cur_j: dict, base_j: dict, tol_pp: float = 5.0) -> dict:
         elif delta > tol:
             improvements.append({"metric": m, "scope": "aggregate", "delta": delta})
 
+    base_scope = base_j.get("by_scope", {})
+    cur_scope = cur_j.get("by_scope", {})
+    for scope_name in sorted(base_scope):
+        if scope_name not in cur_scope:
+            continue
+        b5 = base_scope[scope_name].get("hit@5")
+        c5 = cur_scope[scope_name].get("hit@5")
+        if b5 is None or c5 is None:
+            continue
+        delta = round(c5 - b5, 4)
+        scope = f"scope:{scope_name}"
+        if delta < -tol:
+            regressions.append({"metric": "hit@5", "scope": scope, "delta": delta})
+        elif delta > tol:
+            improvements.append({"metric": "hit@5", "scope": scope, "delta": delta})
+
     base_intent = base_j.get("by_intent", {})
     cur_intent = cur_j.get("by_intent", {})
     for intent in sorted(base_intent):
@@ -83,6 +99,28 @@ def print_table(cur_j: dict, base_j: dict, v: dict, tol_pp: float) -> None:
             else ""
         )
         print(f"  {m:<8} {base_j[m]:.3f} → {cur_j[m]:.3f}  {arrow}{abs(delta):+.3f}{flag}")
+
+    base_scope = base_j.get("by_scope", {})
+    cur_scope = cur_j.get("by_scope", {})
+    if base_scope and cur_scope:
+        print(f"\nPer-scope Hit@5 (tolerance ±{tol_pp}pp):")
+        for scope_name in sorted(base_scope):
+            if scope_name not in cur_scope:
+                continue
+            b5 = base_scope[scope_name].get("hit@5")
+            c5 = cur_scope[scope_name].get("hit@5")
+            if b5 is None or c5 is None:
+                continue
+            delta = c5 - b5
+            n = cur_scope[scope_name].get("n", "?")
+            arrow = "↑" if delta > 0 else ("↓" if delta < 0 else "·")
+            scope = f"scope:{scope_name}"
+            flag = (
+                "  ⚠ REGRESSION"
+                if any(r["scope"] == scope for r in v["regressions"])
+                else ""
+            )
+            print(f"  {scope_name:<16} n={n}  {b5:.3f} → {c5:.3f}  {arrow}{abs(delta):+.3f}{flag}")
 
     base_intent = base_j.get("by_intent", {})
     cur_intent = cur_j.get("by_intent", {})

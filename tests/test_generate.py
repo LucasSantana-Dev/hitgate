@@ -393,6 +393,18 @@ def test_llm_queries_fenced_json_response():
     assert "identifier" in result and "paraphrase" in result
 
 
+def test_llm_queries_logs_exception_to_stderr(capsys):
+    """LLM query failures should log a WARN to stderr and return None (not silent)."""
+    import urllib.error
+    mock = MagicMock(side_effect=urllib.error.URLError("connection refused"))
+    with patch("urllib.request.urlopen", mock):
+        result = _llm_queries(**_LLM_KWARGS)
+    assert result is None
+    captured = capsys.readouterr()
+    assert "WARN: LLM query failed" in captured.err
+    assert "connection refused" in captured.err
+
+
 # ---------------------------------------------------------------------------
 # generate(llm=True) — integration path; two cases per chunk, _source=llm
 # ---------------------------------------------------------------------------
@@ -423,3 +435,175 @@ def test_generate_llm_path_emits_two_cases_per_chunk(tmp_path):
     assert query_types == {"identifier", "paraphrase"}
     paraphrase_cases = [c for c in cases if c.get("paraphrase") is True]
     assert len(paraphrase_cases) == 1
+
+
+# ---------------------------------------------------------------------------
+# Complex LLM mode branches — partial responses, timeout, LLM failure fallback
+# ---------------------------------------------------------------------------
+
+
+def test_generate_llm_only_identifier_no_paraphrase(tmp_path):
+    """LLM response with only 'identifier' key emits 1 case (not 2)."""
+    src = tmp_path / "mymodule.py"
+    src.write_text(
+        'def do_something():\n    """Performs the core transformation step for the pipeline."""\n    pass\n'
+    )
+
+    # LLM returns only identifier, no paraphrase
+    payload = json.dumps({
+        "identifier": "do something function in mymodule",
+    })
+
+    with patch("urllib.request.urlopen", _make_urlopen_mock(payload)):
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test"}):
+            from hitgate.generate import generate
+            cases = generate(llm=True, min_confidence="high", limit=0, roots=[tmp_path])
+
+    # Should emit 1 case (the identifier)
+    assert len(cases) == 1
+    assert cases[0]["_query_type"] == "identifier"
+
+
+def test_generate_llm_only_paraphrase_no_identifier(tmp_path):
+    """LLM response with only 'paraphrase' key falls back to heuristic (since LLM didn't fully respond)."""
+    src = tmp_path / "mymodule.py"
+    src.write_text(
+        'def do_something():\n    """Performs the core transformation step for the pipeline."""\n    pass\n'
+    )
+
+    # LLM returns only paraphrase, no identifier (incomplete response)
+    payload = json.dumps({
+        "paraphrase": "where is the main transformation logic implemented",
+    })
+
+    with patch("urllib.request.urlopen", _make_urlopen_mock(payload)):
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test"}):
+            from hitgate.generate import generate
+            cases = generate(llm=True, min_confidence="high", limit=0, roots=[tmp_path])
+
+    # LLM response was incomplete (missing identifier), so it falls back to heuristic
+    # The heuristic will use the docstring (high confidence)
+    assert len(cases) >= 1
+    # First case should be from heuristic fallback
+    assert cases[0]["_source"] == "heuristic"
+    assert "Performs the core transformation" in cases[0]["query"]
+
+
+def test_generate_llm_failure_falls_back_to_heuristic(tmp_path):
+    """When LLM fails, falls back to heuristic-generated query."""
+    src = tmp_path / "mymodule.py"
+    src.write_text(
+        'def do_something():\n    """Performs the core transformation step for the pipeline."""\n    pass\n'
+    )
+
+    # LLM request fails (URLError)
+    import urllib.error
+    mock = MagicMock(side_effect=urllib.error.URLError("timeout"))
+
+    with patch("urllib.request.urlopen", mock):
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test"}):
+            from hitgate.generate import generate
+            cases = generate(llm=True, min_confidence="high", limit=0, roots=[tmp_path])
+
+    # Should fall back to heuristic
+    assert len(cases) >= 1
+    # First case from heuristic fallback
+    assert cases[0]["_source"] == "heuristic"
+    assert "Performs the core transformation" in cases[0]["query"]
+
+
+def test_generate_multi_intent_merge():
+    """generate() merges cases from different intent classes."""
+    from hitgate.generate import generate
+
+    # Use limit=0 (unlimited) to ensure we capture all intents across the repo.
+    # limit=10 was too tight and sometimes yielded a single intent on CI (non-deterministic).
+    cases = generate(min_confidence="medium", limit=0, roots=[Path(_REPO_ROOT)])
+
+    # Should have cases with multiple intents
+    intents = {c.get("intent") for c in cases}
+    assert len(intents) > 1
+    assert "indexing" in intents or "retrieval" in intents or "infrastructure" in intents
+
+
+def test_generate_limit_cap(tmp_path):
+    """generate(limit=N) caps output at N cases."""
+    # Create multiple source files to exceed limit
+    for i in range(5):
+        src = tmp_path / f"module_{i}.py"
+        src.write_text(
+            f'def func_{i}():\n    """Function number {i} does something important in the system."""\n    pass\n'
+        )
+
+    from hitgate.generate import generate
+    cases = generate(min_confidence="medium", limit=3, roots=[tmp_path])
+
+    assert len(cases) <= 3
+
+
+def test_generate_respects_existing_coverage(tmp_path):
+    """generate() skips files already in the existing golden set."""
+    from hitgate.generate import generate
+
+    # Create source file
+    src = tmp_path / "covered.py"
+    src.write_text(
+        'def important_func():\n    """A function that should be tested in retrieval eval."""\n    pass\n'
+    )
+
+    # Write an existing golden set covering covered.py
+    existing = tmp_path / "existing.jsonl"
+    existing.write_text(
+        json.dumps({
+            "query": "existing test for covered.py",
+            "expect_path_contains": "covered.py",
+            "expect_scope": "code",
+        }) + "\n"
+    )
+
+    cases = generate(existing_path=existing, min_confidence="medium", limit=0, roots=[tmp_path])
+
+    # Should skip covered.py
+    for case in cases:
+        assert "covered.py" not in case["expect_path_contains"]
+
+
+# ---------------------------------------------------------------------------
+# Edge cases in docstring and comment extraction
+# ---------------------------------------------------------------------------
+
+
+def test_heuristic_with_very_long_symbol(tmp_path):
+    """_heuristic handles extremely long symbol names gracefully."""
+    from hitgate.generate import _heuristic
+
+    symbol = "a" * 500  # very long
+    result, conf = _heuristic(symbol, "# some code", "test.py")
+    assert isinstance(result, str)
+    assert conf in ("high", "medium", "low")
+
+
+def test_extract_docstring_with_unicode():
+    """_extract_docstring handles unicode in docstrings."""
+    from hitgate.generate import _extract_docstring
+
+    code = '''def unicode_func():
+    """Handles UTF-8: café, naïve, 日本語 — really quite cool."""
+    pass
+'''
+    result = _extract_docstring(code)
+    assert result is not None
+    assert "café" in result or "UTF" in result
+
+
+def test_extract_docstring_with_special_chars():
+    """_extract_docstring handles special characters in docstrings."""
+    from hitgate.generate import _extract_docstring
+
+    code = r'''def special():
+    """Regex pattern ^[a-z]+$ matches lowercase strings only."""
+    pass
+'''
+    result = _extract_docstring(code)
+    assert result is not None
+    assert "Regex" in result or "pattern" in result

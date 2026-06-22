@@ -1,4 +1,4 @@
-"""Opt-in adapter: push evidence-first-rag eval results into Langfuse Datasets/Experiments.
+"""Opt-in adapter: push hitgate eval results into Langfuse Datasets/Experiments.
 
 This file has **no hard dependency** on Langfuse — it imports the SDK lazily so the
 core never requires it. Install the optional dep only when you want tracking:
@@ -130,7 +130,7 @@ def push(
 
 def main() -> int:
     ap = argparse.ArgumentParser(
-        description="Push evidence-first-rag eval results to Langfuse Datasets/Experiments."
+        description="Push hitgate eval results to Langfuse Datasets/Experiments."
     )
     ap.add_argument("--dataset", required=True, help="path to golden .jsonl file")
     ap.add_argument("--results", required=True, help="path to eval run .json output")

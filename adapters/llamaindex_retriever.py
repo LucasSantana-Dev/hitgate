@@ -1,4 +1,4 @@
-"""Opt-in adapter: measure a LlamaIndex retriever with the evidence-first-rag harness.
+"""Opt-in adapter: measure a LlamaIndex retriever with the hitgate harness.
 
 This file has **no hard dependency** — it duck-types the LlamaIndex interface, so it
 imports even when LlamaIndex isn't installed. It turns any LlamaIndex retriever (anything
@@ -16,14 +16,16 @@ A runnable example using LlamaIndex's BM25Retriever is in
 """
 from __future__ import annotations
 
-from typing import Any, Callable, Mapping, Optional, Sequence
+from typing import Any, Optional
+
+from hitgate import Retriever
 
 
 def to_harness(
     li_retriever: Any,
     path_key: str = "file_path",
     similarity_top_k: Optional[int] = None,
-) -> Callable[[str, int, Optional[str]], Sequence[Mapping]]:
+) -> Retriever:
     """Wrap a LlamaIndex retriever as a harness retriever.
 
     path_key: the metadata key holding the document's path/identifier. LlamaIndex

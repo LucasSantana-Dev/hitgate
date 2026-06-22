@@ -4,6 +4,10 @@ __pycache__/
 *.sqlite-wal
 *.sqlite-shm
 .DS_Store
+
+# Local eval experiment outputs (ablations, one-off runs) are ignored.
+# The per-corpus baseline.*.json files are explicitly un-ignored below because
+# CI (check.sh) and run.py depend on them as frozen golden references.
 hitgate/*.json
 hitgate/candidates.jsonl
 !hitgate/baseline.example.json
@@ -15,6 +19,7 @@ hitgate/candidates.jsonl
 !hitgate/baseline.portfolio.json
 !hitgate/baseline.forge-mcp.json
 !hitgate/baseline.homelab.json
+
 corpus-demo/.index/
 *.egg-info/
 build/

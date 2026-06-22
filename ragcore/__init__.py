@@ -1,1 +1,1 @@
-"""evidence-first-rag — portable hybrid retrieval + eval core."""
+"""hitgate — portable hybrid retrieval + eval core."""

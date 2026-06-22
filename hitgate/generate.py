@@ -231,8 +231,8 @@ def _llm_queries(
         parsed = json.loads(content)
         if "identifier" in parsed and "paraphrase" in parsed:
             return parsed
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"WARN: LLM query failed: {e}", file=sys.stderr)
     return None
 
 

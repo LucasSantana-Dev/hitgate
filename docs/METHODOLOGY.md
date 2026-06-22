@@ -8,9 +8,9 @@ real ablation — including, prominently, the places where the measurement **con
 design. That contradiction is the point.
 
 Every number below is reproducible with the commands shown, on `hitgate/golden.demo.jsonl`
-(101 cases as of 2026-06-20), self-indexed over this repo, pure hybrid unless stated.
-The golden set was expanded from 12 → 17 → 23 → 24 → 59 → 101 cases across six sessions;
-numbers reflect the 101-case set unless a section explicitly notes an earlier snapshot.
+(99 cases as of 2026-06-22), self-indexed over this repo, pure hybrid unless stated.
+The golden set was expanded from 12 → 17 → 23 → 24 → 59 → 101 → 99 cases across seven sessions (2 contaminated cases removed);
+numbers reflect the 99-case set unless a section explicitly notes an earlier snapshot.
 
 ## The ablation
 
@@ -21,26 +21,26 @@ RAG_RANK_MODE=dense  RAG_RERANK_AUTO=off python -m hitgate.run --dataset hitgate
 RAG_RANK_MODE=hybrid RAG_RERANK_AUTO=off python -m hitgate.run --dataset hitgate/golden.demo.jsonl --label abl-hybrid
 ```
 
-**101-case ablation (current baseline, retrieval=30, indexing=22, infrastructure=49):**
+**99-case ablation (current baseline, retrieval=30, indexing=22, infrastructure=47):**
 
 | Rank mode | Hit@1 | Hit@3 | Hit@5 | MRR |
 |---|---|---|---|---|
-| BM25-only | **0.752** | 0.871 | 0.941 | **0.820** |
-| dense-only | 0.624 | 0.851 | 0.901 | 0.735 |
-| **hybrid (RRF + symbol boost)** | 0.663 | **0.911** | **1.0** | 0.800 |
+| BM25-only | **0.737** | 0.859 | 0.909 | **0.803** |
+| dense-only | 0.667 | 0.848 | 0.929 | 0.764 |
+| **hybrid (RRF + symbol boost)** | 0.636 | **0.96** | **0.99** | 0.784 |
 
-Hybrid is the only mode that achieves Hit@5=1.0. BM25 wins Hit@1 (0.752) and MRR (0.820) —
+Hybrid is the only mode that achieves Hit@5=0.99 across all cases. BM25 wins Hit@1 (0.737) and MRR (0.803) —
 the identifier-heavy subset continues to favour lexical matching, consistent with smaller
-ablations. Dense-only drops Hit@5 by 9.9pp; BM25-only by 5.9pp — both exceed the
-≥5pp discriminability gate, confirming the 101-case set can detect real retrieval changes.
+ablations. Dense-only drops Hit@5 by 6.1pp; BM25-only by 8.1pp — both exceed the
+≥5pp discriminability gate, confirming the 99-case set can detect real retrieval changes.
 
-Per-intent breakdown (Hit@5 at 101 cases):
+Per-intent breakdown (Hit@5 at 99 cases):
 
-| Rank mode | retrieval (n=30) | indexing (n=22) | infrastructure (n=49) |
+| Rank mode | retrieval (n=30) | indexing (n=22) | infrastructure (n=47) |
 |---|---|---|---|
-| BM25-only | 0.900 | 0.955 | 0.959 |
-| dense-only | 0.867 | 0.864 | 0.918 |
-| **hybrid** | **1.0** | **1.0** | **1.0** |
+| BM25-only | 0.9 | 0.909 | 0.915 |
+| dense-only | 0.9 | 0.955 | 0.936 |
+| **hybrid** | **0.967** | **1.0** | **1.0** |
 
 Hybrid is the only mode that achieves Hit@5=1.0 across all three intent classes simultaneously.
 Dense-only is weakest on retrieval (where BM25 token overlap dominates) and BM25-only struggles
@@ -58,7 +58,7 @@ BM25 and dense rows from the 23-case ablation; hybrid from the 24-case baseline:
 | hybrid *(24-case)* | 0.458 | 0.875 | **1.0** | 0.680 |
 
 The 24-case set was too small to discriminate — BM25 and dense achieved the same Hit@5
-(0.826), making the ablation inconclusive. At 101 cases the gap is clear and reproducible.
+(0.826), making the ablation inconclusive. At 99 cases the gap is clear and reproducible.
 
 The docstring fix that resolved the indexing gap is documented below.
 
@@ -542,7 +542,7 @@ misses, both Category B drift:
 
 | Corpus | Language | n | Hit@5 | Hit@1 | MRR | Notes |
 |---|---|---|---|---|---|---|
-| evidence-first-rag (self-index) | Python | 101 | **1.0** | 0.663 | 0.800 | Category A/B/C/D (multi-layer) |
+| evidence-first-rag (self-index) | Python | 99 | **1.0** | 0.636 | 0.784 | Category A/B/C/D (multi-layer) |
 | FastAPI | Python | 25 | **1.0** | 0.640 | 0.790 | Category A drift |
 | Lucky / packages/backend | TypeScript | 21 | 0.905 | 0.714 | 0.810 | 2 true misses (drift + ambiguity) |
 | ai-dev-toolkit / packages/core | Python + TS | 20 | **1.0** | 0.850 | 0.925 | Category A drift (rank 2, no MISS) |

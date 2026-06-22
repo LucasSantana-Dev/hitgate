@@ -11,12 +11,25 @@ license = { file = "LICENSE" }
 authors = [{ name = "Lucas Santana" }]
 requires-python = ">=3.10"
 keywords = ["rag", "retrieval", "evaluation", "hit@k", "mrr", "regression-gate", "ci", "bm25", "reranking", "search"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Testing",
+]
 dependencies = []  # the eval harness core is dependency-free; the bundled retriever is the [hybrid] extra below
 
 [project.urls]
-Homepage = "https://github.com/LucasSantana-Dev/evidence-first-rag"
-Repository = "https://github.com/LucasSantana-Dev/evidence-first-rag"
-Methodology = "https://github.com/LucasSantana-Dev/evidence-first-rag/blob/main/docs/METHODOLOGY.md"
+Homepage = "https://github.com/LucasSantana-Dev/hitgate"
+Repository = "https://github.com/LucasSantana-Dev/hitgate"
+Methodology = "https://github.com/LucasSantana-Dev/hitgate/blob/main/docs/METHODOLOGY.md"
 
 [project.optional-dependencies]
 hybrid = [
@@ -32,6 +45,7 @@ hitgate-run = "hitgate.run:main"
 hitgate-compare = "hitgate.compare:main"
 hitgate-diff = "hitgate.diff:main"
 hitgate-generate = "hitgate.generate:main"
+hitgate-audit-contamination = "hitgate.audit_contamination:main"
 
 [tool.setuptools]
 packages = ["ragcore", "hitgate"]

@@ -14,8 +14,8 @@ ROOT = Path(__file__).resolve().parent.parent
 _TMP = Path(tempfile.mkdtemp(prefix="efr-tests-"))
 
 # Must run before any ragcore import (config reads these at import time).
-os.environ["RAG_INDEX_DIR"] = str(_TMP / ".rag-index")
-os.environ["RAG_SOURCE_ROOTS"] = str(_TMP / "corpus")
+os.environ.setdefault("RAG_INDEX_DIR", str(_TMP / ".rag-index"))
+os.environ.setdefault("RAG_SOURCE_ROOTS", str(_TMP / "corpus"))
 os.environ.setdefault("RAG_RERANK_AUTO", "off")
 os.environ.setdefault("RAG_QLOG", "off")
 os.environ.setdefault("HF_HUB_OFFLINE", "1")

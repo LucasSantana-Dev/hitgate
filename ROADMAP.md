@@ -104,30 +104,30 @@ Default stays `ms-marco-MiniLM-L-6-v2` for portability (88 MB); set
 `RAG_RERANK_MODEL=BAAI/bge-reranker-v2-m3` when footprint is not a constraint. Full
 table, calibration sweep, and miss taxonomy in `docs/METHODOLOGY.md` and `docs/adr/0005`.
 
-## 6. Expand golden set to ~100 cases with LLM-generated paraphrases ✅ shipped (101 cases, discriminability confirmed)
+## 6. Expand golden set to ~100 cases with LLM-generated paraphrases ✅ shipped (99 cases, discriminability confirmed)
 
-Golden set expanded from 59 → 101 cases across 22 files (retrieval=30, indexing=22,
-infrastructure=49). New cases were written by hand and via paraphrase variants; 5 queries
-were refined to fix Category A/C MISSes. Final state: **Hit@5=1.0, Hit@1=0.663, MRR=0.800**.
-Frozen to `eval/baseline.example.json` and `eval/golden.demo.jsonl`.
+Golden set expanded from 59 → 101 → 99 cases across 22 files (retrieval=30, indexing=22,
+infrastructure=47). New cases were written by hand and via paraphrase variants; 5 queries
+were refined to fix Category A/C MISSes. 2 cases removed as contaminated (referenced `test_determinism.py` excluded from corpus). Final state: **Hit@5=0.99, Hit@1=0.636, MRR=0.784**.
+Frozen to `hitgate/baseline.example.json` and `hitgate/golden.demo.jsonl`.
 
-**Ablation at 101 cases (all pure hybrid, RAG_RERANK_AUTO=off):**
+**Ablation at 99 cases (all pure hybrid, RAG_RERANK_AUTO=off):**
 
 | Mode | Hit@5 | Hit@1 | Hit@3 | MRR |
 |---|---|---|---|---|
-| hybrid (default) | **1.0** | 0.663 | 0.911 | 0.800 |
-| BM25-only | 0.941 | **0.752** | 0.871 | **0.820** |
-| dense-only | 0.901 | 0.624 | 0.851 | 0.735 |
+| hybrid (default) | **0.99** | 0.636 | 0.96 | 0.784 |
+| BM25-only | 0.909 | **0.737** | 0.859 | **0.803** |
+| dense-only | 0.929 | 0.667 | 0.848 | 0.764 |
 
-Gate criterion met: BM25-only drops Hit@5 by 5.9pp; dense-only by 9.9pp — both exceed
-the ≥5pp discriminability threshold. The 101-case set can detect a real retrieval change.
+Gate criterion met: BM25-only drops Hit@5 by 8.1pp; dense-only by 6.1pp — both exceed
+the ≥5pp discriminability threshold. The 99-case set can detect a real retrieval change.
 
-BM25-only wins Hit@1 (0.752 vs 0.663) — consistent with the identifier-heavy subset
+BM25-only wins Hit@1 (0.737 vs 0.636) — consistent with the identifier-heavy subset
 behaving the same way as on smaller sets. Hybrid wins Hit@5 and is the only mode
-to surface the correct file in the top 5 for all 101 cases.
+to surface the correct file in the top 5 for 98 of 99 cases.
 
 **Reopen trigger:** a retrieval change passes the aggregate Hit@5 gate but a
-per-intent class visibly degrades in local runs — meaning the 101-case set missed it.
+per-intent class visibly degrades in local runs — meaning the 99-case set missed it.
 
 ---
 

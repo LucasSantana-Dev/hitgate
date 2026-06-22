@@ -29,13 +29,11 @@ import time
 from pathlib import Path
 from typing import Callable, Mapping, Optional, Sequence
 
+from hitgate import Retriever
+
 ROOT = Path(__file__).resolve().parent.parent
 
 DATASET = ROOT / "hitgate" / "golden.demo.jsonl"
-
-# A retriever takes (query, top, scope) and returns results ranked best-first; each result
-# is a mapping with at least "path". Rank is assigned by position.
-Retriever = Callable[[str, int, Optional[str]], Sequence[Mapping]]
 
 
 def builtin_retriever(rerank: Optional[bool] = False) -> Retriever:
@@ -73,6 +71,30 @@ def load(path: Path = DATASET) -> list[dict]:
     return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
 
+def _validate_retriever_result(result: object, query: str) -> None:
+    """Validate that a retriever result is a mapping with a string 'path' key.
+    
+    Raises:
+        TypeError: if result is not a mapping, or 'path' is not a string.
+        ValueError: if result is missing the required 'path' key.
+    """
+    if not isinstance(result, dict):
+        raise TypeError(
+            f"External retriever returned malformed result for query {query!r}: "
+            f"expected a mapping (dict), got {type(result).__name__}: {result!r}"
+        )
+    if "path" not in result:
+        raise ValueError(
+            f"External retriever returned result missing required 'path' key for query {query!r}. "
+            f"Each result must be a dict with at least 'path' (str). Got: {result!r}"
+        )
+    if not isinstance(result["path"], str):
+        raise TypeError(
+            f"External retriever returned result with non-string 'path' for query {query!r}: "
+            f"'path' must be str, got {type(result['path']).__name__}: {result!r}"
+        )
+
+
 def run(cases: list[dict], top: int, retriever: Retriever) -> dict:
     per_case = []
     for case in cases:
@@ -85,6 +107,9 @@ def run(cases: list[dict], top: int, retriever: Retriever) -> dict:
         scope_key = scope if isinstance(scope, str) and scope else ("+".join(scope) if isinstance(scope, list) and scope else "none")
         expected = expect if isinstance(expect, list) else [expect]
         results = list(retriever(q, top, scope if isinstance(scope, str) else None))
+        # Validate each result before processing
+        for r in results:
+            _validate_retriever_result(r, q)
         hit_rank = None
         for rank, r in enumerate(results, 1):  # rank by position — retriever-agnostic
             if any(e in r["path"] for e in expected):

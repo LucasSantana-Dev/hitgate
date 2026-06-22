@@ -35,11 +35,10 @@ _SYM_STOP = {"where","what","when","does","with","from","this","that","which","u
 _model = None
 _reranker = None
 _cache: dict[tuple, tuple[list[dict], np.ndarray, BM25Okapi]] = {}
-# Reranker model. Override with RAG_RERANK_MODEL env var.
-# Reranker model — two measured options (Pareto table, ROADMAP #5):
-#   ms-marco-MiniLM-L-6-v2:  88MB,  48ms/query, Hit@1=0.529, MRR=0.696, infra Hit@5=0.75
-#   BAAI/bge-reranker-v2-m3: 2.1GB, 88ms/query, Hit@1=0.647, MRR=0.767, infra Hit@5=1.0
-# bge-v2-m3 is strictly better on quality (no regressions) at 1.8x latency.
+# Reranker model — two measured options (Pareto table, ROADMAP §5, 50-case golden set):
+#   ms-marco-MiniLM-L-6-v2:  88MB,  30.2s/50q, Hit@1=0.62, MRR=0.746, Hit@5=0.96
+#   BAAI/bge-reranker-v2-m3: 2.1GB, 194.2s/50q, Hit@1=0.82, MRR=0.875, Hit@5=0.96
+# bge-v2-m3 is strictly better on quality (+20pp Hit@1) at 6.4× latency cost.
 # Default stays ms-marco-L6 for portability (88MB vs 2.1GB); set
 # RAG_RERANK_MODEL=BAAI/bge-reranker-v2-m3 when disk space allows.
 RERANK_MODEL_DEFAULT = "cross-encoder/ms-marco-MiniLM-L-6-v2"
@@ -51,14 +50,47 @@ RERANK_AUTO_THRESHOLD = float(os.environ.get("RAG_RERANK_AUTO_THRESHOLD", "0.35"
 # 0.015 calibrated on 50-case golden set: fires on ambiguous queries (cosine margin < 0.015)
 # achieving Hit@1 +6pp (0.56→0.62) with Hit@5=1.0 maintained. Old default (0.08) caused 2 MISSes.
 RERANK_AUTO_MARGIN = float(os.environ.get("RAG_RERANK_AUTO_MARGIN", "0.015"))
-# Selective reranking for code-scope queries (the measured weak spot). Code retrieval is
-# lexical-dominant and the fused ranking often buries the right chunk at rank 6-20, where a
-# strong cross-encoder recovers it. Validated 2026-06-15 (ADR 0011): selective
-# bge-reranker-v2-m3 on code scope = +4.9pp code / +2.1pp overall vs the 0.693/0.557 floor;
-# applying it to ALL scopes regressed memory/standards (net -1). Default OFF — the model is
-# ~2.2GB and machine-local; enable (with RAG_RERANK_MODEL=BAAI/bge-reranker-v2-m3 + the model
-# cached) only where present. Reranker failures fall back to the fused ranking (graceful).
+# Selective reranking for code-scope queries (the measured weak spot where fused ranking is
+# weakest). Code retrieval is lexical-dominant; selective code-scope reranking avoids the Hit@5
+# regression (1.0→0.96) observed with forced-global reranking (ADR-0011). Non-code scopes remain
+# on fused ranking. Default OFF — the model is ~2.1GB and machine-local; enable (with
+# RAG_RERANK_MODEL=BAAI/bge-reranker-v2-m3 + the model cached) only where present. Reranker
+# failures fall back to the fused ranking (graceful).
 RAG_CODE_RERANK = os.environ.get("RAG_CODE_RERANK", "off").lower() in ("on", "1", "true")
+
+
+def _auto_rerank_decision(rerank: bool, top1: float, top2: float, is_code_scope: bool) -> bool:
+    """Pure decision helper for auto-rerank trigger logic.
+
+    Encapsulates lines 255–273 of search(): determines whether to enable reranking based on:
+      - Low top-1 similarity (below RERANK_AUTO_THRESHOLD)
+      - Ambiguous top-2 margin (below RERANK_AUTO_MARGIN)
+      - Selective code-scope reranking (RAG_CODE_RERANK + code scope)
+      - Global auto-rerank gate (RERANK_AUTO)
+
+    Args:
+      rerank: Initial rerank state (False when this is called; None is pre-checked in search())
+      top1: Highest cosine similarity score (or 0.0 if no results)
+      top2: Second-highest cosine similarity score (or 0.0 if <2 results)
+      is_code_scope: Whether scope_types includes "code"
+
+    Returns:
+      True if reranking should be enabled, False otherwise.
+    """
+    # Auto-trigger rerank on weak/ambiguous queries (if not explicitly disabled).
+    # NOTE (2026-06-15): in bge code-rerank mode, the configured reranker (RAG_RERANK_MODEL,
+    # e.g. bge-reranker-v2-m3) is validated ONLY for code scope (ADR-0011). Applying it to
+    # non-code scopes regresses retrieval on mixed corpora (see ADR-0011 for the qualitative
+    # rationale). So in bge mode, confine ALL reranking to code scope. In default (ms-marco)
+    # mode, auto-rerank fires on any scope as before (it was net-positive there).
+    auto_allowed = RERANK_AUTO and (not RAG_CODE_RERANK or is_code_scope)
+    if not rerank and auto_allowed:
+        if top1 < RERANK_AUTO_THRESHOLD or (top1 - top2) < RERANK_AUTO_MARGIN:
+            rerank = True
+    # Selective code-scope rerank (ADR 0011): the fused ranking is weakest for code.
+    if not rerank and RAG_CODE_RERANK and is_code_scope:
+        rerank = True
+    return rerank
 
 
 def _get_reranker():
@@ -257,22 +289,9 @@ def search(
     if rerank is None:
         rerank = os.environ.get("RAG_RERANK", "off").lower() in ("on", "1", "true")
         is_code_scope = bool(scope_types and any("code" in s for s in scope_types))
-        # Auto-trigger rerank on weak/ambiguous queries (if not explicitly disabled).
-        # NOTE (2026-06-15): in bge code-rerank mode, the configured reranker (RAG_RERANK_MODEL,
-        # e.g. bge-reranker-v2-m3) is validated ONLY for code scope (ADR 0011). Letting the auto
-        # path rerank non-code scopes with it regressed memory retrieval -10.5pp (measured:
-        # memory 0.921 -> 0.816 on the live rerank=None path). So in bge mode, confine ALL
-        # reranking to code scope. In default (ms-marco) mode, auto-rerank fires on any scope as
-        # before (it was net-positive there).
-        auto_allowed = RERANK_AUTO and (not RAG_CODE_RERANK or is_code_scope)
-        if not rerank and auto_allowed:
-            top1 = float(cos[cos_order[0]]) if len(cos_order) > 0 else 0.0
-            top2 = float(cos[cos_order[1]]) if len(cos_order) > 1 else 0.0
-            if top1 < RERANK_AUTO_THRESHOLD or (top1 - top2) < RERANK_AUTO_MARGIN:
-                rerank = True
-        # Selective code-scope rerank (ADR 0011): the fused ranking is weakest for code.
-        if not rerank and RAG_CODE_RERANK and is_code_scope:
-            rerank = True
+        top1 = float(cos[cos_order[0]]) if len(cos_order) > 0 else 0.0
+        top2 = float(cos[cos_order[1]]) if len(cos_order) > 1 else 0.0
+        rerank = _auto_rerank_decision(rerank, top1, top2, is_code_scope)
 
     if rerank:
         candidate_k = min(len(meta), max(top * 4, 20))
@@ -355,5 +374,5 @@ def _log_query(
         )
         conn.commit()
         conn.close()
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"WARN: query-log write failed: {e}", file=sys.stderr)

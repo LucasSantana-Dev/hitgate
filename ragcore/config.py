@@ -1,4 +1,4 @@
-"""Configuration for evidence-first-rag — env-var driven, zero external deps.
+"""Configuration for hitgate — env-var driven, zero external deps.
 
 Every value is overridable via an environment variable (all prefixed ``RAG_``).
 The defaults make the tool usable with no setup: it indexes the current working
@@ -21,6 +21,83 @@ import os
 from pathlib import Path
 
 
+def _int_env(name: str, default: int, minimum: int | None = None) -> int:
+    """Read an int env var, or return default. Fail-fast on invalid input.
+
+    Args:
+        name: environment variable name (e.g. "RAG_EMBED_DIM")
+        default: value if env var is unset
+        minimum: optional lower bound; if specified, reject values <= minimum
+
+    Returns:
+        integer value
+
+    Raises:
+        ValueError: if env var is set but not a valid int, or if < minimum
+    """
+    val = os.environ.get(name)
+    if val is None:
+        return default
+    try:
+        result = int(val)
+    except ValueError:
+        raise ValueError(f"{name} must be an integer, got {val!r}")
+    if minimum is not None and result <= minimum:
+        raise ValueError(f"{name} must be > {minimum}, got {result}")
+    return result
+
+
+def _bool_env(name: str, default: bool) -> bool:
+    """Read a bool env var, or return default. Fail-fast on unrecognized values.
+
+    Args:
+        name: environment variable name (e.g. "RAG_CHUNK_CONTEXT_PREFIX")
+        default: value if env var is unset
+
+    Returns:
+        boolean value
+
+    Raises:
+        ValueError: if env var is set to an unrecognized value
+    """
+    val = os.environ.get(name)
+    if val is None:
+        return default
+    lower_val = val.lower()
+    if lower_val in ("on", "1", "true", "yes"):
+        return True
+    if lower_val in ("off", "0", "false", "no"):
+        return False
+    raise ValueError(
+        f"{name} must be one of (on, 1, true, yes, off, 0, false, no), got {val!r}"
+    )
+
+
+def _choice_env(name: str, default: str, choices: set[str]) -> str:
+    """Read a choice env var, or return default. Fail-fast on invalid input.
+
+    Args:
+        name: environment variable name (e.g. "RAG_CHUNK_PREFIX_FORMAT")
+        default: value if env var is unset
+        choices: set of valid string values
+
+    Returns:
+        validated string value
+
+    Raises:
+        ValueError: if env var is set but not in choices
+    """
+    val = os.environ.get(name)
+    if val is None:
+        return default
+    lower_val = val.lower()
+    if lower_val in choices:
+        return lower_val
+    raise ValueError(
+        f"{name} must be one of {sorted(choices)}, got {val!r}"
+    )
+
+
 def _roots(val: str) -> list[Path]:
     return [Path(p).expanduser().resolve() for p in val.split(os.pathsep) if p.strip()]
 
@@ -37,11 +114,11 @@ SOURCE_ROOTS = _roots(os.environ.get("RAG_SOURCE_ROOTS", "")) or [Path.cwd()]
 
 # --- embedding ------------------------------------------------------------
 EMBED_MODEL = os.environ.get("RAG_EMBED_MODEL", "intfloat/multilingual-e5-small")
-EMBED_DIM = int(os.environ.get("RAG_EMBED_DIM", "384"))
+EMBED_DIM = _int_env("RAG_EMBED_DIM", 384, minimum=0)
 
 # --- indexing limits ------------------------------------------------------
-MAX_FILE_BYTES = int(os.environ.get("RAG_MAX_FILE_BYTES", "200000"))
-GIT_LOG_DAYS = int(os.environ.get("RAG_GIT_LOG_DAYS", "180"))
+MAX_FILE_BYTES = _int_env("RAG_MAX_FILE_BYTES", 200000, minimum=0)
+GIT_LOG_DAYS = _int_env("RAG_GIT_LOG_DAYS", 180, minimum=0)
 
 CODE_EXTS = {".py", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".sh", ".bash", ".zsh"}
 
@@ -50,8 +127,8 @@ CODE_EXTS = {".py", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".sh", ".bash", ".zsh"
 # Format is controlled by RAG_CHUNK_PREFIX_FORMAT:
 #   "full"   (default) — "source_type | repo | filename | symbol"
 #   "symbol"           — "source_type | symbol"  (omits repo and filename)
-CHUNK_CONTEXT_PREFIX = os.environ.get("RAG_CHUNK_CONTEXT_PREFIX", "on").lower() not in ("off", "0", "false")
-CHUNK_PREFIX_FORMAT = os.environ.get("RAG_CHUNK_PREFIX_FORMAT", "full").lower()
+CHUNK_CONTEXT_PREFIX = _bool_env("RAG_CHUNK_CONTEXT_PREFIX", True)
+CHUNK_PREFIX_FORMAT = _choice_env("RAG_CHUNK_PREFIX_FORMAT", "full", {"full", "symbol"})
 
 EXCLUDED_DIR_PARTS = {
     "site-packages", "htmlcov", ".eggs", ".tox", "node_modules", "vendor",
@@ -88,5 +165,5 @@ def require_hybrid() -> None:
     if missing:
         raise ImportError(
             "the bundled hybrid retriever needs the optional [hybrid] extra — "
-            "`pip install evidence-first-rag[hybrid]` (missing: " + ", ".join(missing) + ")"
+            "`pip install hitgate[hybrid]` (missing: " + ", ".join(missing) + ")"
         )

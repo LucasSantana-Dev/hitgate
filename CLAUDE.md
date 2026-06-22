@@ -2,7 +2,7 @@
 
 ### Issue tracker
 
-Issues live in GitHub Issues (`LucasSantana-Dev/evidence-first-rag`); external PRs are also a triage surface. See `docs/agents/issue-tracker.md`.
+Issues live in GitHub Issues (`LucasSantana-Dev/hitgate`); external PRs are also a triage surface. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 

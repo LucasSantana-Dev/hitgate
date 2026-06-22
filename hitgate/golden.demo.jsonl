@@ -96,6 +96,4 @@
 {"query": "bash script that builds the index if absent, runs the eval, then calls compare.py to gate the result", "expect_path_contains": "check.sh", "expect_scope": "code", "intent": "infrastructure"}
 {"query": "EVAL_EXTRA_FLAGS environment variable passes additional arguments to run.py without modifying the gate script", "expect_path_contains": "check.sh", "expect_scope": "code", "intent": "infrastructure"}
 {"query": "RAG_EVAL_BASELINE env var overrides which frozen baseline file the gate compares the current run against", "expect_path_contains": "check.sh", "expect_scope": "code", "intent": "infrastructure"}
-{"query": "assert that the same query returns the same top-K document ordering across two identical retrieval runs", "expect_path_contains": "test_determinism.py", "expect_scope": "code", "intent": "infrastructure"}
-{"query": "ordered path and start_line pairs of top-K results \u2014 the invariant that must not drift between runs", "expect_path_contains": "test_determinism.py", "expect_scope": "code", "intent": "infrastructure"}
 {"query": "runnable end-to-end example pushing a completed eval run's per-query scores into Langfuse", "expect_path_contains": "example_langfuse_eval.py", "expect_scope": "code", "intent": "infrastructure"}

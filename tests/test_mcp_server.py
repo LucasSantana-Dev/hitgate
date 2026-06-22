@@ -31,7 +31,7 @@ _RESULT = {
     "cos": 0.87,
     "bm25": 0.45,
     "source_type": "code",
-    "repo": "evidence-first-rag",
+    "repo": "hitgate",
     "symbol": "search",
     "path": "ragcore/retrieval.py",
     "start_line": 42,

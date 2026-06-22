@@ -10,6 +10,12 @@ Numbers are code-scope, pure hybrid (`RAG_RERANK_AUTO=off`). Because the demo se
 this repo, exact chunk counts drift commit-to-commit; entries cite the stable **file count**
 and the **metric deltas**, not a chunk number that's wrong by the next commit.
 
+## 2026-06-22 — golden set 101 → 99 cases (2 contaminated removed)
+
+### Changed
+
+- **`hitgate/golden.demo.jsonl` — 101 → 99 cases** (retrieval=30, indexing=22, infrastructure=47). Removed 2 contaminated cases that expected `test_determinism.py` (relocated to `tests/` by #35, excluded from indexing per `ragcore/config.py` EXCLUDED_DIR_PARTS). Audit via `hitgate/audit_contamination` confirmed 0 contamination in 99-case set. **Measured delta: Hit@5 1.0 → 0.99 (−1pp), Hit@1 0.663 → 0.636 (−2.7pp), MRR 0.800 → 0.784 (−1.6pp)** at n=99. **Baselines re-frozen:** `hitgate/baseline.example.json` + `hitgate/baseline.auto-rerank.json`. **Reopen:** if the 99-case set itself becomes contaminated.
+
 ## 2026-06-21 — 0.1.0: PyPI packaging + Trusted Publishing
 
 ### Added

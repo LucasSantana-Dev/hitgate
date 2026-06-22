@@ -19,6 +19,8 @@ The eval run itself needs only the three core deps.
 
 Usage:
   python -m hitgate.plot_history [--max-commits N] [--branch main]
+
+NOTE: This is a maintainer/dev-only utility (not a user-facing console command).
 """
 from __future__ import annotations
 
@@ -128,7 +130,7 @@ def main() -> int:
     ax.set_ylabel("Hit@5 (code scope, pure hybrid)")
     ax.set_xticks(xs)
     ax.set_xticklabels([f"{p['sha']}\n{p['date']}" for p in points], rotation=45, ha="right", fontsize=7)
-    ax.set_title("evidence-first-rag — Hit@5 per commit (self-indexed, per-commit-native eval)")
+    ax.set_title("hitgate — Hit@5 per commit (self-indexed, per-commit-native eval)")
     ax.grid(True, axis="y", alpha=0.3)
     ax.text(
         0.0, -0.42,

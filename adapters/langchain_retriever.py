@@ -1,4 +1,4 @@
-"""Opt-in adapter: measure a LangChain retriever with the evidence-first-rag harness.
+"""Opt-in adapter: measure a LangChain retriever with the hitgate harness.
 
 This file has **no hard dependency** — it duck-types the LangChain interface, so it imports
 even when LangChain isn't installed. It turns any LangChain retriever (anything exposing
@@ -17,10 +17,12 @@ A runnable example using LangChain's BM25Retriever is in
 """
 from __future__ import annotations
 
-from typing import Any, Callable, Mapping, Optional, Sequence
+from typing import Any, Mapping, Optional, Sequence
+
+from hitgate import Retriever
 
 
-def to_harness(lc_retriever: Any, path_key: str = "source") -> Callable[[str, int, Optional[str]], Sequence[Mapping]]:
+def to_harness(lc_retriever: Any, path_key: str = "source") -> Retriever:
     """Wrap a LangChain retriever as a harness retriever.
 
     path_key: the metadata key holding the document's path/identifier (LangChain loaders

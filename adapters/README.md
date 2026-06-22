@@ -21,9 +21,23 @@ adapter only has to *find* and *label* content.
 ## Retriever adapters (measure an external retriever)
 
 A *source* adapter feeds the index; a *retriever* adapter goes the other way — it lets the eval
-harness (`hitgate/run.py`) measure a retriever from another ecosystem. The harness protocol is any
-callable `retrieve(query, top, scope) -> list[{"path": ...}]`, ranked best-first (see
-`hitgate/run.py`). An adapter just maps a foreign retriever onto it, and stays **opt-in** — the
+harness (`hitgate/run.py`) measure a retriever from another ecosystem.
+
+### The Retriever contract
+
+The single source of truth for the harness-retriever contract is `hitgate.Retriever` — a
+callable with signature:
+
+```python
+(query: str, top: int, scope: Optional[str]) -> Sequence[Mapping]
+```
+
+A retriever takes a query, a result limit, and an optional scope filter, and returns results
+ranked best-first (rank assigned by position, not the retriever). Each result is a mapping
+with at least a `"path"` key (string). The `Retriever` protocol lives in `hitgate/__init__.py`
+and is imported by all adapters for consistent type-checking.
+
+An adapter just maps a foreign retriever onto this contract, and stays **opt-in** — the
 core never imports the vendor library.
 
 ### LangChain — `adapters/langchain_retriever.py`
