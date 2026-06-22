@@ -1,0 +1,56 @@
+# Regenerate frozen baselines on Linux (Ubuntu).
+#
+# This workflow re-freezes the eval baselines (ci and auto-rerank gates) on the CI platform
+# to remove cross-platform float variance. Baselines are frozen on Ubuntu to ensure consistent
+# gate comparisons regardless of local developer platform (macOS float ops differ ~2pp).
+#
+# Dispatch manually: gh workflow run regenerate-baseline.yml
+# Or use the Actions UI in the GitHub repository.
+#
+# Output: eval-results artifact containing hitgate/ci.json and hitgate/auto-rerank-ci.json
+# Once validated, download and commit as hitgate/baseline.example.json and
+# hitgate/baseline.auto-rerank.json respectively.
+name: regenerate-baseline (manual dispatch)
+
+on:
+  workflow_dispatch
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Cache the embedding model (avoids HuggingFace 429 rate-limits)
+        id: hfcache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-models-multilingual-e5-small-v1
+      - name: Install the harness + bundled retriever (editable, [hybrid] extra) + dev deps
+        run: pip install -e ".[hybrid]" -r requirements-dev.txt
+      - name: Regenerate baseline — rerank-off (standard gate)
+        env:
+          HF_HUB_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
+          TRANSFORMERS_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
+        run: bash hitgate/check.sh ci
+      - name: Regenerate baseline — auto-rerank gate
+        env:
+          HF_HUB_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
+          TRANSFORMERS_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
+          RAG_RERANK_AUTO: "on"
+          EVAL_EXTRA_FLAGS: "--auto-rerank"
+          RAG_EVAL_BASELINE: "hitgate/baseline.auto-rerank.json"
+        run: bash hitgate/check.sh auto-rerank-ci
+      - name: Upload regenerated baselines as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: regenerated-baselines
+          path: |
+            hitgate/ci.json
+            hitgate/auto-rerank-ci.json

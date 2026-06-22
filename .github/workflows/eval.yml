@@ -63,3 +63,12 @@ jobs:
         # Reuses the e5 model the eval gate already cached; tests duck-type LangChain so the
         # adapter suite needs no extra install. Dev deps already installed above.
         run: python -m pytest tests/ -q
+      - name: Upload eval result JSONs as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: |
+            hitgate/ci.json
+            hitgate/auto-rerank-ci.json
+          if-no-files-found: ignore

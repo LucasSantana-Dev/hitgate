@@ -54,7 +54,7 @@ the budget.
 
 - `RERANK_MODEL_DEFAULT = "cross-encoder/ms-marco-MiniLM-L-6-v2"` in `ragcore/retrieval.py` (line 45).
 - When users want the quality upgrade, they override: `RAG_RERANK_MODEL=BAAI/bge-reranker-v2-m3`.
-- The eval gate (`eval/check.sh`) uses the default (ms-marco) for reproducibility on any machine.
+- The eval gate (`hitgate/check.sh`) uses the default (ms-marco) reranker. The gated number is deterministic *per platform*; baselines are frozen on the CI/Linux platform (see `CONTRIBUTING.md`), so expect ~2pp Hit@K offset if you run the eval on a different platform — that's cross-platform float variance, not a regression.
 - Users operating with selective code-scope reranking (ADR-0011) can combine this choice with
   the selective trigger for measured gains on the narrower scope (code queries).
 - Graceful fallback (ADR-0011) ensures that if the model is unavailable or fails to load, queries

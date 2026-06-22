@@ -14,13 +14,13 @@ cross-encoder was confidently *wrong*, demoting results from rank 3–5 to MISS.
 
 A second discovery during this calibration: the eval harness had no path to exercise
 `rerank=None` (the auto-trigger branch). The harness always passed `rerank=False` or
-`rerank=True` explicitly. This was fixed by adding `--auto-rerank` to `eval/run.py`.
+`rerank=True` explicitly. This was fixed by adding `--auto-rerank` to `hitgate/run.py`.
 
 ## Decision
 
 Set `RAG_RERANK_AUTO_MARGIN` default to **0.015**.
 
-Sweep run on the 50-case golden set with `python eval/run.py --auto-rerank`:
+Sweep run on the 50-case golden set with `python -m hitgate.run --dataset golden.jsonl --auto-rerank`:
 
 | Margin | Hit@1 | Hit@3 | Hit@5 | MRR | Notes |
 |---|---|---|---|---|---|
@@ -79,10 +79,10 @@ the Hit@5=1.0 guarantee.
 ## Consequences
 
 - `RAG_RERANK_AUTO_MARGIN` default changes from 0.08 → 0.015 in `ragcore/retrieval.py`.
-- The eval gate (`eval/check.sh`) continues to measure the no-rerank baseline for
+- The eval gate (`hitgate/check.sh`) continues to measure the no-rerank baseline for
   reproducibility — no reranker is required to reproduce the gated number.
-- `python eval/run.py --auto-rerank` measures the calibrated production operating point.
-- `eval/diff.py` can diff auto-rerank runs against the frozen no-rerank baseline for
+- `python -m hitgate.run --dataset golden.jsonl --auto-rerank` measures the calibrated production operating point.
+- `python -m hitgate.diff` can diff auto-rerank runs against the frozen no-rerank baseline for
   per-case comparison.
 
 ## Revisit when

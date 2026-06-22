@@ -25,3 +25,7 @@ corpus-demo/.index/
 build/
 .venv/
 dist/
+
+# Dev artifacts accidentally committed — untracked here
+.coverage
+.claude/
