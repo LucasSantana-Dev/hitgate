@@ -10,6 +10,25 @@ Numbers are code-scope, pure hybrid (`RAG_RERANK_AUTO=off`). Because the demo se
 this repo, exact chunk counts drift commit-to-commit; entries cite the stable **file count**
 and the **metric deltas**, not a chunk number that's wrong by the next commit.
 
+## 2026-06-21 — 0.1.0: PyPI packaging + Trusted Publishing
+
+### Added
+- **Packaged for PyPI as `hitgate` 0.1.0.** `pip install hitgate` installs the dependency-free
+  harness (measures *any* retriever via `--retriever`); `pip install "hitgate[hybrid]"` adds the
+  bundled BM25 + dense + RRF retriever. sdist + wheel build from `pyproject.toml`; `twine check`
+  passes both. **No metric delta** (packaging — the retriever and gate are unchanged; the demo
+  still reproduces **Hit@5 1.0 / Hit@1 0.663 / MRR 0.795** at 101 cases). **Reopen:** if a fresh
+  `pip install "hitgate[hybrid]"` ever fails to reproduce the demo.
+- **`.github/workflows/publish.yml` — PyPI Trusted Publishing (OIDC, no API token).** Publishes on
+  a GitHub Release via a short-lived OIDC identity GitHub mints and PyPI trusts; no token is stored
+  anywhere. **No metric delta** (release plumbing). **Reopen:** if PyPI changes the trusted-publisher
+  contract.
+
+### Changed
+- **README install line clarified** — separates `pip install hitgate` (harness) from
+  `pip install "hitgate[hybrid]"` (bundled retriever), replacing the single ambiguous line.
+  **No metric delta** (docs).
+
 ## 2026-06-20 — golden set expanded 59 → 101 cases
 
 ### Changed
