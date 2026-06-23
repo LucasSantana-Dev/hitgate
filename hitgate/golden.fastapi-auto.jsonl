@@ -1,0 +1,42 @@
+{"query": "param types in params.py", "expect_path_contains": "params.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "depends in params.py", "expect_path_contains": "params.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "security in params.py", "expect_path_contains": "params.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "http exception handler in exception_handlers.py", "expect_path_contains": "exception_handlers.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "request validation exception handler in exception_handlers.py", "expect_path_contains": "exception_handlers.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "websocket request validation exception handler in exception_handlers.py", "expect_path_contains": "exception_handlers.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "`FastAPI` app class, the main entrypoint to use FastAPI", "expect_path_contains": "applications.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "isoformat in encoders.py", "expect_path_contains": "encoders.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "generate encoders by class tuples in encoders.py", "expect_path_contains": "encoders.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "The input object to convert to JSON", "expect_path_contains": "encoders.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "main in cli.py", "expect_path_contains": "cli.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "get path param names in utils.py", "expect_path_contains": "utils.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "create model field in utils.py", "expect_path_contains": "utils.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "generate operation id for path in utils.py", "expect_path_contains": "utils.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "merge lifespan context in routing.py", "expect_path_contains": "routing.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "serialize response in routing.py", "expect_path_contains": "routing.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "get request handler in routing.py", "expect_path_contains": "routing.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "web socket exception in exceptions.py", "expect_path_contains": "exceptions.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "A generic, FastAPI-specific error", "expect_path_contains": "exceptions.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "validation exception in exceptions.py", "expect_path_contains": "exceptions.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "Default value if the parameter field is not set", "expect_path_contains": "param_functions.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "A \"dependable\" callable (like a function)", "expect_path_contains": "param_functions.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "regenerate error with loc in _compat.py", "expect_path_contains": "_compat.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "annotation is sequence in _compat.py", "expect_path_contains": "_compat.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "field annotation is sequence in _compat.py", "expect_path_contains": "_compat.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "A file uploaded in a request", "expect_path_contains": "datastructures.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "You shouldn't use this class directly", "expect_path_contains": "datastructures.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "You shouldn't use this function directly", "expect_path_contains": "datastructures.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "oauth2password request form in oauth2.py", "expect_path_contains": "oauth2.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "oauth2password request form strict in oauth2.py", "expect_path_contains": "oauth2.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "API key authentication using a query parameter", "expect_path_contains": "api_key.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "API key authentication using a header", "expect_path_contains": "api_key.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "API key authentication using a cookie", "expect_path_contains": "api_key.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "httpbase in http.py", "expect_path_contains": "http.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "HTTP Basic authentication", "expect_path_contains": "http.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "HTTP Bearer token authentication", "expect_path_contains": "http.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "security base in base.py", "expect_path_contains": "base.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "security requirement in models.py", "expect_path_contains": "models.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "dependant in models.py", "expect_path_contains": "models.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "base model with config in models.py", "expect_path_contains": "models.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "The OpenAPI URL that ReDoc should load and use", "expect_path_contains": "docs.py", "expect_scope": "code", "intent": "infrastructure"}
+{"query": "Default configurations for Swagger UI", "expect_path_contains": "docs.py", "expect_scope": "code", "intent": "infrastructure"}

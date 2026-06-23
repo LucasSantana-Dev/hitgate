@@ -34,7 +34,9 @@ and be ruthlessly honest about what the numbers do and don't prove.
 > against a hand-labeled holdout — a path deferred in
 > [ADR-0012](./docs/adr/0012-caveat-investment-timing.md) (reopen triggers there;
 > [DECISIONS.md](./DECISIONS.md) §2 for the broader deferral; full vocabulary in
-> [CONTEXT.md](./CONTEXT.md)).
+> [CONTEXT.md](./CONTEXT.md)). For a hitgate-native, third-party measurement of this exact
+> gap — auto-mined Hit@5 **1.0** vs hand-labeled **0.92** on FastAPI — see
+> [docs/two-channel-fastapi.md](./docs/two-channel-fastapi.md).
 
 ## Quickstart (reproducible in ~10 seconds)
 
