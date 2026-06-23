@@ -26,6 +26,16 @@ no click logs, no A/B traffic, no annotation budget. This repo is one answer: tr
 retrieval quality as a **measurable, regression-gated property**, like a test suite,
 and be ruthlessly honest about what the numbers do and don't prove.
 
+> **What it proves vs. what it doesn't.** hitgate proves whether retrieval got **better or
+> worse between two runs** (regression detection). It does **not** prove retrieval is *good*
+> in absolute terms: the self-indexed Hit@K measures **retrievability** (was the expected path
+> retrieved?), **not human-judged relevance**, and on auto-generated eval sets it runs
+> optimistic by construction. Gate on the *delta*; to certify absolute quality, validate
+> against a hand-labeled holdout — a path deferred in
+> [ADR-0012](./docs/adr/0012-caveat-investment-timing.md) (reopen triggers there;
+> [DECISIONS.md](./DECISIONS.md) §2 for the broader deferral; full vocabulary in
+> [CONTEXT.md](./CONTEXT.md)).
+
 ## Quickstart (reproducible in ~10 seconds)
 
 ```bash
@@ -45,7 +55,9 @@ python -m hitgate.run --retriever hitgate.example_external_retriever:retrieve --
 ```
 
 That eval indexes the repo's own source and scores 50 golden cases against it — so
-**you can reproduce the number below yourself**, no private data required.
+**you can reproduce the number below yourself**, no private data required. Because it is
+**self-indexed, that number is optimistic by construction** — point the gate at *your*
+retriever (last line) for a signal that means something.
 
 ## Results
 
@@ -93,6 +105,12 @@ are lexically indistinguishable — a genuine retrieval ceiling, not a tuning pr
 The finding that matters: **corpus module clarity predicts Hit@1 better than language or
 size.** Clean functional boundaries (homelab, ADT) → 0.85. Same-layer UI components
 (portfolio, Criativaria) → 0.59–0.60. Python vs TypeScript is not the variable.
+
+> **Selection bias, stated plainly.** Six of these seven corpora are the author's own
+> projects (forge-space, portfolio, ai-dev-toolkit, homelab, Lucky, Criativaria) — this is
+> **breadth in N, not breadth in authorship.** **FastAPI v0.115** is the one genuinely
+> third-party corpus, and it is what the external claim rests on. The 63-repo sweep in
+> [docs/SWEEP.md](./docs/SWEEP.md) is a broader sample with the *same* authorship bias.
 
 Full methodology, miss taxonomy, and reproduce commands: [docs/METHODOLOGY.md](./docs/METHODOLOGY.md).
 

@@ -35,6 +35,18 @@ ROOT = Path(__file__).resolve().parent.parent
 
 DATASET = ROOT / "hitgate" / "golden.demo.jsonl"
 
+# Honesty caveat surfaced in the CLI output and written into every result JSON.
+# Hit@K here is retrievability (was the expected path retrieved?), not human-judged
+# relevance. On self-indexed / auto-generated eval sets the absolute number runs
+# optimistic by construction — the gate is trustworthy for *regression* detection,
+# not for certifying absolute quality. See README "Why this exists" + DECISIONS.md.
+CAVEAT = (
+    "SELF-INDEXED: Hit@K measures retrievability (was the expected path retrieved?), "
+    "not human-judged relevance. Auto-generated/self-indexed eval sets score optimistically "
+    "by construction — gate on REGRESSIONS (did a change help or hurt?); to certify absolute "
+    "quality, validate against a hand-labeled holdout."
+)
+
 
 def builtin_retriever(rerank: Optional[bool] = False) -> Retriever:
     """The bundled hybrid retriever (ragcore), wrapped to the harness protocol.
@@ -181,8 +193,9 @@ def main() -> int:
             status = "✓" if c["hit_rank"] else "✗"
             rank = f"#{c['hit_rank']}" if c["hit_rank"] else "MISS"
             print(f"  {status} {rank:>4}  {c['query'][:60]}  → {c['top_hit']}")
+    print(f"  ⓘ {CAVEAT}")
     out_path = ROOT / "hitgate" / f"{args.label}.json"
-    out_path.write_text(json.dumps(result, indent=2))
+    out_path.write_text(json.dumps({**result, "caveat": CAVEAT}, indent=2))
     print(f"wrote {out_path}")
     return 0
 
