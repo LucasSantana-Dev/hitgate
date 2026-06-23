@@ -157,6 +157,12 @@ own retriever and corpus; keep the measurement discipline.
 
 ### Bring your own corpus — 4-step quickstart
 
+**Fast path (one command):** `hitgate-init [corpus]` mines candidate golden cases into
+`eval/golden.jsonl` and prints the curate → build → freeze → CI sequence; `hitgate-demo
+[corpus]` runs the whole pipeline once and prints the verdict ("see it on your code").
+Both default the corpus to `$RAG_SOURCE_ROOTS` or the cwd and need the `[hybrid]` extra.
+Prefer the manual steps below when you want full control.
+
 **0. Bootstrap candidate cases from your corpus (optional):**
 ```bash
 RAG_SOURCE_ROOTS="/path/to/your/corpus" python -m hitgate.generate \
