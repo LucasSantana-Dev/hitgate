@@ -171,25 +171,24 @@ def _load(scope_types: list[str] | None, scope_repos: list[str] | None) -> tuple
     )
     if key in _cache:
         return _cache[key]
-    conn = sqlite3.connect(DB, timeout=10)
-    conn.execute("PRAGMA busy_timeout=10000")  # WAL+timeout hardening (WAL set by writer)
-    where: list[str] = []
-    params: list[Any] = []
-    if scope_types:
-        where.append(f"source_type IN ({','.join('?' * len(scope_types))})")
-        params.extend(scope_types)
-    if scope_repos:
-        where.append(f"repo IN ({','.join('?' * len(scope_repos))})")
-        params.extend(scope_repos)
-    sql = (
-        "SELECT id, source_type, repo, language, symbol, path, start_line, end_line, text, embedding "
-        "FROM chunks"
-    )
-    if where:
-        sql += " WHERE " + " AND ".join(where)
-    cur = conn.execute(sql, params)
-    rows = cur.fetchall()
-    conn.close()
+    with sqlite3.connect(DB, timeout=10) as conn:
+        conn.execute("PRAGMA busy_timeout=10000")  # WAL+timeout hardening (WAL set by writer)
+        where: list[str] = []
+        params: list[Any] = []
+        if scope_types:
+            where.append(f"source_type IN ({','.join('?' * len(scope_types))})")
+            params.extend(scope_types)
+        if scope_repos:
+            where.append(f"repo IN ({','.join('?' * len(scope_repos))})")
+            params.extend(scope_repos)
+        sql = (
+            "SELECT id, source_type, repo, language, symbol, path, start_line, end_line, text, embedding "
+            "FROM chunks"
+        )
+        if where:
+            sql += " WHERE " + " AND ".join(where)
+        cur = conn.execute(sql, params)
+        rows = cur.fetchall()
     if not rows:
         empty_meta: list[dict] = []
         empty_embs = np.zeros((0, DIM), dtype=np.float32)
