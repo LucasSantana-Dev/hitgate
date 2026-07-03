@@ -293,3 +293,60 @@ def test_run_by_intent_aggregation():
     assert out["by_intent"]["retrieval"]["hit@1"] == 1.0
     assert "indexing" in out["by_intent"]
     assert out["by_intent"]["indexing"]["n"] == 1
+
+
+# ---------------------------------------------------------------------------
+# Negative-path tests: retriever returns wrong top-level shape
+# ---------------------------------------------------------------------------
+
+
+def test_run_retriever_returns_plain_string():
+    """Retriever returning a plain string (not a sequence) should raise TypeError with clear message.
+
+    When retriever returns "hello", list("hello") iterates over chars, then validation
+    fails on first char ('h') with a clear type error.
+    """
+    stub = lambda query, top, scope: "plain string result"
+    cases = [
+        {"query": "q1", "expect_path_contains": "right.py", "expect_scope": "code"},
+    ]
+    with pytest.raises(TypeError) as exc_info:
+        run(cases, top=5, retriever=stub)
+    # Expect a clear validation error from _validate_retriever_result
+    assert "mapping" in str(exc_info.value).lower() or "dict" in str(exc_info.value).lower()
+    assert "retriever" in str(exc_info.value).lower()
+
+
+def test_run_retriever_returns_int():
+    """Retriever returning an int should raise TypeError (not iterable).
+
+    Current behavior: list(42) raises 'int' object is not iterable — unhandled exception.
+    This test documents that the harness does not yet have defensive input validation
+    at the sequence level. A follow-up improvement could add early type-checking
+    (isinstance result, (list, tuple, ...)) before calling list()).
+    """
+    stub = lambda query, top, scope: 42
+    cases = [
+        {"query": "q1", "expect_path_contains": "right.py", "expect_scope": "code"},
+    ]
+    with pytest.raises(TypeError) as exc_info:
+        run(cases, top=5, retriever=stub)
+    # Current behavior: raw "not iterable" error
+    assert "not iterable" in str(exc_info.value)
+
+
+def test_run_retriever_returns_none():
+    """Retriever returning None should raise TypeError (not iterable).
+
+    Current behavior: list(None) raises 'NoneType' object is not iterable — unhandled exception.
+    This test documents that the harness does not yet have defensive input validation
+    at the sequence level. A follow-up improvement could add early type-checking.
+    """
+    stub = lambda query, top, scope: None
+    cases = [
+        {"query": "q1", "expect_path_contains": "right.py", "expect_scope": "code"},
+    ]
+    with pytest.raises(TypeError) as exc_info:
+        run(cases, top=5, retriever=stub)
+    # Current behavior: raw "not iterable" error
+    assert "not iterable" in str(exc_info.value)
