@@ -112,7 +112,7 @@ def test_hit5_at_success_parses_json():
         with patch("subprocess.run", side_effect=mock_run):
             with patch("tempfile.TemporaryDirectory") as mock_tmp:
                 # Set up temporary directory structure
-                tmp_path = Path("/tmp/efr-hist-test")
+                tmp_path = Path("/tmp/hitgate-hist-test")
                 wt = tmp_path / "wt"
 
                 mock_tmp.return_value.__enter__.return_value = str(tmp_path)
@@ -145,7 +145,7 @@ def test_hit5_at_missing_eval_file_returns_none():
     with patch("hitgate.plot_history.git") as mock_git:
         with patch("subprocess.run", side_effect=mock_run):
             with patch("tempfile.TemporaryDirectory") as mock_tmp:
-                tmp_path = Path("/tmp/efr-hist-test-missing")
+                tmp_path = Path("/tmp/hitgate-hist-test-missing")
                 mock_tmp.return_value.__enter__.return_value = str(tmp_path)
                 mock_tmp.return_value.__exit__.return_value = False
 
@@ -174,7 +174,7 @@ def test_hit5_at_eval_fails_returns_none():
     with patch("hitgate.plot_history.git") as mock_git:
         with patch("subprocess.run", side_effect=mock_run):
             with patch("tempfile.TemporaryDirectory") as mock_tmp:
-                tmp_path = Path("/tmp/efr-hist-test-eval-fail")
+                tmp_path = Path("/tmp/hitgate-hist-test-eval-fail")
                 mock_tmp.return_value.__enter__.return_value = str(tmp_path)
                 mock_tmp.return_value.__exit__.return_value = False
 
@@ -194,7 +194,7 @@ def test_hit5_at_malformed_json_returns_none():
     with patch("hitgate.plot_history.git") as mock_git:
         with patch("subprocess.run", side_effect=mock_run):
             with patch("tempfile.TemporaryDirectory") as mock_tmp:
-                tmp_path = Path("/tmp/efr-hist-test-bad-json")
+                tmp_path = Path("/tmp/hitgate-hist-test-bad-json")
                 mock_tmp.return_value.__enter__.return_value = str(tmp_path)
                 mock_tmp.return_value.__exit__.return_value = False
 
@@ -215,7 +215,7 @@ def test_hit5_at_missing_hit5_key_returns_none():
     with patch("hitgate.plot_history.git") as mock_git:
         with patch("subprocess.run", side_effect=mock_run):
             with patch("tempfile.TemporaryDirectory") as mock_tmp:
-                tmp_path = Path("/tmp/efr-hist-test-no-hit5")
+                tmp_path = Path("/tmp/hitgate-hist-test-no-hit5")
                 mock_tmp.return_value.__enter__.return_value = str(tmp_path)
                 mock_tmp.return_value.__exit__.return_value = False
 
@@ -237,7 +237,7 @@ def test_hit5_at_harness_not_in_commit_returns_none():
     with patch("hitgate.plot_history.git") as mock_git:
         with patch("subprocess.run", side_effect=mock_run):
             with patch("tempfile.TemporaryDirectory") as mock_tmp:
-                tmp_path = Path("/tmp/efr-hist-test-no-harness")
+                tmp_path = Path("/tmp/hitgate-hist-test-no-harness")
                 mock_tmp.return_value.__enter__.return_value = str(tmp_path)
                 mock_tmp.return_value.__exit__.return_value = False
 
