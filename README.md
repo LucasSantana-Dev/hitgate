@@ -56,7 +56,7 @@ What you get: Hit@5, Hit@1, MRR + per-case breakdown showing which queries faile
 
 ### The Eval Gate
 
-1. **Run your retriever** against a golden set of queries (you write 20–50 JSON cases)
+1. **Run your retriever** against a golden set of queries (you write 20–99 JSON cases; this demo scores 99)
 2. **Measure Hit@1/3/5, MRR** — does the expected file rank in top K?
 3. **Freeze a baseline** when you like the results
 4. **Gate future changes** — CI exits 1 if any metric regresses by >5pp
