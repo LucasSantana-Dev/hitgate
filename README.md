@@ -23,7 +23,7 @@ Building RAG systems is straightforward. Knowing whether a change made retrieval
 ✗ **Not a framework or hosted service** — a harness you fork and customize  
 ✗ **Not a maintained product** — personal tooling shared for the methodology  
 
-> **Comparison to RAGAS / DeepEval / Braintrust:** Those tools gate *answer* quality (faithfulness, relevancy) via labeled golden sets or LLM judges. hitgate gates *retrieval ranking* label-free. Different layer, complementary — and the only one that requires zero labels to start. Full comparison: [**docs/COMPARISONS.md**](docs/COMPARISONS.md).
+> **Comparison to RAGAS / DeepEval / Braintrust:** Those tools gate *answer* quality (faithfulness, relevancy) via labeled golden sets or LLM judges. hitgate gates *retrieval ranking* label-free. Different layer, complementary — and the only one that requires zero labels to start. Full comparison: [**docs/COMPARISONS.md**](./docs/COMPARISONS.md).
 
 ---
 
