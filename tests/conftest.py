@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
-_TMP = Path(tempfile.mkdtemp(prefix="efr-tests-"))
+_TMP = Path(tempfile.mkdtemp(prefix="hitgate-tests-"))
 
 # Must run before any ragcore import (config reads these at import time).
 os.environ.setdefault("RAG_INDEX_DIR", str(_TMP / ".rag-index"))
