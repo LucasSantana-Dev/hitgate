@@ -4,6 +4,7 @@ Loaded once per process (sqlite read + tokenize) and cached by scope signature.
 """
 from __future__ import annotations
 
+import contextlib
 import os
 import re
 import sqlite3
@@ -171,7 +172,7 @@ def _load(scope_types: list[str] | None, scope_repos: list[str] | None) -> tuple
     )
     if key in _cache:
         return _cache[key]
-    with sqlite3.connect(DB, timeout=10) as conn:
+    with contextlib.closing(sqlite3.connect(DB, timeout=10)) as conn:
         conn.execute("PRAGMA busy_timeout=10000")  # WAL+timeout hardening (WAL set by writer)
         where: list[str] = []
         params: list[Any] = []
