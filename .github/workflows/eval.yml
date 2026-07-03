@@ -54,15 +54,6 @@ jobs:
           EVAL_EXTRA_FLAGS: "--auto-rerank"
           RAG_EVAL_BASELINE: "hitgate/baseline.auto-rerank.json"
         run: bash hitgate/check.sh auto-rerank-ci
-      - name: Determinism gate — same query must yield the same top-K ordering
-        env:
-          HF_HUB_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
-          TRANSFORMERS_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
-        run: RAG_SOURCE_ROOTS="$PWD" python -m pytest tests/test_determinism.py -q
-      - name: Unit tests — tokenizer, rank modes, harness, adapter
-        # Reuses the e5 model the eval gate already cached; tests duck-type LangChain so the
-        # adapter suite needs no extra install. Dev deps already installed above.
-        run: python -m pytest tests/ -q
       - name: Upload eval result JSONs as artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -73,13 +64,43 @@ jobs:
             hitgate/auto-rerank-ci.json
           if-no-files-found: ignore
 
-  smoke-test:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Cache the embedding model (avoids HuggingFace 429 rate-limits)
+        id: hfcache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-models-multilingual-e5-small-v1
+      - name: Install the harness + bundled retriever (editable, [hybrid] extra) + dev deps
+        run: pip install -e ".[hybrid]" -r requirements-dev.txt
+      - name: Determinism gate — same query must yield the same top-K ordering
+        env:
+          HF_HUB_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
+          TRANSFORMERS_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
+        run: RAG_SOURCE_ROOTS="$PWD" python -m pytest tests/test_determinism.py -q
+      - name: Unit tests — tokenizer, rank modes, harness, adapter
+        run: python -m pytest tests/ -q
+
+  smoke-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Build wheel
         run: pip install build && python -m build
       - name: Install from wheel
