@@ -22,7 +22,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import importlib
+import importlib.resources
 import json
 import sys
 import time
@@ -31,9 +31,8 @@ from typing import Callable, Mapping, Optional, Sequence
 
 from hitgate import Retriever
 
-ROOT = Path(__file__).resolve().parent.parent
-
-DATASET = ROOT / "hitgate" / "golden.demo.jsonl"
+# Use importlib.resources to access the bundled dataset
+DATASET = importlib.resources.files("hitgate").joinpath("golden.demo.jsonl")
 
 # Honesty caveat surfaced in the CLI output and written into every result JSON.
 # Hit@K here is retrievability (was the expected path retrieved?), not human-judged
@@ -194,7 +193,7 @@ def main() -> int:
             rank = f"#{c['hit_rank']}" if c["hit_rank"] else "MISS"
             print(f"  {status} {rank:>4}  {c['query'][:60]}  → {c['top_hit']}")
     print(f"  ⓘ {CAVEAT}")
-    out_path = ROOT / "hitgate" / f"{args.label}.json"
+    out_path = Path.cwd() / f"{args.label}.json"
     out_path.write_text(json.dumps({**result, "caveat": CAVEAT}, indent=2))
     print(f"wrote {out_path}")
     return 0

@@ -51,3 +51,7 @@ hitgate-demo = "hitgate.scaffold:demo_main"
 
 [tool.setuptools]
 packages = ["ragcore", "hitgate"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+hitgate = ["golden.demo.jsonl", "baseline.example.json", "baseline.auto-rerank.json"]

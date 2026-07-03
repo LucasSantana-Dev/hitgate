@@ -127,7 +127,7 @@ class TestQueryReranking:
                 assert call_kwargs["rerank"] is False
 
     def test_rerank_auto_default(self, monkeypatch):
-        """--rerank auto should default to True (but can be overridden by env)."""
+        """--rerank auto should pass rerank=None so search() makes the auto decision."""
         with mock.patch("ragcore.query.search") as mock_search:
             mock_search.return_value = []
             with mock.patch.object(
@@ -135,8 +135,8 @@ class TestQueryReranking:
             ):
                 main()
                 call_kwargs = mock_search.call_args[1]
-                # auto defaults to True in the call
-                assert call_kwargs["rerank"] is True
+                # auto defers the decision to search()'s internal heuristic
+                assert call_kwargs["rerank"] is None
 
     def test_fast_disables_rerank(self, monkeypatch):
         """--fast should disable reranking even if default is auto."""

@@ -63,7 +63,7 @@ def main() -> int:
         scope_types=scope_types,
         scope_repos=scope_repos,
         cwd=cwd,
-        rerank=rerank if rerank is not None else True,
+        rerank=rerank,
     )
 
     if args.format == "json":
