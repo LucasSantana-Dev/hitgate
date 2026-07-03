@@ -57,3 +57,4 @@ jobs:
           path: |
             hitgate/ci.json
             hitgate/auto-rerank-ci.json
+          retention-days: 30
