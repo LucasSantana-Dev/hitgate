@@ -607,3 +607,84 @@ def test_extract_docstring_with_special_chars():
     result = _extract_docstring(code)
     assert result is not None
     assert "Regex" in result or "pattern" in result
+
+
+# ---------------------------------------------------------------------------
+# Negative test cases: missing index, missing golden-case keys
+# ---------------------------------------------------------------------------
+
+
+def test_generate_with_empty_roots_returns_empty_list():
+    """When generate() is called with empty roots, return empty candidates list."""
+    from hitgate.generate import generate
+
+    cases = generate(min_confidence="medium", limit=0, roots=[])
+    assert cases == [], "Expected empty list when roots is empty"
+
+
+def test_generate_with_nonexistent_roots_returns_empty_list():
+    """When all provided roots don't exist, return empty candidates list."""
+    from hitgate.generate import generate
+
+    nonexistent = Path("/this/path/does/not/exist/anywhere")
+    cases = generate(min_confidence="medium", limit=0, roots=[nonexistent])
+    assert cases == [], "Expected empty list when all roots are nonexistent"
+
+
+def test_generate_existing_golden_missing_expect_path_contains_key(tmp_path):
+    """When a golden-case JSON line is valid but missing expect_path_contains key,
+    it should be handled gracefully without raising an exception.
+    The file should NOT be marked as covered (since we use .get() with default "").
+    """
+    from hitgate.generate import generate
+
+    # Create a source file to generate from
+    src = tmp_path / "test_module.py"
+    src.write_text(
+        'def important_func():\n    """A function that should be generated as a candidate."""\n    pass\n'
+    )
+
+    # Write an existing golden set with a line missing the expect_path_contains key
+    # This is structurally valid JSON but missing a required key
+    existing = tmp_path / "existing.jsonl"
+    existing.write_text(
+        json.dumps({"query": "test query", "expect_scope": "code"}) + "\n"  # missing expect_path_contains
+    )
+
+    # This should NOT raise an exception; the missing key is handled gracefully
+    cases = generate(existing_path=existing, min_confidence="medium", limit=0, roots=[tmp_path])
+
+    # The source file test_module.py should NOT be marked as covered, so we should get cases for it
+    assert len(cases) > 0, "Expected cases to be generated since malformed golden case wasn't properly marked as covered"
+    covered_files = {c["expect_path_contains"] for c in cases}
+    assert "test_module.py" in covered_files, "test_module.py should be in generated cases since the golden case was missing the key"
+
+
+def test_generate_existing_golden_with_multiple_missing_keys(tmp_path):
+    """When multiple golden-case JSON lines are missing keys, all are handled gracefully."""
+    from hitgate.generate import generate
+
+    # Create source files
+    for i in range(3):
+        src = tmp_path / f"module_{i}.py"
+        src.write_text(
+            f'def func_{i}():\n    """Module {i} function that should generate candidates."""\n    pass\n'
+        )
+
+    # Write an existing golden set with several malformed lines
+    existing = tmp_path / "existing.jsonl"
+    with existing.open("w") as f:
+        # Line 1: missing expect_path_contains
+        f.write(json.dumps({"query": "q1", "expect_scope": "code"}) + "\n")
+        # Line 2: missing both expect_path_contains and expect_scope
+        f.write(json.dumps({"query": "q2"}) + "\n")
+        # Line 3: well-formed (should mark file as covered)
+        f.write(json.dumps({"query": "q3", "expect_path_contains": "module_1.py", "expect_scope": "code"}) + "\n")
+
+    # This should NOT raise an exception
+    cases = generate(existing_path=existing, min_confidence="medium", limit=0, roots=[tmp_path])
+
+    # module_1.py should be covered (well-formed entry), but module_0.py and module_2.py should not be
+    covered_files = {c["expect_path_contains"] for c in cases}
+    assert "module_1.py" not in covered_files, "module_1.py should be covered by well-formed golden case"
+    assert "module_0.py" in covered_files or "module_2.py" in covered_files, "At least one uncovered file should generate candidates"
