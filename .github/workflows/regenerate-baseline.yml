@@ -15,6 +15,9 @@ name: regenerate-baseline (manual dispatch)
 on:
   workflow_dispatch
 
+permissions:
+  contents: read
+
 jobs:
   regenerate:
     runs-on: ubuntu-latest
