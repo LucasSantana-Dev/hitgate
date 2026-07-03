@@ -106,7 +106,8 @@ def _get_reranker():
 def _get_model():
     global _model
     if _model is None:
-        from sentence_transformers import SentenceTransformer, models
+        from sentence_transformers import SentenceTransformer
+        from sentence_transformers.sentence_transformer import modules
 
         try:
             _model = SentenceTransformer(MODEL_NAME)
@@ -130,9 +131,9 @@ def _get_model():
                 candidates = [p for p in snapshots.glob("*") if (p / "config.json").exists()]
                 if candidates:
                     model_path = str(candidates[0])
-            transformer = models.Transformer(model_path)
-            pooling = models.Pooling(DIM, pooling_mode="mean")
-            normalize = models.Normalize()
+            transformer = modules.Transformer(model_path)
+            pooling = modules.Pooling(DIM, pooling_mode="mean")
+            normalize = modules.Normalize()
             _model = SentenceTransformer(modules=[transformer, pooling, normalize])
     return _model
 
