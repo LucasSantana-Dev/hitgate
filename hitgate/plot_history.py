@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -67,8 +68,8 @@ def hit5_at(sha: str) -> float | None:
                 "RAG_INDEX_DIR": str(wt / ".rag-index"),
                 "HF_HUB_OFFLINE": "1",
                 "TRANSFORMERS_OFFLINE": "1",
-                "PATH": __import__("os").environ.get("PATH", ""),
-                "HOME": __import__("os").environ.get("HOME", ""),
+                "PATH": os.environ.get("PATH", ""),
+                "HOME": os.environ.get("HOME", ""),
             }
             build = wt / "ragcore" / "build.py"
             if not build.exists():
