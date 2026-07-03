@@ -40,6 +40,7 @@ def load_demo_cases():
     return cases
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "case",
     load_demo_cases(),
@@ -62,6 +63,7 @@ def test_retrieval_determinism(case, tiny_index):
         )
 
 
+@pytest.mark.slow
 def test_determinism_summary(tiny_index):
     """Report determinism results for all cases (summary test)."""
     cases = load_demo_cases()
