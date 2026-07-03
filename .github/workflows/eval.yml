@@ -84,5 +84,9 @@ jobs:
         run: pip install build && python -m build
       - name: Install from wheel
         run: pip install dist/*.whl
-      - name: Smoke test CLI
+      - name: Smoke test hitgate-run --help
         run: hitgate-run --help
+      - name: Smoke test hitgate-init --help
+        run: hitgate-init --help
+      - name: Smoke test hitgate-demo --help
+        run: hitgate-demo --help
