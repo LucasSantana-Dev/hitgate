@@ -231,7 +231,7 @@ python -m hitgate.diff hitgate/baseline-v1.json hitgate/ci.json
 | MRR | 0.784 |
 | Corpus | this repo, self-indexed · 99 cases |
 
-63 of 99 hit at rank 1; misses kept on purpose (no quiet dropping). Why Hit@5 is the gate: as the corpus grows, borderline cases drift rank. Hit@5 tolerates that noise; Hit@1 is for strict ranking.
+63 of 99 hit at rank 1; misses kept on purpose (no quiet dropping). Why Hit@5 is the gate: as the corpus grows, borderline cases drift rank. Hit@5 tolerates that noise; Hit@1 is for strict ranking. See [CONTEXT.md](CONTEXT.md) (search "Drift over self-indexed corpus") for the fuller drift/self-indexed discussion.
 
 ### External Corpus Benchmarks (Zero Tuning)
 
