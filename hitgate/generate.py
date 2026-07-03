@@ -261,7 +261,7 @@ def generate(
     covered: set[str] = set()
     if existing_path and existing_path.is_file():
         with existing_path.open() as f:
-            for line in f:
+            for line_num, line in enumerate(f, start=1):
                 line = line.strip()
                 if line:
                     try:
@@ -270,7 +270,12 @@ def generate(
                         if ep:
                             covered.add(ep)
                     except json.JSONDecodeError:
-                        pass
+                        # Warn about malformed JSON but continue processing
+                        snippet = line[:60] + "..." if len(line) > 60 else line
+                        print(
+                            f"WARNING: Malformed JSON at {existing_path.name}:{line_num}: {snippet}",
+                            file=sys.stderr,
+                        )
         print(f"Skipping {len(covered)} already-covered file(s) from {existing_path.name}", file=sys.stderr)
 
     confidence_rank = {"high": 2, "medium": 1, "low": 0}
