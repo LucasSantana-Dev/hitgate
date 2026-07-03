@@ -50,15 +50,7 @@ def pack(task: str, files: list[str], budget_tokens: int, cwd: str | None) -> st
     code_hits = search(task, top=6, scope_types=["code"], cwd=cwd)
     emit("Relevant code", code_hits, per_chunk_cap=900)
 
-    # 2. Standards pulled by task wording
-    std_hits = search(task, top=3, scope_types=["standards"], scope_repos=["all"], cwd=cwd)
-    emit("Applicable standards", std_hits, per_chunk_cap=600)
-
-    # 3. Past decisions: memory + plans + handoffs
-    past_hits = search(task, top=4, scope_types=["memory", "plans", "handoffs"], scope_repos=["all"], cwd=cwd)
-    emit("Past decisions / memory", past_hits, per_chunk_cap=700)
-
-    # 4. Explicit files: include the file's top-1 symbol chunks matched against task
+    # 2. Explicit files: include the file's top-1 symbol chunks matched against task
     if files:
         out.append("## Explicit files")
         for f in files:

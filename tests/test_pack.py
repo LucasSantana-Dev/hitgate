@@ -57,7 +57,7 @@ class TestPack:
             }
         ]
         with mock.patch("ragcore.pack.search") as mock_search:
-            mock_search.side_effect = [mock_chunks, [], []]
+            mock_search.side_effect = [mock_chunks]
             result = pack("my task description", [], budget_tokens=2000, cwd=None)
             assert "my task description" in result
             assert "2000" in result
@@ -102,8 +102,8 @@ class TestPack:
         ]
 
         with mock.patch("ragcore.pack.search") as mock_search:
-            # First call (code hits), return results; subsequent calls return empty
-            mock_search.side_effect = [mock_chunks, [], []]
+            # First call (code hits), return results
+            mock_search.side_effect = [mock_chunks]
             result = pack("search implementation", [], budget_tokens=5000, cwd=None)
             assert "search" in result.lower()
             assert "retrieval.py" in result
@@ -111,27 +111,6 @@ class TestPack:
             assert mock_search.call_count >= 1
             first_call = mock_search.call_args_list[0]
             assert first_call[1].get("scope_types") == ["code"]
-
-    def test_pack_includes_standards_section(self):
-        """Standards should be fetched and included if available."""
-        mock_std_chunks = [
-            {
-                "source_type": "standards",
-                "repo": None,
-                "symbol": "test-standard",
-                "path": ".claude/standards/testing.md",
-                "start_line": 1,
-                "end_line": 30,
-                "text": "All tests must be deterministic",
-                "cos": 0.88,
-                "bm25": 12.0,
-            }
-        ]
-
-        with mock.patch("ragcore.pack.search") as mock_search:
-            mock_search.side_effect = [[], mock_std_chunks, []]
-            result = pack("test strategy", [], budget_tokens=5000, cwd=None)
-            assert "standards" in result.lower() or "standard" in result.lower() or mock_std_chunks[0]["text"] in result
 
     def test_pack_honors_per_chunk_caps(self):
         """Each chunk should be truncated to its per_chunk_cap."""
@@ -151,7 +130,7 @@ class TestPack:
         ]
 
         with mock.patch("ragcore.pack.search") as mock_search:
-            mock_search.side_effect = [mock_chunks, [], []]
+            mock_search.side_effect = [mock_chunks]
             result = pack("test", [], budget_tokens=10000, cwd=None)
             # The text should be capped at 900 chars (per_chunk_cap for code)
             # but still present in output
@@ -219,7 +198,7 @@ class TestPack:
         ]
 
         with mock.patch("ragcore.pack.search") as mock_search:
-            mock_search.side_effect = [mock_chunks, [], []]
+            mock_search.side_effect = [mock_chunks]
             result = pack("test", [], budget_tokens=50, cwd=None)
             # With tight budget, not all chunks should be included
             # Verify we didn't include all 10 functions
