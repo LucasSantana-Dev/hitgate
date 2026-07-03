@@ -14,7 +14,7 @@ HONEST CAVEATS (by design, not hidden — see the chart caption too):
   stick evolves across history. This is the project's real measured trajectory, not a
   controlled A/B. For a single-ruler ablation, see docs/METHODOLOGY.md.
 
-Charting needs matplotlib (optional dev dependency): `pip install -r requirements-dev.txt`.
+Charting needs matplotlib (optional dependency): `pip install hitgate[plot]`.
 The eval run itself needs only the three core deps.
 
 Usage:
@@ -119,7 +119,7 @@ def main() -> int:
     except ImportError:
         sys.exit(
             "matplotlib not installed — wrote the data file but not the chart.\n"
-            "Install the optional dev dep: pip install -r requirements-dev.txt"
+            "Install the optional dependency: pip install hitgate[plot]"
         )
 
     xs = list(range(len(points)))

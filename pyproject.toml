@@ -37,6 +37,7 @@ hybrid = [
     "rank-bm25~=0.2",
     "numpy~=2.4",
 ]
+plot = ["matplotlib>=3.7"]
 
 [project.scripts]
 rag-query = "ragcore.query:main"
