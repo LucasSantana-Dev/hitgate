@@ -42,7 +42,7 @@ status=$?
 cat /tmp/eval-run.out
 [ "$status" -ne 0 ] && exit "$status"
 
-CURRENT="$EVAL_DIR/${LABEL}.json"
+CURRENT="$REPO_ROOT/${LABEL}.json"
 BASELINE="${RAG_EVAL_BASELINE:-$EVAL_DIR/baseline.example.json}"
 [ -f "$BASELINE" ] || { echo "(no baseline at $BASELINE — skipping comparison)"; exit 0; }
 [ -f "$CURRENT" ]  || { echo "(no $CURRENT — eval may have failed)"; exit 1; }
