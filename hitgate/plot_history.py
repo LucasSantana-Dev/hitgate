@@ -52,7 +52,7 @@ def commits(branch: str, limit: int) -> list[tuple[str, str, str]]:
 
 def hit5_at(sha: str) -> float | None:
     """Eval Hit@5 for one commit in an isolated worktree; None if it can't be measured."""
-    with tempfile.TemporaryDirectory(prefix="efr-hist-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="hitgate-hist-") as tmp:
         wt = Path(tmp) / "wt"
         try:
             git("worktree", "add", "--detach", "--quiet", str(wt), sha)
