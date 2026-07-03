@@ -35,7 +35,7 @@ Methodology = "https://github.com/LucasSantana-Dev/hitgate/blob/main/docs/METHOD
 hybrid = [
     "sentence-transformers~=5.5",
     "rank-bm25~=0.2",
-    "numpy~=2.4",
+    "numpy>=1.26,<3",
 ]
 plot = ["matplotlib>=3.7"]
 
