@@ -255,6 +255,7 @@ def test_hit5_at_harness_not_in_commit_returns_none():
 
 def test_main_writes_json_data_on_success(tmp_path, capsys, mocker):
     """main() writes hit5_history.json and svg when data is available."""
+    pytest.importorskip("matplotlib")
     from hitgate.plot_history import main
 
     # Create a fake DOCS directory
@@ -297,6 +298,7 @@ def test_main_writes_json_data_on_success(tmp_path, capsys, mocker):
 
 def test_main_skipped_commits_are_not_included(tmp_path, mocker):
     """main() doesn't include commits that couldn't be measured (hit5_at returned None)."""
+    pytest.importorskip("matplotlib")
     from hitgate.plot_history import main
 
     docs = tmp_path / "docs"
