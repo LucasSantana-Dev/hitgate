@@ -33,9 +33,9 @@ Methodology = "https://github.com/LucasSantana-Dev/hitgate/blob/main/docs/METHOD
 
 [project.optional-dependencies]
 hybrid = [
-    "sentence-transformers>=2.2",
-    "rank-bm25>=0.2",
-    "numpy>=1.24",
+    "sentence-transformers~=5.5",
+    "rank-bm25~=0.2",
+    "numpy~=2.4",
 ]
 
 [project.scripts]
