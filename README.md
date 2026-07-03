@@ -44,6 +44,82 @@ What you get: Hit@5, Hit@1, MRR + per-case breakdown showing which queries faile
 
 ---
 
+## CLI Commands
+
+After `pip install hitgate`, the following commands are available on `$PATH`. Each also works as `python -m <module>` (e.g. `python -m hitgate.run --label demo`).
+
+### Indexing
+
+**`rag-build`** — Build a searchable index from source code and docs.
+```bash
+RAG_SOURCE_ROOTS="/path/to/corpus" rag-build
+```
+- `--incremental FILES` — Reindex only specific files (e.g. `--incremental src/core.py docs/api.md`)
+- `--no-code` — Skip source code; index docs only
+
+**`rag-query QUERY`** — Search the indexed corpus.
+```bash
+rag-query "how does pagination work" --top 5 --format json
+```
+- `--top K` (default 5) — Return top K results
+- `--scope TYPE` — Filter by source type (e.g. `--scope code` or `--scope docs`)
+- `--rerank {on|off|auto}` (default `auto`) — Cross-encoder reranking
+- `--format {text|json}` — Output format
+
+### Eval Gate
+
+**`hitgate-run`** — Run the gate on a golden set and measure Hit@K, MRR.
+```bash
+hitgate-run --dataset eval/golden.jsonl --label baseline
+```
+- `--top K` (default 5) — Measure up to top K
+- `--label NAME` (default `baseline`) — Label for output file
+- `--dataset PATH` — Golden set (JSONL)
+- `--retriever MODULE:FUNC` — Custom retriever (omit to use bundled hybrid)
+- `--rerank` — Force cross-encoder reranking (bundled retriever only)
+- `--auto-rerank` — Auto-trigger reranking on weak/ambiguous queries
+- `--verbose` — Show per-case details
+
+**`hitgate-init [ROOT]`** — Scaffold a label-free golden set from a corpus.
+```bash
+hitgate-init /path/to/corpus --output eval/golden.jsonl
+```
+- `--output PATH` (default `eval/golden.jsonl`) — Where to write the golden set
+- `--min-confidence {high|medium|low}` (default `medium`) — Heuristic confidence threshold
+- `--limit N` (default 0, unlimited) — Cap number of candidate cases
+
+**`hitgate-demo [ROOT]`** — One-shot demo: build index, mine cases, run gate, print verdict.
+```bash
+hitgate-demo /path/to/corpus --limit 12
+```
+- `--limit N` (default 12) — Number of golden cases to mine
+
+### Analysis
+
+**`hitgate-generate`** — Mine candidate golden cases from a corpus (auto-generated, needs curation).
+```bash
+hitgate-generate --output candidates.jsonl --min-confidence medium
+```
+- `--output PATH` (default `hitgate/candidates.jsonl`) — Where to write candidates
+- `--existing JSONL` — Skip files already in an existing golden set
+- `--min-confidence {high|medium|low}` (default `medium`) — Confidence threshold
+- `--llm` — Use an LLM to paraphrase queries (requires `OPENAI_API_KEY`)
+- `--limit N` — Cap total output cases
+
+**`hitgate-diff BASELINE.json HEAD.json`** — Diff two eval result JSON files case-by-case.
+```bash
+hitgate-diff eval/baseline.json eval/ci.json
+```
+- `--quiet` — Summary line only, no per-case detail
+
+**`hitgate-audit-contamination`** — Check golden set for data leakage (eval queries appear in corpus).
+```bash
+hitgate-audit-contamination --dataset eval/golden.jsonl
+```
+- `--dataset PATH` (default `eval/golden.jsonl`) — Golden set to audit
+
+---
+
 ## How It Works
 
 ### Hybrid Retrieval
