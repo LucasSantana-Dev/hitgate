@@ -66,6 +66,7 @@ jobs:
             hitgate/ci.json
             hitgate/auto-rerank-ci.json
           if-no-files-found: ignore
+          retention-days: 30
 
   test:
     runs-on: ubuntu-latest
