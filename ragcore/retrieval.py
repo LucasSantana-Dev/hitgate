@@ -288,7 +288,7 @@ def search(
 
     if rerank is None:
         rerank = os.environ.get("RAG_RERANK", "off").lower() in ("on", "1", "true")
-        is_code_scope = bool(scope_types and any("code" in s for s in scope_types))
+        is_code_scope = bool(scope_types and "code" in scope_types)
         top1 = float(cos[cos_order[0]]) if len(cos_order) > 0 else 0.0
         top2 = float(cos[cos_order[1]]) if len(cos_order) > 1 else 0.0
         rerank = _auto_rerank_decision(rerank, top1, top2, is_code_scope)
