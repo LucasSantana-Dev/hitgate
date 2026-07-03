@@ -56,3 +56,8 @@ include-package-data = true
 
 [tool.setuptools.package-data]
 hitgate = ["golden.demo.jsonl", "baseline.example.json", "baseline.auto-rerank.json"]
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (index building), deselect with -m 'not slow'",
+]
