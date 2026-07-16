@@ -82,6 +82,25 @@ def load(path: Path = DATASET) -> list[dict]:
     return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
 
+def _validate_retriever_results(results: object, query: str) -> None:
+    """Validate that a retriever returned a Sequence, per the documented protocol.
+
+    The protocol is `-> Sequence[Mapping]` (see this module's docstring and README).
+    str/bytes are Sequences but are never a valid result set: without this check a
+    returned string is iterated character-by-character and surfaces as the baffling
+    "expected a mapping (dict), got str: 'p'" from _validate_retriever_result.
+
+    Raises:
+        TypeError: if results is not a Sequence, or is a str/bytes.
+    """
+    if isinstance(results, (str, bytes)) or not isinstance(results, Sequence):
+        raise TypeError(
+            f"External retriever returned a non-Sequence for query {query!r}: "
+            f"expected Sequence[Mapping] (e.g. a list of dicts), got "
+            f"{type(results).__name__}: {results!r}"
+        )
+
+
 def _validate_retriever_result(result: object, query: str) -> None:
     """Validate that a retriever result is a mapping with a string 'path' key.
     
@@ -117,7 +136,12 @@ def run(cases: list[dict], top: int, retriever: Retriever) -> dict:
         scope = case.get("expect_scope")
         scope_key = scope if isinstance(scope, str) and scope else ("+".join(scope) if isinstance(scope, list) and scope else "none")
         expected = expect if isinstance(expect, list) else [expect]
-        results = list(retriever(q, top, scope if isinstance(scope, str) else None))
+        raw_results = retriever(q, top, scope if isinstance(scope, str) else None)
+        # Validate the container before list() — otherwise a non-iterable return
+        # (int, None) surfaces as a raw "'int' object is not iterable" traceback
+        # pointing into harness internals rather than at the retriever (#121).
+        _validate_retriever_results(raw_results, q)
+        results = list(raw_results)
         # Validate each result before processing
         for r in results:
             _validate_retriever_result(r, q)
