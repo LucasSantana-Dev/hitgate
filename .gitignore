@@ -13,6 +13,16 @@ hitgate/candidates.jsonl
 !hitgate/baseline.example.json
 !hitgate/baseline.auto-rerank.json
 
+# Golden sets are mined FROM a corpus, so a per-corpus golden set embeds that corpus:
+# prose describing internals, real filenames, intent labels. For a non-public corpus
+# that must not reach this public repo. The `hitgate/*.json` rule above already covers
+# the derived baseline.*.json, but never covered the .jsonl sources they are computed
+# from, so those kept landing. Ignore by default; un-ignore only the public corpora.
+hitgate/golden.*.jsonl
+!hitgate/golden.demo.jsonl
+!hitgate/golden.fastapi.jsonl
+!hitgate/golden.fastapi-auto.jsonl
+
 corpus-demo/.index/
 *.egg-info/
 build/
