@@ -48,7 +48,10 @@ def main() -> int:
 
     scope_types = [s.strip() for s in args.scope.split(",") if s.strip()] or None
     if args.scope_repo == "all":
-        scope_repos = None
+        # search() skips cwd detection only for the literal ["all"] sentinel; None
+        # means "no preference" and re-runs cwd_repo(), which scoped every query to
+        # a repo named after the working directory (SOURCE_ROOTS defaults to cwd).
+        scope_repos = ["all"]
         cwd = None
     elif args.scope_repo:
         scope_repos = [s.strip() for s in args.scope_repo.split(",") if s.strip()]

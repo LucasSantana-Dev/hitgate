@@ -67,7 +67,15 @@ class TestQueryArgumentParsing:
                 assert call_kwargs["scope_types"] is None
 
     def test_scope_repo_all(self, monkeypatch):
-        """--scope-repo all should disable cwd scoping."""
+        """--scope-repo all must forward the ["all"] sentinel, not None.
+
+        search() only skips cwd detection when it receives ["all"] literally; None
+        means "caller expressed no preference" and re-runs cwd_repo(). Passing None
+        here silently scoped every CLI query to a repo named after the working
+        directory (SOURCE_ROOTS defaults to cwd), which returns zero results
+        instead of an error. Asserting None cannot distinguish this from the
+        default case below, which is why the bug survived.
+        """
         with mock.patch("ragcore.query.search") as mock_search:
             mock_search.return_value = []
             with mock.patch.object(
@@ -75,7 +83,7 @@ class TestQueryArgumentParsing:
             ):
                 main()
                 call_kwargs = mock_search.call_args[1]
-                assert call_kwargs["scope_repos"] is None
+                assert call_kwargs["scope_repos"] == ["all"]
                 assert call_kwargs["cwd"] is None
 
     def test_scope_repo_comma_separated(self, monkeypatch):
