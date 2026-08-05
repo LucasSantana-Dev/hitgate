@@ -31,7 +31,7 @@ jobs:
           cache: pip
       - name: Cache the embedding model (avoids HuggingFace 429 rate-limits)
         id: hfcache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/huggingface
           key: hf-models-multilingual-e5-small-v1
