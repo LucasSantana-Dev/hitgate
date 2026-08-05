@@ -2,6 +2,6 @@
 # matplotlib: eval/plot_history.py chart.  pytest: the unit suite.  langchain-community: the LangChain example.
 # pytest-mock: fixture support in test_config.py.
 matplotlib>=3.7
-pytest>=7
+pytest>=9.1.1
 pytest-mock>=3
 langchain-community>=0.2
