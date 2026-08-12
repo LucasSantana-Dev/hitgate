@@ -258,6 +258,11 @@ Full methodology and miss taxonomy: [docs/METHODOLOGY.md](./docs/METHODOLOGY.md)
 ### AI Assistant Memory
 Gate retrieval quality in RAG-backed chatbots or assistants. Detect when corpus updates or embedding model swaps regress search. Deployed version of this exact use case: [docs/two-channel-fastapi.md](./docs/two-channel-fastapi.md) (auto-mined Hit@5=1.0 vs hand-labeled=0.92).
 
+Want the retrieval engine + MCP server + agent-recall hooks, not just the eval
+gate? See [shelfmark](https://github.com/LucasSantana-Dev/shelfmark) — same
+hybrid-retrieval lineage, packaged for agent memory instead of regression
+testing.
+
 ### Document / Knowledge Base Search
 Keep search quality stable as your docs grow. No user click data? Gate on retrievability. Ecosystem wrappers for LangChain / LlamaIndex: [adapters/README.md](./adapters/README.md).
 
