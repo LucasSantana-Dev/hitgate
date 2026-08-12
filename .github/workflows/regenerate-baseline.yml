@@ -51,7 +51,7 @@ jobs:
           RAG_EVAL_BASELINE: "hitgate/baseline.auto-rerank.json"
         run: bash hitgate/check.sh auto-rerank-ci
       - name: Upload regenerated baselines as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: regenerated-baselines
           path: |
