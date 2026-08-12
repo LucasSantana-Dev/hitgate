@@ -3,5 +3,5 @@
 # pytest-mock: fixture support in test_config.py.
 matplotlib>=3.7
 pytest>=7
-pytest-mock>=3
+pytest-mock>=3.15.1
 langchain-community>=0.2
