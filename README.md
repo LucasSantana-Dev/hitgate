@@ -25,8 +25,6 @@ Building RAG systems is straightforward. Knowing whether a change made retrieval
 
 > **Comparison to RAGAS / DeepEval / Braintrust:** Those tools gate *answer* quality (faithfulness, relevancy) via labeled golden sets or LLM judges. hitgate gates *retrieval ranking* label-free. Different layer, complementary — and the only one that requires zero labels to start. Full comparison: [**docs/COMPARISONS.md**](./docs/COMPARISONS.md).
 
-Want production agent memory instead of a quality gate? [shelfmark](https://github.com/LucasSantana-Dev/shelfmark) builds zero-setup agent recall (MCP server for Claude Code and other agents) on the same hybrid-retrieval foundation.
-
 ---
 
 ## Quick Start (10 seconds)
