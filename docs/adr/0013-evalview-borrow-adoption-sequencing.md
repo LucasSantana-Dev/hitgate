@@ -159,3 +159,29 @@ external users).
   packaging wedge is neutralized; fall back to the honesty/methodology angle (ADR-0006).
 - **No Show HN / resonance test runs within 30 days** → the whole launch posture is stale;
   reopen ADR-0031/0037 (their timing assumes an imminent launch).
+
+## Amendment 2026-10-03: staleness trigger fired, clock restarted
+
+The 30-day trigger above fired around 2026-07-22: this ADR was accepted 2026-06-22 and
+neither the resonance test nor the ecosystem scout ran. Between then and now Wave 1A shipped
+(caveat in `hitgate/run.py`, `hitgate-init` and `hitgate-demo`, `docs/COMPARISONS.md`) and
+0.1.1 reached PyPI with the adapters inside the package (`hitgate.adapters`, #135).
+
+Decision: the caveat and launch-timing assumptions of ADR-0012 and ADR-0031/0037 still hold,
+because the launch is still unrun and nothing in Wave 1A contradicts them. Running Gate 0 now
+is not a reopen of them. The 30-day clock restarts on 2026-10-03.
+
+Gate 0 sequencing, from a `research-and-decide` pass on 2026-10-03 (critic verdict: modified
+sequential run):
+
+1. Post the resonance hook to r/LocalLLaMA first. Adapt the wording for r/MLOps the next day
+   and judge each sub separately against the 5 upvote / 1 comment floor. Test the methodology
+   hook (docs/series), not a generic tool pitch.
+2. Run the scout independently of the post's score. Triage 3 to 5 targets from RAG-framework
+   issue trackers, then contact the 2 strongest, at least one from LangChain or LlamaIndex.
+   Send 24 to 48 hours after the post. Cold messages cite the 70-repo sweep, METHODOLOGY.md
+   and the ablation, never the Reddit numbers. One flop does not cancel the scout.
+3. Publish the Langfuse page as a 1-page guide (ADR-0008 step 6) whether or not anyone replies.
+
+Revisit when: resonance and scout outcomes are as listed above; if neither Gate 0 step runs
+by 2026-11-02, this ADR is stale again and the launch posture needs a fresh decision.

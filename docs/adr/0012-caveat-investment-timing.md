@@ -83,3 +83,10 @@ harder/more-realistic queries. The honesty items (#48/#52/#53) + the launch anch
 ship now regardless. If no Show HN posts within 30 days, reopen this ADR — the posture
 assumes the launch is imminent. See `DECISIONS.md` §2 for the broader ~500-real-label
 ML/labels deferral this refines.
+
+## Amendment 2026-10-03: timing assumption re-checked
+
+The "no Show HN within 30 days, reopen" trigger passed unrun (see the 2026-10-03 amendment to
+ADR-0013). Re-checked: the posture still holds. The caveat ships in the run output, 0.1.1 is
+on PyPI, and the launch has not happened, so the 48h demand window in trigger 1 is still the
+bar once a Show HN runs. The 30-day clock restarts on 2026-10-03 and follows ADR-0013.
