@@ -1,6 +1,6 @@
 """The LangChain adapter is pure interface-mapping, so it's tested with fake Documents —
 no LangChain install required (it duck-types `.invoke` / `.metadata` / `.page_content`)."""
-from adapters.langchain_retriever import to_harness
+from hitgate.adapters.langchain_retriever import to_harness
 
 
 class _Doc:

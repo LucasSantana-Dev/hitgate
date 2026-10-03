@@ -1,6 +1,6 @@
 """LlamaIndex adapter is pure interface-mapping with no hard dep — tested with
 duck-typed fakes for NodeWithScore / TextNode, mirroring test_langchain_adapter.py."""
-from adapters.llamaindex_retriever import to_harness
+from hitgate.adapters.llamaindex_retriever import to_harness
 
 
 class _Node:

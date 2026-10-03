@@ -19,7 +19,7 @@ Prerequisites
 
 3.  Run this script from the repo root:
 
-        python adapters/example_langfuse_eval.py
+        python hitgate/adapters/example_langfuse_eval.py
 
 After running, open Langfuse → Datasets → "rag-golden" → Runs to compare
 before/after experiments side by side.
@@ -30,7 +30,7 @@ from pathlib import Path
 # Allow running from the repo root without installing the package.
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from adapters.langfuse_eval import push
+from hitgate.adapters.langfuse_eval import push
 
 # Paths relative to repo root.
 GOLDEN = Path("hitgate/golden.demo.jsonl")

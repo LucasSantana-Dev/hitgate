@@ -12,7 +12,7 @@ point the gate at it:
     python -m hitgate.run --retriever yourmod:retrieve
 
 A runnable example using LlamaIndex's BM25Retriever is in
-`adapters/example_llamaindex_retriever.py`. See `adapters/README.md`.
+`hitgate/adapters/example_llamaindex_retriever.py`. See `hitgate/adapters/README.md`.
 """
 from __future__ import annotations
 

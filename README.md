@@ -264,7 +264,7 @@ hybrid-retrieval lineage, packaged for agent memory instead of regression
 testing.
 
 ### Document / Knowledge Base Search
-Keep search quality stable as your docs grow. No user click data? Gate on retrievability. Ecosystem wrappers for LangChain / LlamaIndex: [adapters/README.md](./adapters/README.md).
+Keep search quality stable as your docs grow. No user click data? Gate on retrievability. Ecosystem wrappers for LangChain / LlamaIndex: [hitgate/adapters/README.md](./hitgate/adapters/README.md).
 
 ### Code Search
 Find code references and definitions. The hybrid retriever knows `camelCase` — useful for codebases with identifier-heavy queries. Same gate works for private codebases.
@@ -273,7 +273,7 @@ Find code references and definitions. The hybrid retriever knows `camelCase` —
 
 ## Extending
 
-Core indexes code + docs + commits, nothing else. Tool-specific sources (assistant transcripts, code-graphs, other memory stores) plug in as optional adapters — [adapters/README.md](./adapters/README.md).
+Core indexes code + docs + commits, nothing else. Tool-specific sources (assistant transcripts, code-graphs, other memory stores) plug in as optional adapters — [hitgate/adapters/README.md](./hitgate/adapters/README.md).
 
 ---
 

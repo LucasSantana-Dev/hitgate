@@ -55,13 +55,13 @@ the eval set and its Hit@K/MRR scores into [Langfuse](https://langfuse.com)
 Datasets/Experiments, so before/after comparisons are versioned and drillable instead
 of hand-diffed.
 
-Shipped as `adapters/langfuse_eval.py`. Scores recorded per item: `hit@1`, `hit@3`,
+Shipped as `hitgate/adapters/langfuse_eval.py`. Scores recorded per item: `hit@1`, `hit@3`,
 `hit@5`, `mrr_contribution`, `hit_rank`. Dataset items are stable-ID'd so every
 experiment run accumulates against the same dataset. Usage:
 
 ```bash
 pip install langfuse
-python adapters/langfuse_eval.py \
+python hitgate/adapters/langfuse_eval.py \
     --dataset eval/golden.demo.jsonl \
     --results  eval/my-run.json \
     --run-name "feat/my-experiment"

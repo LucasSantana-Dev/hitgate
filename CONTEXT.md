@@ -99,4 +99,4 @@ The repo's own eval (`hitgate/baseline.json`, 101 golden cases) indexes the repo
 
 1. **If measuring your own retriever:** see "Bring your own corpus — 4-step quickstart" in [README.md](./README.md). Write a retriever callable; pass it to `hitgate.run --retriever`; use `check.sh` to gate.
 2. **If studying the methodology:** start with [METHODOLOGY.md](./docs/METHODOLOGY.md), then read [DECISIONS.md](./DECISIONS.md) and relevant ADRs.
-3. **If extending ragcore:** see [ARCHITECTURE.md](./ARCHITECTURE.md) for layer justifications and [adapters/README.md](./adapters/README.md) for integration patterns.
+3. **If extending ragcore:** see [ARCHITECTURE.md](./ARCHITECTURE.md) for layer justifications and [hitgate/adapters/README.md](./adapters/README.md) for integration patterns.
