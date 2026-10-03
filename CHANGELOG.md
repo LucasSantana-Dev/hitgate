@@ -10,7 +10,7 @@ Numbers are code-scope, pure hybrid (`RAG_RERANK_AUTO=off`). Because the demo se
 this repo, exact chunk counts drift commit-to-commit; entries cite the stable **file count**
 and the **metric deltas**, not a chunk number that's wrong by the next commit.
 
-## 2026-10-03 — adapters ship in the pip package as `hitgate.adapters`
+## 2026-10-03 — 0.1.1: adapters ship in the pip package as `hitgate.adapters`
 
 ### Changed
 
