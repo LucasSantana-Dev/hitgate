@@ -40,18 +40,18 @@ and is imported by all adapters for consistent type-checking.
 An adapter just maps a foreign retriever onto this contract, and stays **opt-in** — the
 core never imports the vendor library.
 
-### LangChain — `adapters/langchain_retriever.py`
+### LangChain — `hitgate/adapters/langchain_retriever.py`
 
 `to_harness(lc_retriever, path_key="source")` wraps any LangChain retriever (anything with
 `.invoke(query)` / `.get_relevant_documents(query)` returning Documents) into the protocol. The
 adapter is dependency-free; it duck-types the interface.
 
-Runnable example over this repo (`adapters/example_langchain_retriever.py`):
+Runnable example over this repo (`hitgate/adapters/example_langchain_retriever.py`):
 
 ```bash
 pip install langchain-community           # opt-in; NOT a core dependency
 RAG_SOURCE_ROOTS="$PWD" python -m hitgate.run \
-    --retriever adapters.example_langchain_retriever:retrieve --label langchain
+    --retriever hitgate.adapters.example_langchain_retriever:retrieve --label langchain
 ```
 
 Measured on the demo: `Hit@5 0.917 / Hit@1 0.75 / MRR 0.833`. (That it edges the bundled hybrid
@@ -59,19 +59,19 @@ says the 12-case demo is too easy to discriminate retrievers — see `docs/METHO
 that BM25-over-whole-files is better.) To wire your own, mirror the example: build your retriever,
 `to_harness(...)` it, expose the callable, and point `--retriever` at it.
 
-### LlamaIndex — `adapters/llamaindex_retriever.py`
+### LlamaIndex — `hitgate/adapters/llamaindex_retriever.py`
 
 `to_harness(li_retriever, path_key="file_path")` wraps any LlamaIndex retriever (anything with
 `.retrieve(query)` returning `NodeWithScore` objects) into the protocol. The adapter is
 dependency-free; it duck-types the interface and tries both calling conventions for
 `similarity_top_k`.
 
-Runnable example over this repo (`adapters/example_llamaindex_retriever.py`):
+Runnable example over this repo (`hitgate/adapters/example_llamaindex_retriever.py`):
 
 ```bash
 pip install llama-index-retrievers-bm25 llama-index-core   # opt-in; NOT core deps
 RAG_SOURCE_ROOTS="$PWD" python -m hitgate.run \
-    --retriever adapters.example_llamaindex_retriever:retrieve --label llamaindex
+    --retriever hitgate.adapters.example_llamaindex_retriever:retrieve --label llamaindex
 ```
 
 To wire your own LlamaIndex retriever, build it, `to_harness(...)` it, and point `--retriever`
@@ -85,7 +85,7 @@ experiment-tracking tool so before/after comparisons are versioned and drillable
 instead of hand-diffed JSON. The adapter is strictly opt-in — the core never imports
 the vendor library.
 
-### Langfuse — `adapters/langfuse_eval.py`
+### Langfuse — `hitgate/adapters/langfuse_eval.py`
 
 `push(golden_path, results_path, run_name, dataset_name)` upserts a Langfuse Dataset
 from the golden JSONL file and records a named Run with per-item scores
@@ -100,13 +100,13 @@ export LANGFUSE_SECRET_KEY="sk-lf-..."
 
 # Run an eval, then push the results:
 python -m hitgate.run --label feat/my-experiment
-python adapters/langfuse_eval.py \
+python hitgate/adapters/langfuse_eval.py \
     --dataset hitgate/golden.demo.jsonl \
     --results  hitgate/feat-my-experiment.json \
     --run-name "feat/my-experiment"
 ```
 
-Runnable example: `adapters/example_langfuse_eval.py`. For self-hosted Langfuse,
+Runnable example: `hitgate/adapters/example_langfuse_eval.py`. For self-hosted Langfuse,
 set `LANGFUSE_HOST=http://your-host:3000`.
 
 ## Intentionally out of scope (and why)

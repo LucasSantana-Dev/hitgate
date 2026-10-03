@@ -51,7 +51,7 @@ hitgate-init = "hitgate.scaffold:init_main"
 hitgate-demo = "hitgate.scaffold:demo_main"
 
 [tool.setuptools]
-packages = ["ragcore", "hitgate"]
+packages = ["ragcore", "hitgate", "hitgate.adapters"]
 include-package-data = true
 
 [tool.setuptools.package-data]

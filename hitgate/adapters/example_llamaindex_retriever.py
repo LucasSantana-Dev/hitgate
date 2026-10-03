@@ -2,11 +2,11 @@
 
 Strictly opt-in — requires `pip install llama-index-retrievers-bm25 llama-index-core`
 (NOT core dependencies). It builds a LlamaIndex BM25Retriever over this repo's code
-files, wraps it via `adapters.llamaindex_retriever.to_harness`, and exposes `retrieve`:
+files, wraps it via `hitgate.adapters.llamaindex_retriever.to_harness`, and exposes `retrieve`:
 
     pip install llama-index-retrievers-bm25 llama-index-core
     RAG_SOURCE_ROOTS="$PWD" python -m hitgate.run \\
-        --retriever adapters.example_llamaindex_retriever:retrieve --label llamaindex
+        --retriever hitgate.adapters.example_llamaindex_retriever:retrieve --label llamaindex
 
 The point is not the number — a BM25 baseline over whole files is a rough instrument
 on small code sets (see docs/METHODOLOGY.md). The point is that the harness measures
@@ -18,7 +18,7 @@ import os
 from pathlib import Path
 from typing import Mapping, Optional, Sequence
 
-from adapters.llamaindex_retriever import to_harness
+from hitgate.adapters.llamaindex_retriever import to_harness
 
 _CODE_EXTS = {".py", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".sh"}
 _SKIP = {".git", "node_modules", "venv", ".venv", ".rag-index", "__pycache__", "dist", "build", "tests"}

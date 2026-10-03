@@ -8,7 +8,7 @@ core never requires it. Install the optional dep only when you want tracking:
 Usage (CLI):
 
     # After an eval run, push the dataset + results to Langfuse:
-    python adapters/langfuse_eval.py \\
+    python hitgate/adapters/langfuse_eval.py \\
         --dataset hitgate/golden.demo.jsonl \\
         --results  hitgate/my-run.json \\
         --run-name "feat/chunk-prefixing"

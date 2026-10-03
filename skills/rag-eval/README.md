@@ -59,8 +59,8 @@ cp hitgate/baseline-v1.json hitgate/baseline.my-project.json
 
 ```bash
 pip install langchain-community
-EVAL_EXTRA_FLAGS="--retriever adapters.langchain_retriever:to_harness_retrieve"
+EVAL_EXTRA_FLAGS="--retriever hitgate.adapters.langchain_retriever:to_harness_retrieve"
 RAG_EVAL_BASELINE="hitgate/baseline.langchain.json"
 ```
 
-See `adapters/langchain_retriever.py` and `adapters/example_langchain_retriever.py` for wiring.
+See `hitgate/adapters/langchain_retriever.py` and `hitgate/adapters/example_langchain_retriever.py` for wiring.

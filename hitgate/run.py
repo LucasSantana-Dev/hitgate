@@ -17,7 +17,7 @@ Usage:
   python -m hitgate.run                                            # bundled retriever, demo set
   python -m hitgate.run --label wider --top 10
   python -m hitgate.run --rerank                                   # bundled + cross-encoder rerank
-  python -m hitgate.run --retriever mypkg.myretriever:retrieve     # YOUR retriever (see adapters/)
+  python -m hitgate.run --retriever mypkg.myretriever:retrieve     # YOUR retriever (see hitgate/adapters/)
 """
 from __future__ import annotations
 

@@ -2,11 +2,11 @@
 
 Strictly opt-in — requires `pip install langchain-community` (NOT a core dependency). It
 builds a LangChain `BM25Retriever` over this repo's code files, wraps it via
-`adapters.langchain_retriever.to_harness`, and exposes `retrieve` for the gate:
+`hitgate.adapters.langchain_retriever.to_harness`, and exposes `retrieve` for the gate:
 
     pip install langchain-community
     RAG_SOURCE_ROOTS="$PWD" python -m hitgate.run \
-        --retriever adapters.example_langchain_retriever:retrieve --label langchain
+        --retriever hitgate.adapters.example_langchain_retriever:retrieve --label langchain
 
 On the 12-case code demo it measures `Hit@5 0.917 / Hit@1 0.75 / MRR 0.833` — slightly *above*
 the bundled hybrid (0.667 / 0.833), which says more about the demo being too small and lexical
@@ -19,7 +19,7 @@ import os
 from pathlib import Path
 from typing import Mapping, Optional, Sequence
 
-from adapters.langchain_retriever import to_harness
+from hitgate.adapters.langchain_retriever import to_harness
 
 _CODE_EXTS = {".py", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".sh"}
 _SKIP = {".git", "node_modules", "venv", ".venv", ".rag-index", "__pycache__", "dist", "build", "tests"}

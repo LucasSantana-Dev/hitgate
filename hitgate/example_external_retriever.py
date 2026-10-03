@@ -9,7 +9,7 @@ hybrid one. Score it through the exact same eval:
     RAG_SOURCE_ROOTS="$PWD" python -m hitgate.run --retriever hitgate.example_external_retriever:retrieve
 
 To wire your own retriever, copy this signature and return results ranked best-first, each a
-mapping with a "path" (and optionally "start_line"). See adapters/ for ecosystem wrappers.
+mapping with a "path" (and optionally "start_line"). See hitgate/adapters/ for ecosystem wrappers.
 """
 from __future__ import annotations
 

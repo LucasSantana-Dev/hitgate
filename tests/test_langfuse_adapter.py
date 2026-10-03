@@ -87,7 +87,7 @@ def _patch_langfuse(mock_lf):
 
 
 def test_creates_dataset_items(tmp_path):
-    from adapters.langfuse_eval import push
+    from hitgate.adapters.langfuse_eval import push
 
     golden = _make_golden_jsonl(tmp_path)
     results = _make_results_json(tmp_path)
@@ -101,7 +101,7 @@ def test_creates_dataset_items(tmp_path):
 
 
 def test_records_run_per_item(tmp_path):
-    from adapters.langfuse_eval import push
+    from hitgate.adapters.langfuse_eval import push
 
     golden = _make_golden_jsonl(tmp_path)
     results = _make_results_json(tmp_path)
@@ -115,7 +115,7 @@ def test_records_run_per_item(tmp_path):
 
 
 def test_scores_hit_at_k(tmp_path):
-    from adapters.langfuse_eval import push
+    from hitgate.adapters.langfuse_eval import push
 
     golden = _make_golden_jsonl(tmp_path)
     results = _make_results_json(tmp_path)
@@ -142,7 +142,7 @@ def test_scores_hit_at_k(tmp_path):
 
 
 def test_miss_scores_zero(tmp_path):
-    from adapters.langfuse_eval import push
+    from hitgate.adapters.langfuse_eval import push
 
     # Override results: second case is a miss (hit_rank=None)
     golden = _make_golden_jsonl(tmp_path)
@@ -169,7 +169,7 @@ def test_miss_scores_zero(tmp_path):
 
 
 def test_missing_langfuse_raises(tmp_path):
-    from adapters.langfuse_eval import push
+    from hitgate.adapters.langfuse_eval import push
 
     golden = _make_golden_jsonl(tmp_path)
     results = _make_results_json(tmp_path)
@@ -180,7 +180,7 @@ def test_missing_langfuse_raises(tmp_path):
 
 
 def test_flushes_after_run(tmp_path):
-    from adapters.langfuse_eval import push
+    from hitgate.adapters.langfuse_eval import push
 
     golden = _make_golden_jsonl(tmp_path)
     results = _make_results_json(tmp_path)

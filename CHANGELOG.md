@@ -10,6 +10,12 @@ Numbers are code-scope, pure hybrid (`RAG_RERANK_AUTO=off`). Because the demo se
 this repo, exact chunk counts drift commit-to-commit; entries cite the stable **file count**
 and the **metric deltas**, not a chunk number that's wrong by the next commit.
 
+## 2026-10-03 — adapters ship in the pip package as `hitgate.adapters`
+
+### Changed
+
+- **`adapters/` moved to `hitgate/adapters/`** and listed in `pyproject.toml` `packages`. Wheel 0.1.0 had no adapter files; they now install as `hitgate.adapters.*` (LangChain, LlamaIndex, Langfuse). Imports in examples, tests, README, CONTEXT, ROADMAP and `skills/rag-eval/README.md` updated. **Measured delta (self-indexed, n=99, within the ±5pp gate):** Hit@5 0.970 → 0.970, Hit@3 0.960 → 0.939, Hit@1 0.657 → 0.636, MRR 0.794 → 0.776, from top hits shifting paths. Baselines not re-frozen. **Reopen:** if a later move pushes any metric past ±5pp.
+
 ## 2026-06-22 — golden set 101 → 99 cases (2 contaminated removed)
 
 ### Changed
