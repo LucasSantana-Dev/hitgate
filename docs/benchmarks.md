@@ -54,7 +54,7 @@ Finding: corpus module clarity predicts Hit@1 better than language or size. Clea
 boundaries reach 0.85. Same-layer UI components sit near 0.59.
 
 Selection bias: FastAPI is third-party, and the others are the author's own repositories. The full
-per-corpus write-up is in [METHODOLOGY.md](METHODOLOGY.md#external-corpus-benchmarks). A broader
+per-corpus write-up is in [METHODOLOGY.md](METHODOLOGY.md#external-corpus-benchmarks-generalizability-check). A broader
 70-repository auto-generated sweep is in [portfolio-benchmark.md](portfolio-benchmark.md) and
 [SWEEP.md](SWEEP.md), with its own warning that auto-mined Hit@5 saturates.
 

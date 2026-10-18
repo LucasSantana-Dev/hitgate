@@ -20,7 +20,9 @@ RAG_RANK_MODE=dense  RAG_RERANK_AUTO=off python -m hitgate.run --dataset hitgate
 RAG_RANK_MODE=hybrid RAG_RERANK_AUTO=off python -m hitgate.run --dataset hitgate/golden.demo.jsonl --label abl-hybrid
 ```
 
-**99-case ablation (current baseline, retrieval=30, indexing=22, infrastructure=47):**
+**99-case ablation (dated snapshot from 2026-06-22; retrieval=30, indexing=22, infrastructure=47):**
+
+The golden set and corpus have changed since this run. For the current numbers (BM25 Hit@1 0.747, hybrid Hit@1 0.616, measured 2026-10-17) see [benchmarks.md](benchmarks.md#self-indexed-demo-reproducible).
 
 | Rank mode | Hit@1 | Hit@3 | Hit@5 | MRR |
 |---|---|---|---|---|
