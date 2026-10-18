@@ -26,7 +26,7 @@ for m in bm25 dense hybrid; do
 done
 ```
 
-Reading it honestly:
+Reading the table:
 
 - Hybrid is the only mode that keeps Hit@5 near 1.0. Single-channel modes lose 8 to 9 points.
 - BM25 alone wins Hit@1 and MRR here. The corpus is identifier heavy, so lexical match is strong.
