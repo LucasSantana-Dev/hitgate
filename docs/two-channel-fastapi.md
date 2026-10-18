@@ -10,7 +10,7 @@ query sources, and put the numbers side by side:
   (`hitgate/golden.fastapi.jsonl`), e.g. *"API key authentication using a query parameter"*.
 
 FastAPI is the one corpus in the benchmark set that is **not** the author's own code
-(see [SWEEP.md](./SWEEP.md)), so this is a bias-free check.
+(see [SWEEP.md](./SWEEP.md)), so this check does not share the author-corpus bias. It still uses one corpus and 25 queries.
 
 ## Result (same engine, same corpus, same session)
 
@@ -29,9 +29,8 @@ detection, not absolute quality.
 
 **The gap is modest on a clean corpus, so do not over-claim it either.** At Hit@1 and MRR
 the two channels are effectively equivalent (auto is actually *lower* at Hit@1: 0.595 vs
-0.640). The dramatic gaps you may have heard (toward ~0.27 Hit@5) come from *broad* or
-*homogeneous* corpora, **not** a clean, well-structured third-party one like FastAPI. The
-synthetic-human gap is **real and directional, but corpus-dependent in magnitude.**
+0.640). The synthetic-human gap here is **real and directional**; this page measures it on FastAPI only, so
+do not extrapolate its size to other corpora.
 
 **The circularity also shows up as query *quality*, not just score.** Raw `generate.py`
 output is degenerate: it leaks source tokens and comments verbatim (e.g. literal

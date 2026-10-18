@@ -2,7 +2,7 @@
 
 A breadth check: the same hitgate pipeline, zero per-repo tuning, run against **every code
 repository in one maintainer's GitHub footprint** - personal account + five organizations. It
-complements the small, hand-curated [7-corpus benchmark](METHODOLOGY.md#external-corpus-benchmarks):
+complements the small, hand-curated [7-external-corpus benchmark](METHODOLOGY.md#external-corpus-benchmarks-generalizability-check):
 that one is *deep* (manual curation, adversarial queries); this one is *wide* (70 repos, fully
 automated).
 
@@ -114,5 +114,5 @@ untuned codebases spanning five languages and six owners, with the variance trac
 exactly as the curated benchmark predicted.
 
 **Doesn't:** prove difficulty-robustness. Auto-generated queries are easier than human paraphrases;
-the saturated Hit@5 is an artifact of that, not a quality claim. The curated 7-corpus benchmark
+the saturated Hit@5 is an artifact of that, not a quality claim. The curated 7-external-corpus benchmark
 remains the rigorous test; this is the wide-angle companion.

@@ -1,10 +1,10 @@
 # Cross-repo sweep: 63 codebases
 
-A broader companion to the 7-corpus table in the [README](../README.md): the same retriever + the same `hitgate.run` pipeline, **zero per-corpus tuning**, swept across 63 repositories. Each repo is cloned shallow → indexed alone → a golden set is **auto-generated** (`hitgate.generate`) → scored → the clone is discarded.
+A broader companion to the external-corpus table in [benchmarks.md](benchmarks.md#external-corpora-zero-tuning): the same retriever + the same `hitgate.run` pipeline, **zero per-corpus tuning**, swept across 63 repositories. Each repo is cloned shallow → indexed alone → a golden set is **auto-generated** (`hitgate.generate`) → scored → the clone is discarded.
 
 ## What this sweep does and does not show
 - **The golden set is label-free** (mined from distinctive query→chunk pairs in each corpus), so these numbers measure **retrievability / regression - not human-judged relevance.** They run optimistic *by construction*; treat them as a self-consistency / regression signal, not a relevance leaderboard. (The hand-labeled reality is lower - see `docs/METHODOLOGY.md`.)
-- **Selection bias:** the 63 repos are almost entirely the author's own ecosystem (`LucasSantana-Dev/*`, `vsantana-organization/*`, `Criativaria-Projects/*`, `Fintech-fiap/*`). The sweep is broad in repository count and narrow in authorship. The one genuinely third-party corpus benchmarked with care is **FastAPI v0.115** (README 7-corpus table, Hit@5 1.0).
+- **Selection bias:** the 63 repos are almost entirely the author's own ecosystem (`LucasSantana-Dev/*`, `vsantana-organization/*`, `Criativaria-Projects/*`, `Fintech-fiap/*`). The sweep is broad in repository count and narrow in authorship. The one genuinely third-party corpus benchmarked with care is **FastAPI v0.115** (benchmarks.md external-corpus table, Hit@5 1.0).
 - Each corpus is indexed **alone** (no cross-repo confusion), which inflates Hit@5 vs a shared multi-repo index.
 
 ## Aggregate (63 ok / 70 attempted; 7 skipped for too-few-cases)
@@ -27,4 +27,4 @@ A broader companion to the 7-corpus table in the [README](../README.md): the sam
 The structural finding (also in `METHODOLOGY.md`): **corpus module clarity predicts Hit@1 better than language or size**: clean functional boundaries score high, and same-layer sibling components are the genuine ceiling.
 
 ## Reproduce
-The raw run is `results.tsv` (kept out of the package). Per-repo: `clone → ragcore.build → hitgate.generate → hitgate.run`. Re-run any single corpus with the [Quickstart](../README.md#quickstart-reproducible-in-10s).
+The raw run is `results.tsv` (kept out of the package). Per-repo: `clone → ragcore.build → hitgate.generate → hitgate.run`. Re-run any single corpus with the [Quickstart](../README.md#quickstart).
