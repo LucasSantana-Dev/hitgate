@@ -30,6 +30,7 @@ from pathlib import Path
 from typing import Callable, Mapping, Optional, Sequence
 
 from hitgate import Retriever
+from hitgate._console import safe_stdio
 
 # Use importlib.resources to access the bundled dataset
 DATASET = importlib.resources.files("hitgate").joinpath("golden.demo.jsonl")
@@ -184,6 +185,7 @@ def run(cases: list[dict], top: int, retriever: Retriever) -> dict:
 
 
 def main() -> int:
+    safe_stdio()
     ap = argparse.ArgumentParser()
     ap.add_argument("--top", type=int, default=5)
     ap.add_argument("--label", default="baseline")

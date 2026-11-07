@@ -32,6 +32,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+from hitgate._console import safe_stdio
+
 ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 EVAL_REL = "hitgate/run.py"
@@ -93,6 +95,7 @@ def hit5_at(sha: str) -> float | None:
 
 
 def main() -> int:
+    safe_stdio()
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--max-commits", type=int, default=20)
     ap.add_argument("--branch", default="main")

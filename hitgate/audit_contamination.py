@@ -30,6 +30,8 @@ import sqlite3
 import sys
 from pathlib import Path
 
+from hitgate._console import safe_stdio
+
 ROOT = Path(__file__).resolve().parent.parent
 from ragcore.config import DB  # honors RAG_INDEX_DIR
 
@@ -107,6 +109,7 @@ def resolve_dataset(arg: str) -> Path:
 
 
 def main() -> int:
+    safe_stdio()
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dataset", default=str(DEFAULT_DATASET),
                     help="eval jsonl to audit (absolute, or relative to cwd or repo root)")

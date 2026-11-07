@@ -53,12 +53,25 @@ jobs:
       - name: Binary size
         run: ls -la target/release/hitgate-context
 
+      - name: Static build (musl)
+        run: |
+          sudo apt-get install -y --no-install-recommends musl-tools
+          rustup target add x86_64-unknown-linux-musl
+          cargo build --release --target x86_64-unknown-linux-musl
+          BIN=target/x86_64-unknown-linux-musl/release/hitgate-context
+          ls -la "$BIN"
+          file "$BIN"
+          file "$BIN" | grep -Eq "static(ally|-pie) linked"
+          "$BIN" --help > /dev/null
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Cross-check against the Python implementation
+      - name: Cross-check the static binary against the Python implementation
         working-directory: .
+        env:
+          HITGATE_CONTEXT_RS: ${{ github.workspace }}/rust/hitgate-context/target/x86_64-unknown-linux-musl/release/hitgate-context
         run: |
           python -m pip install --quiet -e . pytest
           python -m pytest tests/test_context_rs.py -q
