@@ -95,5 +95,5 @@ when setting expectations for a new corpus:
 - Homogeneous UI component layer (sibling components share vocabulary) → Hit@5 ~0.74, consider reranker
 - Hit@1 below 0.65 is normal and not a tuning failure — it reflects architectural ambiguity
 
-Each baseline lives at `hitgate/baseline.<corpus>.json` in the evidence-first-rag repo.
+Each baseline lives at `hitgate/baseline.<corpus>.json` in the hitgate repo.
 Run `/rag-eval` with `RAG_EVAL_BASELINE=hitgate/baseline.<corpus>.json` to compare against any of them.

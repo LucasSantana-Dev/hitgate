@@ -31,7 +31,7 @@ This script is designed to run on Linux (Ubuntu). Your platform shows cross-plat
 float variance (~2pp drift) compared to the CI baselines. To re-freeze baselines:
 
   1. Preferred: Use the GitHub workflow (manually dispatch):
-     gh workflow run regenerate-baseline.yml --repo=LucasSantana-Dev/evidence-first-rag
+     gh workflow run regenerate-baseline.yml --repo=LucasSantana-Dev/hitgate
      Then download the artifact and commit the result.
 
   2. Alternative: Download the eval-results artifact from a recent eval-gate run:

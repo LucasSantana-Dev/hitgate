@@ -25,7 +25,7 @@ are symbolic (`file:symbol`), not line numbers, so they survive refactors.
 ```
 
 Surfaces over `search()`: `query.py` (CLI), `mcp_server.py` (MCP `rag_query`), `pack.py`
-(context packing), `eval/run.py` (Hit@K/MRR).
+(context packing), `hitgate/run.py` (Hit@K/MRR).
 
 ## Why each layer
 
@@ -61,14 +61,14 @@ embeds into a coherent vector; arbitrary fixed-size windows smear two half-funct
 no config file to thread through — the same reason the eval and CI can pin behavior with
 environment variables alone.
 
-## Trust layer (eval/)
+## Trust layer (hitgate/)
 
 The retriever is only half the repo; the other half exists to keep its numbers honest:
 
-- `eval/run.py` — Hit@K / MRR against a golden set.
-- `eval/check.sh` — regression gate: re-eval, compare to a frozen baseline within tolerance.
-- `eval/audit_contamination.py` — flags un-winnable golden cases (answer not in corpus).
-- `eval/test_determinism.py` — same query → same top-K ordering, so the numbers are reproducible.
+- `hitgate/run.py` — Hit@K / MRR against a golden set.
+- `hitgate/check.sh` — regression gate: re-eval, compare to a frozen baseline within tolerance.
+- `hitgate/audit_contamination.py` — flags un-winnable golden cases (answer not in corpus).
+- `tests/test_determinism.py` — same query → same top-K ordering, so the numbers are reproducible.
 
 See [DECISIONS.md](./DECISIONS.md) for *why* the system stops where it does, and
 [ROADMAP.md](./ROADMAP.md) for measured experiments that might extend it.
