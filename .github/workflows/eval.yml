@@ -93,7 +93,7 @@ jobs:
           TRANSFORMERS_OFFLINE: ${{ steps.hfcache.outputs.cache-hit == 'true' && '1' || '0' }}
         run: RAG_SOURCE_ROOTS="$PWD" python -m pytest tests/test_determinism.py -q
       - name: Unit tests — tokenizer, rank modes, harness, adapter
-        run: python -m pytest tests/ -q
+        run: python -m pytest tests/ -q --ignore=tests/test_determinism.py  # already run by the determinism gate above
 
   smoke-test:
     runs-on: ubuntu-latest
