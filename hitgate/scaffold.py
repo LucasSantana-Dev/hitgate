@@ -26,6 +26,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from hitgate._console import safe_stdio
 from hitgate.run import CAVEAT  # CAVEAT shipped in run.py (PR #54); light import, no [hybrid]
 
 _HYBRID_HINT = 'this command needs the bundled engine — `pip install "hitgate[hybrid]"`'
@@ -119,6 +120,7 @@ def demo(root: Path, limit: int = 12) -> int:
 
 
 def init_main() -> int:
+    safe_stdio()
     ap = argparse.ArgumentParser(
         prog="hitgate-init", description="Scaffold a label-free golden set for your corpus."
     )
@@ -131,6 +133,7 @@ def init_main() -> int:
 
 
 def demo_main() -> int:
+    safe_stdio()
     ap = argparse.ArgumentParser(
         prog="hitgate-demo", description="Run the gate once on a corpus and print the verdict."
     )

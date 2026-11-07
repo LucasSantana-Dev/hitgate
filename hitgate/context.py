@@ -17,6 +17,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Optional, Sequence
 
+from hitgate._console import safe_stdio
 from hitgate.compare import compare, print_table
 from hitgate.run import load_retriever, run
 
@@ -209,6 +210,7 @@ def lost(result: dict, base: dict) -> list[dict]:
 
 
 def main(argv: Optional[list[str]] = None) -> int:
+    safe_stdio()
     ap = argparse.ArgumentParser(prog="hitgate-context", description=__doc__.splitlines()[0])
     ap.add_argument("root", type=_path, help="context root (e.g. ~/.claude or a repo's .claude/)")
     ap.add_argument("--label", default="context")

@@ -36,6 +36,7 @@ import urllib.request
 from pathlib import Path
 from typing import Optional
 
+from hitgate._console import safe_stdio
 from ragcore.build import is_excluded_path, iter_code_sources
 from ragcore.chunkers import chunk_file
 from ragcore.config import CODE_EXTS, MAX_FILE_BYTES, SOURCE_ROOTS
@@ -385,6 +386,7 @@ def _full_fields(case: dict) -> dict:
 
 
 def main() -> int:
+    safe_stdio()
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--output", default="hitgate/candidates.jsonl",
                     help="path to write candidate cases (default: hitgate/candidates.jsonl)")

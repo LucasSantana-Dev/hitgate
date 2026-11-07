@@ -12,6 +12,8 @@ import json
 import sys
 from pathlib import Path
 
+from hitgate._console import safe_stdio
+
 
 def load(path: Path) -> dict:
     return json.loads(path.read_text())
@@ -22,6 +24,7 @@ def rank_label(r: int | None) -> str:
 
 
 def main() -> int:
+    safe_stdio()
     ap = argparse.ArgumentParser(description="Diff two eval result JSON files")
     ap.add_argument("baseline", help="baseline result JSON (before)")
     ap.add_argument("head", help="head result JSON (after)")

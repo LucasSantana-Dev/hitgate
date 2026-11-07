@@ -22,6 +22,11 @@ and the **metric deltas**, not a chunk number that's wrong by the next commit.
 
 - **Baseline re-frozen** (`hitgate/baseline.example.json`) to `MRR 0.742 / Hit@1 0.586 / Hit@3 0.919 / Hit@5 0.970` (was `0.794 / 0.657 / 0.960 / 0.970`), n=99, from the Linux eval run on the PR. Adding `hitgate/context.py` to the self-indexed corpus (its stdlib `BM25` class and `tokenize` share vocabulary with `ragcore/retrieval.py`, and its `lost()` with `hitgate/run.py` / `diff.py`) demoted 16 retrieval-vocabulary cases by one to four ranks, among them "hybrid retrieval fusing BM25 and cosine with reciprocal rank fusion" (2→3), "symbol boost multiplier raises BM25 score..." (1→2) and "where is the logic that records the rank position..." (1→5). One case left the top-5 ("swap in a third-party document finder...", expect `langchain_retriever.py`, 3→miss) and one entered it (`pack.py`, miss→4), so **Hit@5 held**. No retrieval code changed. Deliberate re-baseline per the living-benchmark policy (>±5pp on MRR and Hit@1). Also fixed `regenerate-baseline.yml` and `scripts/regenerate-baseline.sh`, which looked for the result JSONs under `hitgate/` while `check.sh` writes them at the repo root. **Reopen:** Hit@5 moves beyond ±5pp, or a case that hit at rank 1 goes missing without a corpus change.
 
+### Fixed
+
+- **CLIs no longer crash on a legacy console code page.** `hitgate-context --baseline`, `hitgate-compare` and the other entry points printed arrows and check marks that raise `UnicodeEncodeError` on a Windows cp1252 console, killing the report with a traceback and exit 1 instead of the real verdict. Each entry point now replaces unencodable characters. No metric (output only). **Measured:** `tests/test_console.py` fails on the previous code and passes now. **Reopen:** a CLI prints through something other than `sys.stdout`/`sys.stderr`.
+- **Rust CI builds and cross-checks the static binary.** The `rust` job now builds `x86_64-unknown-linux-musl`, asserts the result is statically linked and runs the Python cross-check against that binary, so the static build documented in the crate README is exercised on every change. No metric (CI only).
+
 ## 2026-10-03 — 0.1.1: adapters ship in the pip package as `hitgate.adapters`
 
 ### Changed

@@ -14,6 +14,8 @@ import json
 import sys
 from pathlib import Path
 
+from hitgate._console import safe_stdio
+
 
 def compare(cur_j: dict, base_j: dict, tol_pp: float = 5.0) -> dict:
     """Core comparison. Returns verdict dict; does not touch the filesystem."""
@@ -159,6 +161,7 @@ def print_table(cur_j: dict, base_j: dict, v: dict, tol_pp: float) -> None:
 
 
 def main() -> int:
+    safe_stdio()
     if len(sys.argv) < 3:
         sys.exit(f"Usage: {sys.argv[0]} <current.json> <baseline.json> [tol_pp=5]")
 
