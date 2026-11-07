@@ -1,39 +1,39 @@
 {
   "n": 99,
-  "mrr": 0.794,
-  "hit@1": 0.657,
-  "hit@3": 0.96,
+  "mrr": 0.742,
+  "hit@1": 0.586,
+  "hit@3": 0.919,
   "hit@5": 0.97,
   "by_scope": {
     "code": {
       "n": 99,
-      "mrr": 0.794,
-      "hit@1": 0.657,
-      "hit@3": 0.96,
+      "mrr": 0.742,
+      "hit@1": 0.586,
+      "hit@3": 0.919,
       "hit@5": 0.97
     }
   },
   "by_intent": {
     "indexing": {
       "n": 22,
-      "mrr": 0.886,
-      "hit@1": 0.773,
+      "mrr": 0.909,
+      "hit@1": 0.818,
       "hit@3": 1.0,
       "hit@5": 1.0
     },
     "infrastructure": {
       "n": 47,
-      "mrr": 0.796,
-      "hit@1": 0.681,
-      "hit@3": 0.936,
-      "hit@5": 0.957
+      "mrr": 0.741,
+      "hit@1": 0.596,
+      "hit@3": 0.872,
+      "hit@5": 0.979
     },
     "retrieval": {
       "n": 30,
-      "mrr": 0.722,
-      "hit@1": 0.533,
-      "hit@3": 0.967,
-      "hit@5": 0.967
+      "mrr": 0.622,
+      "hit@1": 0.4,
+      "hit@3": 0.933,
+      "hit@5": 0.933
     }
   },
   "per_case": [
@@ -42,8 +42,8 @@
       "expect": "retrieval.py",
       "scope": "code",
       "intent": "retrieval",
-      "hit_rank": 2,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/query.py:1"
+      "hit_rank": 3,
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/context.py:149"
     },
     {
       "query": "selective cross-encoder reranker applied only to code-scope queries",
@@ -51,15 +51,15 @@
       "scope": "code",
       "intent": "retrieval",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:96"
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:97"
     },
     {
       "query": "tokenize identifiers into camelCase and snake_case subtokens",
       "expect": "retrieval.py",
       "scope": "code",
       "intent": "retrieval",
-      "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:139"
+      "hit_rank": 2,
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/context.py:32"
     },
     {
       "query": "auto rerank weak ambiguous queries below a score threshold",
@@ -67,7 +67,7 @@
       "scope": "code",
       "intent": "retrieval",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:62"
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:63"
     },
     {
       "query": "environment variable configuration defaults for the index",
@@ -75,7 +75,7 @@
       "scope": "code",
       "intent": "infrastructure",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/config.py:1"
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/config.py:76"
     },
     {
       "query": "directories excluded from indexing like node_modules and venv",
@@ -83,7 +83,7 @@
       "scope": "code",
       "intent": "infrastructure",
       "hit_rank": 3,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/build.py:67"
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/example_external_retriever.py:1"
     },
     {
       "query": "chunk and embed source roots into a sqlite index",
@@ -99,7 +99,7 @@
       "scope": "code",
       "intent": "indexing",
       "hit_rank": 2,
-      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/plot_history.py:46"
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/plot_history.py:47"
     },
     {
       "query": "classify a file into a source type by its path",
@@ -131,7 +131,7 @@
       "scope": "code",
       "intent": "retrieval",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:62"
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:63"
     },
     {
       "query": "which module is responsible for dividing files into passages before they are vectorized",
@@ -146,8 +146,8 @@
       "expect": "retrieval.py",
       "scope": "code",
       "intent": "retrieval",
-      "hit_rank": 2,
-      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/__init__.py:12"
+      "hit_rank": 3,
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/context.py:149"
     },
     {
       "query": "where does the codebase list the folder names that are skipped when walking the project tree",
@@ -171,7 +171,7 @@
       "scope": "code",
       "intent": "retrieval",
       "hit_rank": 3,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:220"
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:221"
     },
     {
       "query": "which module collects the top search results and formats them as a self-contained bundle of code and documentation for answering a task",
@@ -179,7 +179,7 @@
       "scope": "code",
       "intent": "infrastructure",
       "hit_rank": 3,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:220"
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:221"
     },
     {
       "query": "which file counts how many times the expected document surfaces within the highest-ranked positions across a batch of test questions",
@@ -194,7 +194,7 @@
       "expect": "langchain_retriever.py",
       "scope": "code",
       "intent": "retrieval",
-      "hit_rank": 3,
+      "hit_rank": null,
       "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/__init__.py:12"
     },
     {
@@ -211,7 +211,7 @@
       "scope": "code",
       "intent": "retrieval",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:62"
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:63"
     },
     {
       "query": "what breaks source code into smaller fragments at logical declaration boundaries rather than arbitrary line counts",
@@ -227,7 +227,7 @@
       "scope": "code",
       "intent": "retrieval",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:220"
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:221"
     },
     {
       "query": "push eval results into Langfuse Datasets and Experiments with per-item Hit@K scores",
@@ -235,7 +235,7 @@
       "scope": "code",
       "intent": "infrastructure",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/adapters/langfuse_eval.py:40"
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/adapters/langfuse_eval.py:40"
     },
     {
       "query": "chart Hit@5 per commit by checking out each revision into a git worktree and self-indexing",
@@ -258,8 +258,8 @@
       "expect": "audit_contamination.py",
       "scope": "code",
       "intent": "infrastructure",
-      "hit_rank": 2,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:220"
+      "hit_rank": 3,
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:221"
     },
     {
       "query": "which file shows a deliberately dumb keyword counter wired into the eval gate to prove the harness accepts any document source",
@@ -283,7 +283,7 @@
       "scope": "code",
       "intent": "retrieval",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/adapters/example_langchain_retriever.py:52"
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/adapters/example_langchain_retriever.py:52"
     },
     {
       "query": "MCP server registers the RAG search function as a named tool over stdio transport",
@@ -291,7 +291,7 @@
       "scope": "code",
       "intent": "infrastructure",
       "hit_rank": 2,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:220"
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:221"
     },
     {
       "query": "compute per-case Hit@K scores and write aggregate and per-intent metrics to a JSON result file",
@@ -299,7 +299,7 @@
       "scope": "code",
       "intent": "infrastructure",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/run.py:98"
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/run.py:128"
     },
     {
       "query": "token budget limits how many ranked chunks are included in the context pack output",
@@ -314,8 +314,8 @@
       "expect": "retrieval.py",
       "scope": "code",
       "intent": "retrieval",
-      "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:220"
+      "hit_rank": 2,
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/context.py:149"
     },
     {
       "query": "output format flags control whether search results are printed as JSON or human-readable text with rank",
@@ -323,7 +323,7 @@
       "scope": "code",
       "intent": "retrieval",
       "hit_rank": null,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:220"
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:221"
     },
     {
       "query": "classify each golden case as ok scope-mismatch or CONTAMINATED based on whether the expected path is indexed",
@@ -363,15 +363,15 @@
       "scope": "code",
       "intent": "retrieval",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/adapters/langchain_retriever.py:1"
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/adapters/langchain_retriever.py:1"
     },
     {
       "query": "where is the logic that records the rank position of the expected document for each test question and summarises the scores across the full evaluation set",
       "expect": "run.py",
       "scope": "code",
       "intent": "infrastructure",
-      "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/run.py:1"
+      "hit_rank": 5,
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/__init__.py:12"
     },
     {
       "query": "which file registers the retrieval capability under a named schema so that an AI assistant can invoke it as part of a tool-calling protocol",
@@ -379,15 +379,15 @@
       "scope": "code",
       "intent": "infrastructure",
       "hit_rank": null,
-      "top_hit": "/home/runner/work/hitgate/hitgate/adapters/langchain_retriever.py:1"
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/adapters/langchain_retriever.py:1"
     },
     {
       "query": "which module selects the top results from a search and bundles them into a single text payload sized to fit a language model's context window",
       "expect": "pack.py",
       "scope": "code",
       "intent": "infrastructure",
-      "hit_rank": null,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:220"
+      "hit_rank": 4,
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:221"
     },
     {
       "query": "which function applies extra weight to BM25 rankings when the search phrase contains the same words as the function or class name of the retrieved chunk",
@@ -395,7 +395,7 @@
       "scope": "code",
       "intent": "retrieval",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:220"
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:221"
     },
     {
       "query": "what verifies that every expected answer in an evaluation set is actually present in the search corpus before trusting the benchmark score",
@@ -403,7 +403,7 @@
       "scope": "code",
       "intent": "infrastructure",
       "hit_rank": 2,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:220"
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:221"
     },
     {
       "query": "reindex only the files listed on the command line without rebuilding the entire corpus",
@@ -418,8 +418,8 @@
       "expect": "build.py",
       "scope": "code",
       "intent": "indexing",
-      "hit_rank": 2,
-      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/plot_history.py:1"
+      "hit_rank": 1,
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/build.py:216"
     },
     {
       "query": "what divides documents that have no recognizable programming-language structure into approximate word-count segments with overlap between consecutive windows",
@@ -458,24 +458,24 @@
       "expect": "example_llamaindex_retriever.py",
       "scope": "code",
       "intent": "retrieval",
-      "hit_rank": 2,
-      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/__init__.py:12"
+      "hit_rank": 3,
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/context.py:149"
     },
     {
       "query": "Runnable example: a LangChain BM25 retriever measured by the harness",
       "expect": "example_langchain_retriever.py",
       "scope": "code",
       "intent": "retrieval",
-      "hit_rank": 2,
-      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/__init__.py:12"
+      "hit_rank": 3,
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/context.py:149"
     },
     {
       "query": "Walk source roots, emit candidate golden cases",
       "expect": "generate.py",
       "scope": "code",
       "intent": "infrastructure",
-      "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/generate.py:241"
+      "hit_rank": 2,
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/scaffold.py:121"
     },
     {
       "query": "Call an OpenAI-compatible API; return identifier and paraphrase or None",
@@ -555,7 +555,7 @@
       "scope": "code",
       "intent": "indexing",
       "hit_rank": 2,
-      "top_hit": "/home/runner/work/hitgate/hitgate/adapters/example_llamaindex_retriever.py:28"
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/adapters/example_llamaindex_retriever.py:28"
     },
     {
       "query": "context prefix format prepended to each chunk before embedding to improve semantic matching",
@@ -586,16 +586,16 @@
       "expect": "diff.py",
       "scope": "code",
       "intent": "infrastructure",
-      "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/diff.py:24"
+      "hit_rank": 2,
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/context.py:196"
     },
     {
       "query": "minimal retrieve function that counts keyword matches without any vector or BM25 machinery",
       "expect": "example_external_retriever.py",
       "scope": "code",
       "intent": "infrastructure",
-      "hit_rank": 3,
-      "top_hit": "/home/runner/work/hitgate/hitgate/adapters/example_langchain_retriever.py:52"
+      "hit_rank": 4,
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/context.py:149"
     },
     {
       "query": "heuristic confidence score that filters candidate queries by length, genericity, and symbol overlap",
@@ -618,8 +618,8 @@
       "expect": "generate.py",
       "scope": "code",
       "intent": "infrastructure",
-      "hit_rank": 2,
-      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/audit_contamination.py:1"
+      "hit_rank": 5,
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/scaffold.py:121"
     },
     {
       "query": "convert a LangChain Document list into the path-ranked mapping format the harness retrieve protocol expects",
@@ -627,7 +627,7 @@
       "scope": "code",
       "intent": "infrastructure",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/adapters/example_langchain_retriever.py:52"
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/adapters/example_langchain_retriever.py:52"
     },
     {
       "query": "create or reuse a Langfuse Dataset from a golden .jsonl and upsert items by stable ID",
@@ -635,7 +635,7 @@
       "scope": "code",
       "intent": "infrastructure",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/adapters/langfuse_eval.py:40"
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/adapters/langfuse_eval.py:40"
     },
     {
       "query": "record per-query hit@1 hit@3 hit@5 and mrr_contribution into a Langfuse experiment run",
@@ -643,7 +643,7 @@
       "scope": "code",
       "intent": "infrastructure",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/adapters/langfuse_eval.py:1"
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/adapters/langfuse_eval.py:1"
     },
     {
       "query": "extract the file path from a LlamaIndex NodeWithScore using metadata keys in priority order",
@@ -651,7 +651,7 @@
       "scope": "code",
       "intent": "infrastructure",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/adapters/llamaindex_retriever.py:24"
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/adapters/llamaindex_retriever.py:24"
     },
     {
       "query": "JSON-RPC dispatcher that routes tools/call requests to the search function and returns ranked results",
@@ -659,7 +659,7 @@
       "scope": "code",
       "intent": "infrastructure",
       "hit_rank": 3,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:220"
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:221"
     },
     {
       "query": "which module accepts a query and a token budget and returns only as many ranked chunks as fit",
@@ -683,7 +683,7 @@
       "scope": "code",
       "intent": "infrastructure",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/plot_history.py:53"
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/plot_history.py:54"
     },
     {
       "query": "which script generates a SVG showing Hit@5 trend across the repository commit history",
@@ -699,7 +699,7 @@
       "scope": "code",
       "intent": "retrieval",
       "hit_rank": 3,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:220"
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:221"
     },
     {
       "query": "argparse CLI that accepts --scope and --top flags and prints ranked search results to stdout",
@@ -707,15 +707,15 @@
       "scope": "code",
       "intent": "retrieval",
       "hit_rank": 3,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:220"
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:221"
     },
     {
       "query": "where is the RRF formula 1 divided by rank plus 60 applied to merge BM25 and dense rankings",
       "expect": "retrieval.py",
       "scope": "code",
       "intent": "retrieval",
-      "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:1"
+      "hit_rank": 2,
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/context.py:149"
     },
     {
       "query": "which function reads embeddings from SQLite and computes cosine similarity against the query vector",
@@ -730,8 +730,8 @@
       "expect": "retrieval.py",
       "scope": "code",
       "intent": "retrieval",
-      "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:1"
+      "hit_rank": 2,
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/context.py:149"
     },
     {
       "query": "graceful degradation when the cross-encoder reranker model is not installed or fails to load",
@@ -739,7 +739,7 @@
       "scope": "code",
       "intent": "retrieval",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:96"
+      "top_hit": "/home/runner/work/hitgate/hitgate/ragcore/retrieval.py:97"
     },
     {
       "query": "filter candidate chunks to only those matching the requested scope before applying ranking",
@@ -762,8 +762,8 @@
       "expect": "run.py",
       "scope": "code",
       "intent": "infrastructure",
-      "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/run.py:98"
+      "hit_rank": 2,
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/context.py:196"
     },
     {
       "query": "intent field on a golden case controls which by_intent bucket a retrieval result is counted in",
@@ -771,7 +771,7 @@
       "scope": "code",
       "intent": "infrastructure",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/run.py:98"
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/run.py:128"
     },
     {
       "query": "core comparison returning a structured verdict dict without touching the filesystem",
@@ -827,7 +827,8 @@
       "scope": "code",
       "intent": "infrastructure",
       "hit_rank": 1,
-      "top_hit": "/home/runner/work/hitgate/hitgate/adapters/example_langfuse_eval.py:1"
+      "top_hit": "/home/runner/work/hitgate/hitgate/hitgate/adapters/example_langfuse_eval.py:1"
     }
-  ]
+  ],
+  "caveat": "SELF-INDEXED: Hit@K measures retrievability (was the expected path retrieved?), not human-judged relevance. Auto-generated/self-indexed eval sets score optimistically by construction \u2014 gate on REGRESSIONS (did a change help or hurt?); to certify absolute quality, validate against a hand-labeled holdout."
 }

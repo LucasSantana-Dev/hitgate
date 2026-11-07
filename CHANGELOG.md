@@ -10,6 +10,16 @@ Numbers are code-scope, pure hybrid (`RAG_RERANK_AUTO=off`). Because the demo se
 this repo, exact chunk counts drift commit-to-commit; entries cite the stable **file count**
 and the **metric deltas**, not a chunk number that's wrong by the next commit.
 
+## Unreleased: `hitgate-context`, a label-free gate for agent context (ADR-0015)
+
+### Added
+
+- **`hitgate-context ROOT`** mines a golden set from skills (trigger phrases to their own `SKILL.md`, searched over descriptions) and notes (frontmatter description to the body), scores it with a stdlib BM25 proxy or any `--retriever`, prints a shadowing report and gates with `--baseline` through the existing compare step plus a per-case check (any case that hit before and misses now fails the run). Zero runtime dependencies. **Measured (operator's `~/.claude/skills`, 590 docs):** skill-trigger n=1481 Hit@1 0.490 Hit@5 0.719; note n=103 Hit@1 0.835 Hit@5 0.981. **Reopen:** see ADR-0015.
+
+### Changed
+
+- **Baseline re-frozen** (`hitgate/baseline.example.json`) to `MRR 0.742 / Hit@1 0.586 / Hit@3 0.919 / Hit@5 0.970` (was `0.794 / 0.657 / 0.960 / 0.970`), n=99, from the Linux eval run on the PR. Adding `hitgate/context.py` to the self-indexed corpus (its stdlib `BM25` class and `tokenize` share vocabulary with `ragcore/retrieval.py`, and its `lost()` with `hitgate/run.py` / `diff.py`) demoted 16 retrieval-vocabulary cases by one to four ranks, among them "hybrid retrieval fusing BM25 and cosine with reciprocal rank fusion" (2→3), "symbol boost multiplier raises BM25 score..." (1→2) and "where is the logic that records the rank position..." (1→5). One case left the top-5 ("swap in a third-party document finder...", expect `langchain_retriever.py`, 3→miss) and one entered it (`pack.py`, miss→4), so **Hit@5 held**. No retrieval code changed. Deliberate re-baseline per the living-benchmark policy (>±5pp on MRR and Hit@1). Also fixed `regenerate-baseline.yml` and `scripts/regenerate-baseline.sh`, which looked for the result JSONs under `hitgate/` while `check.sh` writes them at the repo root. **Reopen:** Hit@5 moves beyond ±5pp, or a case that hit at rank 1 goes missing without a corpus change.
+
 ## 2026-10-03 — 0.1.1: adapters ship in the pip package as `hitgate.adapters`
 
 ### Changed

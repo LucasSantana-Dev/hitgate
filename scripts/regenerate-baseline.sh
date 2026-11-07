@@ -63,7 +63,7 @@ bash "$HITGATE_DIR/check.sh" ci
 
 # Copy result to baseline.
 echo "Freezing baseline.example.json..."
-cp "$HITGATE_DIR/ci.json" "$HITGATE_DIR/baseline.example.json"
+cp "$REPO_ROOT/ci.json" "$HITGATE_DIR/baseline.example.json"
 
 # Run auto-rerank baseline.
 echo "Running eval gate (auto-rerank)..."
@@ -72,7 +72,7 @@ RAG_RERANK_AUTO=on EVAL_EXTRA_FLAGS=--auto-rerank RAG_EVAL_BASELINE="$HITGATE_DI
 
 # Copy result to baseline.
 echo "Freezing baseline.auto-rerank.json..."
-cp "$HITGATE_DIR/auto-rerank-ci.json" "$HITGATE_DIR/baseline.auto-rerank.json"
+cp "$REPO_ROOT/auto-rerank-ci.json" "$HITGATE_DIR/baseline.auto-rerank.json"
 
 echo "Done. Baselines frozen:"
 echo "  - $HITGATE_DIR/baseline.example.json"

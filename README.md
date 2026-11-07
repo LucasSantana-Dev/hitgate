@@ -40,6 +40,18 @@ hitgate-compare ci.json baseline.json         # exit 1 when any gated metric dro
 
 The gate loop (run, freeze, compare) and how to point it at your own retriever (`--retriever mypkg:retrieve`) are in [docs/byo-retriever.md](docs/byo-retriever.md).
 
+## Agent context: does your skill or memory edit still reach its target?
+
+The same gate runs over a context directory (skills, memory notes, agents) with no index and no extra dependencies:
+
+```bash
+hitgate-context ~/.claude/skills --label before   # freeze
+# edit a skill description, add a skill, rewrite a memory note
+hitgate-context ~/.claude/skills --label after --baseline context.before.json   # exit 1 if any case lost its hit
+```
+
+Cases are mined from the corpus itself: each skill's trigger phrases must rank that skill's description first; each note's description must rank its own body first. The shadowing report names the document that won instead. It is a lexical proxy for discoverability, not a judgement of the model's choice ([ADR-0015](docs/adr/0015-context-gate-closes-agent-gate-track.md)).
+
 ## What it does, and does not
 
 - Detects retrieval regressions between two runs, with zero labeled data to start.
