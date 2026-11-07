@@ -1,0 +1,23 @@
+[package]
+name = "hitgate-context"
+version = "0.1.0"
+edition = "2021"
+description = "Static binary of the hitgate context gate: a label-free retrieval regression gate for agent context (skills, memory notes)."
+license = "MIT"
+repository = "https://github.com/LucasSantana-Dev/hitgate"
+publish = false
+
+[[bin]]
+name = "hitgate-context"
+path = "src/main.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

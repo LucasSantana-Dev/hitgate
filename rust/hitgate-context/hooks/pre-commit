@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Sample git pre-commit hook: run the hitgate context gate against a frozen baseline.
+#
+# Install:
+#   cp rust/hitgate-context/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+#
+# Configure with environment variables (all optional):
+#   HITGATE_CONTEXT_BIN       path to the binary (default: hitgate-context on PATH)
+#   HITGATE_CONTEXT_ROOT      context root (default: ./.claude if it exists, else ~/.claude)
+#   HITGATE_CONTEXT_BASELINE  frozen context.<label>.json (default: $ROOT/context.baseline.json)
+#   HITGATE_CONTEXT_TOL       tolerance in percentage points (default: 5)
+#
+# Exit 1 from the gate (regression or newly unreachable cases) blocks the commit.
+# Exit 2 (bad root, no cases, unusable baseline) warns and lets the commit through:
+# a misconfigured gate must not lock the repository.
+set -u
+
+BIN="${HITGATE_CONTEXT_BIN:-hitgate-context}"
+if [ -d "${HITGATE_CONTEXT_ROOT:-}" ]; then
+  ROOT="$HITGATE_CONTEXT_ROOT"
+elif [ -d ".claude" ]; then
+  ROOT=".claude"
+else
+  ROOT="$HOME/.claude"
+fi
+BASELINE="${HITGATE_CONTEXT_BASELINE:-$ROOT/context.baseline.json}"
+TOL="${HITGATE_CONTEXT_TOL:-5}"
+
+if ! command -v "$BIN" >/dev/null 2>&1 && [ ! -x "$BIN" ]; then
+  echo "hitgate-context: binary not found ($BIN); skipping context gate" >&2
+  exit 0
+fi
+
+if [ ! -f "$BASELINE" ]; then
+  echo "hitgate-context: no baseline at $BASELINE; skipping context gate" >&2
+  echo "  freeze one with: $BIN \"$ROOT\" --label baseline --out \"$ROOT\"" >&2
+  exit 0
+fi
+
+OUT="$(mktemp -d 2>/dev/null || mktemp -d -t hitgate)"
+trap 'rm -rf "$OUT"' EXIT
+
+"$BIN" "$ROOT" --baseline "$BASELINE" --tol "$TOL" --out "$OUT" --label precommit
+status=$?
+
+case "$status" in
+  0) exit 0 ;;
+  1)
+    echo "" >&2
+    echo "hitgate-context: context gate failed (retrieval regression against $BASELINE)." >&2
+    echo "  fix the shadowed or unreachable cases above, or re-freeze the baseline on purpose:" >&2
+    echo "  $BIN \"$ROOT\" --label baseline --out \"$ROOT\"" >&2
+    echo "  bypass once with: git commit --no-verify" >&2
+    exit 1
+    ;;
+  *)
+    echo "hitgate-context: gate could not run (exit $status); allowing the commit" >&2
+    exit 0
+    ;;
+esac
