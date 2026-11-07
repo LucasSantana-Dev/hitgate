@@ -16,7 +16,7 @@ A runnable example using LlamaIndex's BM25Retriever is in
 """
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any, Mapping, Optional, Sequence
 
 from hitgate import Retriever
 

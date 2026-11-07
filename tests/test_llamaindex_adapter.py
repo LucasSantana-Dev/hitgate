@@ -78,3 +78,10 @@ def test_file_name_metadata_fallback():
     """When file_path and source are absent, adapter falls back to 'file_name'."""
     r = to_harness(_Retriever([_NodeWithScore(meta={"file_name": "chunkers.py"})]))
     assert r("q", top=1, scope=None) == [{"path": "chunkers.py"}]
+
+
+def test_retrieve_type_hints_resolve():
+    import typing
+
+    hints = typing.get_type_hints(to_harness(_Retriever([])))
+    assert "return" in hints
