@@ -29,7 +29,7 @@ export RAG_SOURCE_ROOTS="${RAG_SOURCE_ROOTS:-$REPO_ROOT}"
 # Self-contained: build the index from the repo's own source if it isn't there yet.
 if [ ! -f "$RAG_INDEX_DIR/index.sqlite" ]; then
     echo "(no index at $RAG_INDEX_DIR — building from $RAG_SOURCE_ROOTS)"
-    "$PY" "$REPO_ROOT/ragcore/build.py" >/tmp/eval-build.out 2>&1 || { cat /tmp/eval-build.out; exit 1; }
+    (cd "$REPO_ROOT" && "$PY" -m ragcore.build) >/tmp/eval-build.out 2>&1 || { cat /tmp/eval-build.out; exit 1; }
 fi
 
 cd "$REPO_ROOT"
