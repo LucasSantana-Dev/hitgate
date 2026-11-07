@@ -25,11 +25,14 @@ export RAG_RERANK_AUTO="${RAG_RERANK_AUTO:-off}"
 # Resolve index + sources to absolute paths so this works from any CWD / fresh clone.
 export RAG_INDEX_DIR="${RAG_INDEX_DIR:-$REPO_ROOT/.rag-index}"
 export RAG_SOURCE_ROOTS="${RAG_SOURCE_ROOTS:-$REPO_ROOT}"
+# Per-invocation scratch dir so concurrent runs never share or clobber logs.
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
 
 # Self-contained: build the index from the repo's own source if it isn't there yet.
 if [ ! -f "$RAG_INDEX_DIR/index.sqlite" ]; then
     echo "(no index at $RAG_INDEX_DIR — building from $RAG_SOURCE_ROOTS)"
-    (cd "$REPO_ROOT" && "$PY" -m ragcore.build) >/tmp/eval-build.out 2>&1 || { cat /tmp/eval-build.out; exit 1; }
+    (cd "$REPO_ROOT" && "$PY" -m ragcore.build) >"$TMP_DIR/build.out" 2>&1 || { cat "$TMP_DIR/build.out"; exit 1; }
 fi
 
 cd "$REPO_ROOT"
@@ -37,9 +40,9 @@ cd "$REPO_ROOT"
 DATASET="${RAG_EVAL_DATASET:-$EVAL_DIR/golden.demo.jsonl}"
 # EVAL_EXTRA_FLAGS lets callers inject additional run flags without modifying this script.
 # Example: EVAL_EXTRA_FLAGS=--auto-rerank RAG_RERANK_AUTO=on bash hitgate/check.sh auto-rerank-ci
-"$PY" -m hitgate.run --dataset "$DATASET" --label "$LABEL" ${EVAL_EXTRA_FLAGS:-} >/tmp/eval-run.out 2>&1
+"$PY" -m hitgate.run --dataset "$DATASET" --label "$LABEL" ${EVAL_EXTRA_FLAGS:-} >"$TMP_DIR/run.out" 2>&1
 status=$?
-cat /tmp/eval-run.out
+cat "$TMP_DIR/run.out"
 [ "$status" -ne 0 ] && exit "$status"
 
 CURRENT="$REPO_ROOT/${LABEL}.json"
