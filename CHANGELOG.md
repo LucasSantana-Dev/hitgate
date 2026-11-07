@@ -10,6 +10,12 @@ Numbers are code-scope, pure hybrid (`RAG_RERANK_AUTO=off`). Because the demo se
 this repo, exact chunk counts drift commit-to-commit; entries cite the stable **file count**
 and the **metric deltas**, not a chunk number that's wrong by the next commit.
 
+## Unreleased: `hitgate-context`, a label-free gate for agent context (ADR-0015)
+
+### Added
+
+- **`hitgate-context ROOT`** mines a golden set from skills (trigger phrases to their own `SKILL.md`, searched over descriptions) and notes (frontmatter description to the body), scores it with a stdlib BM25 proxy or any `--retriever`, prints a shadowing report and gates with `--baseline` through the existing compare step plus a per-case check (any case that hit before and misses now fails the run). Zero runtime dependencies. **Measured (operator's `~/.claude/skills`, 590 docs):** skill-trigger n=1481 Hit@1 0.490 Hit@5 0.719; note n=103 Hit@1 0.835 Hit@5 0.981. **Reopen:** see ADR-0015.
+
 ## 2026-10-03 — 0.1.1: adapters ship in the pip package as `hitgate.adapters`
 
 ### Changed
