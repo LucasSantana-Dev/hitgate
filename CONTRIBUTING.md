@@ -23,7 +23,7 @@ If you need to re-freeze after a meaningful eval change:
 #### Option 1: GitHub workflow (recommended)
 
 ```bash
-gh workflow run regenerate-baseline.yml --repo=LucasSantana-Dev/evidence-first-rag
+gh workflow run regenerate-baseline.yml --repo=LucasSantana-Dev/hitgate
 ```
 
 Then download the `regenerated-baselines` artifact from the workflow run and commit:
