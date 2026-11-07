@@ -7,7 +7,7 @@
 # Dispatch manually: gh workflow run regenerate-baseline.yml
 # Or use the Actions UI in the GitHub repository.
 #
-# Output: eval-results artifact containing hitgate/ci.json and hitgate/auto-rerank-ci.json
+# Output: eval-results artifact containing ci.json and auto-rerank-ci.json (check.sh writes them at the repo root)
 # Once validated, download and commit as hitgate/baseline.example.json and
 # hitgate/baseline.auto-rerank.json respectively.
 name: regenerate-baseline (manual dispatch)
@@ -55,6 +55,6 @@ jobs:
         with:
           name: regenerated-baselines
           path: |
-            hitgate/ci.json
-            hitgate/auto-rerank-ci.json
+            ci.json
+            auto-rerank-ci.json
           retention-days: 30
