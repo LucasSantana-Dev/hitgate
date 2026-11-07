@@ -6,11 +6,11 @@ JSON-RPC 2.0. Supports: initialize, tools/list, tools/call (rag_query).
 from __future__ import annotations
 
 import json
+import sqlite3
 import sys
-from pathlib import Path
+import traceback
 
-sys.path.insert(0, str(Path(__file__).parent))
-from retrieval import search
+from ragcore.retrieval import search
 
 TOOL_SCHEMA = {
     "name": "rag_query",
@@ -70,6 +70,23 @@ def _respond(msg_id, result=None, error=None):
         out["result"] = result
     sys.stdout.write(json.dumps(out) + "\n")
     sys.stdout.flush()
+
+
+def _client_message(exc: Exception) -> str:
+    """Map an exception to a message safe to send to an MCP client.
+
+    Raw exception text can carry absolute paths, model locations or library
+    internals, so it never reaches the client. The full traceback goes to stderr
+    (the server log) instead.
+    """
+    traceback.print_exception(type(exc), exc, exc.__traceback__, file=sys.stderr)
+    if isinstance(exc, ImportError):
+        return "retrieval engine dependencies are missing: pip install 'hitgate[hybrid]'"
+    if isinstance(exc, (FileNotFoundError, sqlite3.OperationalError)):
+        return "index not available: build it with `python -m ragcore.build`"
+    if isinstance(exc, (ValueError, TypeError)):
+        return "invalid arguments for rag_query"
+    return "internal error (see server log)"
 
 
 def main() -> int:
@@ -132,7 +149,7 @@ def main() -> int:
                     },
                 )
             except Exception as e:  # noqa: BLE001
-                _respond(msg_id, error={"code": -32000, "message": str(e)})
+                _respond(msg_id, error={"code": -32000, "message": _client_message(e)})
         elif msg_id is not None:
             _respond(msg_id, error={"code": -32601, "message": f"unknown method: {method}"})
     return 0

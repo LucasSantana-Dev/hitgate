@@ -7,18 +7,15 @@ from __future__ import annotations
 
 import io
 import json
+import sqlite3
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Ensure ragcore/ is on the path so `import mcp_server` works the same way
-# the server itself expects (mcp_server.py does sys.path.insert(0, its parent)).
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "ragcore"))
-
-import mcp_server
-from mcp_server import _render, _respond
+from ragcore import mcp_server
+from ragcore.mcp_server import _render, _respond
 
 
 # ---------------------------------------------------------------------------
@@ -98,7 +95,7 @@ def _run_main(lines: list[str], mock_search=None) -> list[dict]:
     stdin_mock = io.StringIO("\n".join(lines) + "\n")
     captured_out = io.StringIO()
     target = mock_search or MagicMock(return_value=[])
-    with patch("mcp_server.search", target), \
+    with patch("ragcore.mcp_server.search", target), \
          patch.object(sys, "stdin", stdin_mock), \
          patch.object(sys, "stdout", captured_out):
         mcp_server.main()
@@ -176,4 +173,42 @@ def test_main_search_exception_returns_error():
     })
     responses = _run_main([msg], mock_search=mock_search)
     assert responses[0]["error"]["code"] == -32000
-    assert "index not built" in responses[0]["error"]["message"]
+    assert responses[0]["error"]["message"] == "internal error (see server log)"
+
+
+def _call(exc: Exception, capsys) -> tuple[str, str]:
+    msg = json.dumps({
+        "jsonrpc": "2.0", "id": 8,
+        "method": "tools/call",
+        "params": {"name": "rag_query", "arguments": {"query": "anything"}},
+    })
+    responses = _run_main([msg], mock_search=MagicMock(side_effect=exc))
+    return responses[0]["error"]["message"], capsys.readouterr().err
+
+
+@pytest.mark.parametrize("exc,expected", [
+    (sqlite3.OperationalError("no such table: chunks in /Users/me/secret/index.db"), "index not available"),
+    (FileNotFoundError("no index at /Users/me/secret/index.db"), "index not available"),
+    (ImportError("missing numpy from /opt/venv/lib"), "dependencies are missing"),
+    (ValueError("invalid literal for int() with base 10: '/etc/passwd'"), "invalid arguments"),
+    (RuntimeError("token=abc at /home/me/.cache/model"), "internal error"),
+])
+def test_tools_call_error_does_not_leak_details(exc, expected, capsys):
+    message, log = _call(exc, capsys)
+    assert expected in message
+    assert "/Users/" not in message and "/home/" not in message and "/opt/" not in message
+    assert "/etc/" not in message and "token=" not in message
+    # The original error and traceback stay server-side.
+    assert "Traceback" in log
+    assert str(exc) in log
+
+
+def test_package_shares_one_config_module():
+    import importlib
+
+    import ragcore.config
+    import ragcore.retrieval
+    # Other tests reload ragcore.config; re-import retrieval so it binds the current one.
+    importlib.reload(ragcore.retrieval)
+    assert "config" not in sys.modules or sys.modules["config"] is ragcore.config
+    assert ragcore.retrieval.DB is ragcore.config.DB

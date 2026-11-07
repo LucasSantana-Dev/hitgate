@@ -21,8 +21,7 @@ try:
 except ImportError:  # rank-bm25 ships with the optional [hybrid] extra
     BM25Okapi = None  # type: ignore[assignment]
 
-sys.path.insert(0, str(Path(__file__).parent))
-from config import DB, QLOG, SOURCE_ROOTS, EMBED_MODEL as MODEL_NAME, EMBED_DIM as DIM, require_hybrid
+from ragcore.config import DB, QLOG, SOURCE_ROOTS, EMBED_MODEL as MODEL_NAME, EMBED_DIM as DIM, require_hybrid
 
 RRF_K = 60
 BM25_WEIGHT = float(os.environ.get("RAG_BM25_WEIGHT", "1.5"))  # >1 favors lexical (code) match

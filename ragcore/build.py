@@ -26,9 +26,8 @@ try:
 except ImportError:  # numpy ships with the optional [hybrid] extra
     np = None  # type: ignore[assignment]
 
-sys.path.insert(0, str(Path(__file__).parent))
-from chunkers import chunk_file, detect_language
-from config import (
+from ragcore.chunkers import chunk_file, detect_language
+from ragcore.config import (
     CHUNK_CONTEXT_PREFIX,
     CHUNK_PREFIX_FORMAT,
     CODE_EXTS,
