@@ -1,0 +1,64 @@
+name: rust
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "rust/**"
+      - "hitgate/**"
+      - "tests/test_context.py"
+      - "tests/test_context_rs.py"
+      - ".github/workflows/rust.yml"
+  pull_request:
+    paths:
+      - "rust/**"
+      - "hitgate/**"
+      - "tests/test_context.py"
+      - "tests/test_context_rs.py"
+      - ".github/workflows/rust.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  rust:
+    name: hitgate-context crate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust/hitgate-context
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust/hitgate-context
+
+      - name: Format
+        run: cargo fmt --check
+
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Build (release)
+        run: cargo build --release
+
+      - name: Rust tests
+        run: cargo test
+
+      - name: Binary size
+        run: ls -la target/release/hitgate-context
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cross-check against the Python implementation
+        working-directory: .
+        run: |
+          python -m pip install --quiet -e . pytest
+          python -m pytest tests/test_context_rs.py -q

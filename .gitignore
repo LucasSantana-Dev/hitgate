@@ -32,3 +32,6 @@ dist/
 # Dev artifacts accidentally committed — untracked here
 .coverage
 .claude/
+
+# Rust crate build output
+rust/hitgate-context/target/
