@@ -4,4 +4,4 @@
 matplotlib>=3.7
 pytest>=9.1.1
 pytest-mock>=3.17.0
-langchain-community>=0.2
+langchain-community>=0.4.2
