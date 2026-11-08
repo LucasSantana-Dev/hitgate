@@ -10,7 +10,7 @@ Numbers are code-scope, pure hybrid (`RAG_RERANK_AUTO=off`). Because the demo se
 this repo, exact chunk counts drift commit-to-commit; entries cite the stable **file count**
 and the **metric deltas**, not a chunk number that's wrong by the next commit.
 
-## Unreleased: `hitgate-context`, a label-free gate for agent context (ADR-0015)
+## 2026-11-07 (0.2.0): `hitgate-context`, a label-free gate for agent context (ADR-0015)
 
 ### Added
 
@@ -24,6 +24,9 @@ and the **metric deltas**, not a chunk number that's wrong by the next commit.
 
 ### Fixed
 
+- **`ragcore` imports its own package instead of a `sys.path` hack.** Modules imported a sibling `config` through `sys.path`, so an installed `ragcore` loaded config twice and a stray `config.py` could shadow it; they now import `ragcore.config` and `ragcore.retrieval` directly and `check.sh` runs the build as `python -m ragcore.build`. No metric change (#151, closes #68).
+- **MCP `tools/call` no longer leaks internals to the client.** The handler sent `str(exc)`, exposing paths and library details; it now maps known failures to fixed messages and logs the full traceback to stderr (#151, closes #69).
+- **LlamaIndex adapter imports `Sequence` and `Mapping`.** `typing.get_type_hints()` on the wrapped `retrieve` raised `NameError` because the return annotation names were never imported; matches the LangChain adapter (#155, closes #64).
 - **CLIs no longer crash on a legacy console code page.** `hitgate-context --baseline`, `hitgate-compare` and the other entry points printed arrows and check marks that raise `UnicodeEncodeError` on a Windows cp1252 console, killing the report with a traceback and exit 1 instead of the real verdict. Each entry point now replaces unencodable characters. No metric (output only). **Measured:** `tests/test_console.py` fails on the previous code and passes now. **Reopen:** a CLI prints through something other than `sys.stdout`/`sys.stderr`.
 - **Rust CI builds and cross-checks the static binary.** The `rust` job now builds `x86_64-unknown-linux-musl`, asserts the result is statically linked and runs the Python cross-check against that binary, so the static build documented in the crate README is exercised on every change. No metric (CI only).
 
